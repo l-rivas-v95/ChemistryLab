@@ -1,19 +1,22 @@
-function MoleculeCard({ molecula }) {
+function MoleculeCard({ molecula, onClick }) {
     return (
-        <article className="molecule-card">
+        <button className="molecule-card" onClick={onClick}>
             <div className="molecule-card-top">
-        <span className="molecule-type">
-          {molecula.tipoCompuesto || "Inorgánico"}
-        </span>
+                <span className="molecule-type">
+                    {molecula.tipoCompuesto || "Inorgánico"}
+                </span>
 
                 <span className="molecule-cid">
-          CID {molecula.pubchemCid}
-        </span>
+                    CID {molecula.pubchemCid || "N/A"}
+                </span>
             </div>
 
             <div className="molecule-image-box">
                 {molecula.imagen2d ? (
-                    <img src={molecula.imagen2d} alt={molecula.nombre} />
+                    <img
+                        src={molecula.imagen2d}
+                        alt={molecula.nombre || "Molécula"}
+                    />
                 ) : (
                     <div className="molecule-no-image">⚗️</div>
                 )}
@@ -35,28 +38,26 @@ function MoleculeCard({ molecula }) {
                 <InfoChip icono="🌋" label="Ebullición" value={molecula.puntoEbullicion} />
             </div>
 
-            <div className="molecule-actions">
-                {molecula.modelo3dUrl && (
-                    <a href={molecula.modelo3dUrl} target="_blank" rel="noreferrer">
-                        Ver modelo 3D
-                    </a>
-                )}
+            <div className="molecule-open-hint">
+                Ver ficha completa
             </div>
-        </article>
+        </button>
     );
 }
 
 function InfoChip({ icono, label, value, unit }) {
-    const finalValue = value !== null && value !== undefined && value !== "" ? value : "N/A";
+    const tieneValor = value !== null && value !== undefined && value !== "";
+    const finalValue = tieneValor ? value : "N/A";
 
     return (
         <div className="molecule-chip">
-            <span>{icono}</span>
+            <span className="molecule-chip-icon">{icono}</span>
+
             <div>
                 <small>{label}</small>
                 <strong>
                     {finalValue}
-                    {finalValue !== "N/A" && unit ? ` ${unit}` : ""}
+                    {tieneValor && unit ? ` ${unit}` : ""}
                 </strong>
             </div>
         </div>
