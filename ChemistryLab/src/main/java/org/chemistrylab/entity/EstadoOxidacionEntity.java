@@ -16,11 +16,9 @@ public class EstadoOxidacionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private Integer valor;
 
-    @Column(nullable = false)
-    private Boolean comun = false;
+    private Boolean comun;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "elemento_id", nullable = false)

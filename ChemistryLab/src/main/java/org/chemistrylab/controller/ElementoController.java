@@ -36,19 +36,4 @@ public class ElementoController {
     public ElementoDTO findByNumeroAtomico(@PathVariable Integer numeroAtomico) {
         return elementoService.findByNumeroAtomico(numeroAtomico);
     }
-
-    @PostMapping
-    public ElementoDTO save(@RequestBody ElementoDTO elementoDTO) {
-        return elementoService.save(elementoDTO);
-    }
-
-    @PutMapping("/{id}")
-    public ElementoDTO update(@PathVariable Long id, @RequestBody ElementoDTO elementoDTO) {
-        return elementoService.update(id, elementoDTO);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id) {
-        elementoService.deleteById(id);
-    }
 }

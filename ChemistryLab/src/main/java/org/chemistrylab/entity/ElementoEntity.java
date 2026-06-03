@@ -1,12 +1,9 @@
 package org.chemistrylab.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
-import lombok.*;
 
 @Entity
 @Table(name = "elementos")
@@ -21,16 +18,14 @@ public class ElementoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 5)
     private String simbolo;
 
-    @Column(nullable = false, length = 100)
     private String nombre;
 
-    @Column(name = "numero_atomico", nullable = false, unique = true)
+    @Column(name = "numero_atomico")
     private Integer numeroAtomico;
 
-    @Column(name = "masa_atomica", nullable = false, precision = 10, scale = 4)
+    @Column(name = "masa_atomica")
     private BigDecimal masaAtomica;
 
     @Column(name = "grupo_periodico")
@@ -38,24 +33,83 @@ public class ElementoEntity {
 
     private Integer periodo;
 
-    @Column(length = 1)
     private String bloque;
 
-    @Column(length = 50)
     private String categoria;
 
-    @Column(name = "configuracion_electronica", length = 255)
+    @Column(name = "configuracion_electronica")
     private String configuracionElectronica;
 
-    @Column(precision = 5, scale = 2)
+    @Column(name = "configuracion_electronica_semantica")
+    private String configuracionElectronicaSemantica;
+
     private BigDecimal electronegatividad;
 
-    @Column(name = "estado_25c", length = 20)
+    @Column(name = "afinidad_electronica")
+    private BigDecimal afinidadElectronica;
+
+    @Column(name = "estado_25c")
     private String estado25c;
 
-    @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @OneToMany(mappedBy = "elemento", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EstadoOxidacionEntity> estadosOxidacion = new ArrayList<>();
+    private String apariencia;
+
+    @Column(name = "punto_ebullicion")
+    private BigDecimal puntoEbullicion;
+
+    @Column(name = "punto_fusion")
+    private BigDecimal puntoFusion;
+
+    private BigDecimal densidad;
+
+    @Column(name = "calor_molar")
+    private BigDecimal calorMolar;
+
+    @Column(name = "descubierto_por")
+    private String descubiertoPor;
+
+    @Column(name = "nombrado_por")
+    private String nombradoPor;
+
+    private String fuente;
+
+    @Column(name = "imagen_modelo_bohr")
+    private String imagenModeloBohr;
+
+    @Column(name = "modelo_3d_bohr")
+    private String modelo3dBohr;
+
+    @Column(name = "imagen_espectral")
+    private String imagenEspectral;
+
+    @Column(name = "posicion_x")
+    private Integer posicionX;
+
+    @Column(name = "posicion_y")
+    private Integer posicionY;
+
+    @Column(name = "posicion_wx")
+    private Integer posicionWx;
+
+    @Column(name = "posicion_wy")
+    private Integer posicionWy;
+
+    @Column(name = "capas", columnDefinition = "integer[]")
+    private Integer[] capas;
+
+    @Column(name = "energias_ionizacion", columnDefinition = "numeric(12,6)[]")
+    private BigDecimal[] energiasIonizacion;
+
+    @Column(name = "color_cpk")
+    private String colorCpk;
+
+    @Column(name = "imagen_titulo")
+    private String imagenTitulo;
+
+    @Column(name = "imagen_url")
+    private String imagenUrl;
+
+    @Column(name = "imagen_atribucion")
+    private String imagenAtribucion;
 }

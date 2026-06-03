@@ -10,4 +10,6 @@ public interface ElementoRepository extends JpaRepository<ElementoEntity, Long> 
     Optional<ElementoEntity> findBySimboloIgnoreCase(String simbolo);
 
     Optional<ElementoEntity> findByNumeroAtomico(Integer numeroAtomico);
+
+    boolean existsByNumeroAtomico(Integer numeroAtomico);
 }

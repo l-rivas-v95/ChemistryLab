@@ -1,0 +1,115 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 240px;
+    height: 100vh;
+
+    padding: 22px 16px;
+
+    border-right: 1px solid rgba(181, 138, 60, 0.35);
+
+    background: rgba(20, 24, 36, 0.92);
+    backdrop-filter: blur(12px);
+
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.28);
+
+    z-index: 20;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 34px;
+    padding: 12px;
+
+    border: 1px solid rgba(181, 138, 60, 0.35);
+    border-radius: 16px;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-logo span {
+    font-size: 28px;
+}
+
+.sidebar-logo h1 {
+    margin: 0;
+    color: #fff4bd;
+    font-size: 20px;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    padding: 13px 14px;
+
+    border: 2px solid transparent;
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff4bd;
+
+    cursor: pointer;
+
+    font-size: 14px;
+    font-weight: 900;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.sidebar-menu button:hover {
+    background: rgba(255, 244, 189, 0.18);
+    border-color: rgba(181, 138, 60, 0.45);
+}
+
+.sidebar-menu button.activo {
+    background: linear-gradient(180deg, #ffd45a, #f3b33d);
+    color: #1f1a12;
+    border-color: #7b6332;
+
+    box-shadow: 0 0 16px rgba(255, 210, 80, 0.4);
+}
+
+.sidebar-menu button span {
+    font-size: 20px;
+}
+
+@media (max-width: 800px) {
+    .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        border-right: none;
+        border-bottom: 1px solid rgba(181, 138, 60, 0.35);
+    }
+
+    .sidebar-logo {
+        margin-bottom: 0;
+    }
+
+    .sidebar-menu {
+        flex-direction: row;
+    }
+
+    .sidebar-menu button {
+        white-space: nowrap;
+    }
+}

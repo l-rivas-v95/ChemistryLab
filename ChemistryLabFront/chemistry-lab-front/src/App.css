@@ -1,0 +1,153 @@
+/* =========================
+   ESTILOS GENERALES
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  color: #111;
+  overflow-x: hidden;
+
+  background:
+          radial-gradient(circle at top left, rgba(120, 190, 255, 0.28), transparent 32%),
+          radial-gradient(circle at bottom right, rgba(255, 210, 120, 0.28), transparent 34%),
+          linear-gradient(135deg, #eef4fb 0%, #f8f5ec 50%, #edf3f8 100%);
+}
+
+button {
+  font-family: inherit;
+}
+
+.app {
+  min-height: 100vh;
+  width: 100%;
+  background: transparent;
+}
+
+.app-contenido {
+  min-height: 100vh;
+  margin-left: 240px;
+  padding: 24px;
+}
+.vista-placeholder {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 40px;
+
+  border: 1px solid rgba(181, 138, 60, 0.35);
+  border-radius: 22px;
+
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff4bd;
+
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+.vista-placeholder h2 {
+  margin-top: 0;
+  font-size: 34px;
+}
+h1 {
+  margin: 0 0 10px;
+  text-align: center;
+
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.05;
+
+  color: #142033;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.65);
+}
+
+.estado-pagina {
+  margin-top: 80px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #142033;
+}
+
+.error-pagina {
+  color: #a01919;
+}
+
+/* =========================
+   COLORES DE CATEGORÍAS
+   Usadas por tabla, leyenda y carta
+========================= */
+
+.cat-alcalino {
+  background: #ffd0d0;
+  border-color: #ff8a8a;
+}
+
+.cat-alcalinoterreo {
+  background: #ffdcae;
+  border-color: #f1a64d;
+}
+
+.cat-transicion {
+  background: #fff0a8;
+  border-color: #d9b720;
+}
+
+.cat-postransicion {
+  background: #e0f6c9;
+  border-color: #89c86d;
+}
+
+.cat-metaloide {
+  background: #bceee4;
+  border-color: #58b7aa;
+}
+
+.cat-no-metal {
+  background: #cfeaff;
+  border-color: #75b9f1;
+}
+
+.cat-gas-noble {
+  background: #ded2ff;
+  border-color: #9e85ef;
+}
+
+.cat-lantanido {
+  background: #ffc7ec;
+  border-color: #e979c8;
+}
+
+.cat-actinido {
+  background: #e2c8b6;
+  border-color: #b78a68;
+}
+
+.cat-desconocida {
+  background: #e8e8e8;
+  border-color: #bcbcbc;
+}
+
+/* =========================
+   RESPONSIVE GENERAL
+========================= */
+
+@media (max-width: 800px) {
+  .app-contenido {
+    margin-left: 0;
+    padding: 18px 12px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+}
