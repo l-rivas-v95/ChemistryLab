@@ -7,17 +7,16 @@ function MoleculeStructure({ molecula }) {
     const [representacion, setRepresentacion] = useState(null);
     const [error, setError] = useState(false);
 
+    const moleculaId = molecula?.id;
+
     useEffect(() => {
-        if (!molecula?.id) {
-            setRepresentacion(null);
+        if (!moleculaId) {
             return;
         }
 
         const controller = new AbortController();
 
-        setError(false);
-
-        fetch(`${API_BASE_URL}/moleculas/${molecula.id}/representacion`, {
+        fetch(`${API_BASE_URL}/moleculas/${moleculaId}/representacion`, {
             signal: controller.signal
         })
             .then((response) => {
@@ -29,6 +28,7 @@ function MoleculeStructure({ molecula }) {
             })
             .then((data) => {
                 setRepresentacion(data);
+                setError(false);
             })
             .catch((fetchError) => {
                 if (fetchError.name === "AbortError") {
@@ -43,7 +43,7 @@ function MoleculeStructure({ molecula }) {
         return () => {
             controller.abort();
         };
-    }, [molecula?.id]);
+    }, [moleculaId]);
 
     if (error || !representacion) {
         return <FormulaStructure formula={molecula?.formula} />;
@@ -256,6 +256,19 @@ function getVseprLayout(representacion) {
     const terminales = representacion.atomosTerminales || [];
     const layout = getLayoutName(representacion.vsepr);
 
+    if (layout === "diatomic") {
+        return {
+            atoms: [
+                { symbol: representacion.atomoCentral, x: 96, y: 78 },
+                { symbol: terminales[0], x: 164, y: 78 }
+            ],
+            bonds: [
+                { x1: 118, y1: 78, x2: 142, y2: 78 }
+            ],
+            lonePairs: []
+        };
+    }
+
     if (layout === "linear") {
         return {
             atoms: [
@@ -333,6 +346,7 @@ function getVseprLayout(representacion) {
 }
 
 function getLayoutName(vsepr) {
+    if (vsepr === "AX1") return "diatomic";
     if (vsepr === "AX2") return "linear";
     if (vsepr === "AX2E" || vsepr === "AX2E2") return "bent";
     if (vsepr === "AX3") return "trigonal";

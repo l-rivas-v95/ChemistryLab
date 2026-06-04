@@ -49,16 +49,16 @@ public class MoleculaRepresentacionService {
             );
         }
 
-        if (esRepresentacionIonica(tipo)) {
-            return MoleculaRepresentacionDTO.ionica(
-                    formulaVisual,
-                    textoIonicoGenerico(tipo)
-            );
-        }
-
         MoleculaRepresentacionDTO vsepr = intentarVsepr(formulaVisual);
         if (vsepr != null) {
             return vsepr;
+        }
+
+        if (esRepresentacionIonica(tipo)) {
+            return MoleculaRepresentacionDTO.ionica(
+                    formulaVisual,
+                    construirTextoIonico(formulaVisual, tipo)
+            );
         }
 
         return MoleculaRepresentacionDTO.formula(formulaVisual);
@@ -69,6 +69,11 @@ public class MoleculaRepresentacionService {
 
         if (atomosFormula.isEmpty()) {
             return null;
+        }
+
+        MoleculaRepresentacionDTO diatomica = intentarDiatomica(formulaVisual, atomosFormula);
+        if (diatomica != null) {
+            return diatomica;
         }
 
         MoleculaRepresentacionDTO excepcion = intentarExcepcionVsepr(formulaVisual);
@@ -113,6 +118,45 @@ public class MoleculaRepresentacionService {
                 paresLibres,
                 vsepr,
                 geometria,
+                polaridad
+        );
+    }
+
+    private MoleculaRepresentacionDTO intentarDiatomica(String formulaVisual, Map<String, Integer> atomosFormula) {
+        int totalAtomos = atomosFormula.values().stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+
+        if (totalAtomos != 2) {
+            return null;
+        }
+
+        List<String> atomosExpandidos = new ArrayList<>();
+
+        for (Map.Entry<String, Integer> entry : atomosFormula.entrySet()) {
+            for (int i = 0; i < entry.getValue(); i++) {
+                atomosExpandidos.add(entry.getKey());
+            }
+        }
+
+        if (atomosExpandidos.size() != 2) {
+            return null;
+        }
+
+        String atomoCentral = atomosExpandidos.get(0);
+        String atomoTerminal = atomosExpandidos.get(1);
+
+        String polaridad = atomoCentral.equals(atomoTerminal)
+                ? "No polar"
+                : "Polar";
+
+        return MoleculaRepresentacionDTO.vsepr(
+                formulaVisual,
+                atomoCentral,
+                List.of(atomoTerminal),
+                0,
+                "AX1",
+                "Lineal",
                 polaridad
         );
     }
@@ -218,8 +262,8 @@ public class MoleculaRepresentacionService {
 
         return candidatos.stream()
                 .min((a, b) -> Double.compare(
-                        (Double) getElectronegatividad(elementos.get(a)),
-                        (Double) getElectronegatividad(elementos.get(b))
+                        getElectronegatividad(elementos.get(a)).doubleValue(),
+                        getElectronegatividad(elementos.get(b)).doubleValue()
                 ))
                 .orElse(null);
     }
@@ -290,8 +334,7 @@ public class MoleculaRepresentacionService {
 
     private String obtenerGeometria(String vsepr) {
         return switch (vsepr) {
-            case "AX1" -> "Lineal";
-            case "AX2" -> "Lineal";
+            case "AX1", "AX2" -> "Lineal";
             case "AX2E", "AX2E2" -> "Angular";
             case "AX3" -> "Trigonal plana";
             case "AX3E" -> "Piramidal trigonal";
@@ -331,23 +374,144 @@ public class MoleculaRepresentacionService {
         return tipo.contains("sal")
                 || tipo.contains("acido")
                 || tipo.contains("base")
-                || tipo.contains("hidroxido");
+                || tipo.contains("hidroxido")
+                || tipo.contains("oxido");
     }
 
-    private String textoIonicoGenerico(String tipo) {
-        if (tipo.contains("sal")) {
-            return "catión + anión";
+    private String construirTextoIonico(String formulaVisual, String tipo) {
+        if (tipo.contains("acido")) {
+            return construirTextoAcido(formulaVisual);
         }
 
-        if (tipo.contains("acido")) {
-            return "H⁺ + anión";
+        if (tipo.contains("oxido")) {
+            return construirTextoOxido(formulaVisual);
+        }
+
+        if (tipo.contains("sal")) {
+            return construirTextoSal(formulaVisual);
         }
 
         if (tipo.contains("base") || tipo.contains("hidroxido")) {
-            return "catión + OH⁻";
+            return construirTextoHidroxido(formulaVisual);
         }
 
         return "representación iónica";
+    }
+
+    private String construirTextoAcido(String formulaVisual) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("^H(\\d?)(.+)$")
+                .matcher(formulaVisual);
+
+        if (!matcher.matches()) {
+            return "H⁺ + anión";
+        }
+
+        String cantidadHTexto = matcher.group(1);
+        String anion = matcher.group(2);
+
+        int cantidadH = cantidadHTexto == null || cantidadHTexto.isBlank()
+                ? 1
+                : Integer.parseInt(cantidadHTexto);
+
+        String protones = cantidadH == 1 ? "H⁺" : cantidadH + "H⁺";
+        String cargaAnion = cantidadH == 1 ? "⁻" : toSuperscript(cantidadH) + "⁻";
+
+        return protones + " + " + anion + cargaAnion;
+    }
+
+    private String construirTextoOxido(String formulaVisual) {
+        Map<String, Integer> atomos = parsearFormula(formulaVisual);
+
+        Integer oxigenos = atomos.get("O");
+
+        if (oxigenos == null || oxigenos == 0 || atomos.size() < 2) {
+            return "elemento + O²⁻";
+        }
+
+        String elemento = atomos.keySet().stream()
+                .filter(simbolo -> !"O".equals(simbolo))
+                .findFirst()
+                .orElse(null);
+
+        if (elemento == null) {
+            return "elemento + O²⁻";
+        }
+
+        int cantidadElemento = atomos.getOrDefault(elemento, 1);
+
+        String textoElemento = cantidadElemento == 1
+                ? elemento
+                : cantidadElemento + elemento;
+
+        String textoOxigeno = oxigenos == 1
+                ? "O²⁻"
+                : oxigenos + "O²⁻";
+
+        return textoElemento + " + " + textoOxigeno;
+    }
+
+    private String construirTextoSal(String formulaVisual) {
+        Map<String, Integer> atomos = parsearFormula(formulaVisual);
+
+        if (atomos.size() < 2) {
+            return "catión + anión";
+        }
+
+        String primerElemento = atomos.keySet().stream()
+                .findFirst()
+                .orElse(null);
+
+        if (primerElemento == null) {
+            return "catión + anión";
+        }
+
+        int cantidad = atomos.getOrDefault(primerElemento, 1);
+
+        String cation = cantidad == 1
+                ? primerElemento + "⁺"
+                : cantidad + primerElemento + "⁺";
+
+        return cation + " + anión";
+    }
+
+    private String construirTextoHidroxido(String formulaVisual) {
+        Map<String, Integer> atomos = parsearFormula(formulaVisual);
+
+        Integer oxigenos = atomos.get("O");
+        Integer hidrogenos = atomos.get("H");
+
+        if (oxigenos == null || hidrogenos == null) {
+            return "catión + OH⁻";
+        }
+
+        int cantidadOH = Math.min(oxigenos, hidrogenos);
+
+        String textoOH = cantidadOH <= 1
+                ? "OH⁻"
+                : cantidadOH + "OH⁻";
+
+        String cation = atomos.keySet().stream()
+                .filter(simbolo -> !"O".equals(simbolo))
+                .filter(simbolo -> !"H".equals(simbolo))
+                .findFirst()
+                .orElse("catión");
+
+        return cation + " + " + textoOH;
+    }
+
+    private String toSuperscript(int numero) {
+        return String.valueOf(numero)
+                .replace("0", "⁰")
+                .replace("1", "¹")
+                .replace("2", "²")
+                .replace("3", "³")
+                .replace("4", "⁴")
+                .replace("5", "⁵")
+                .replace("6", "⁶")
+                .replace("7", "⁷")
+                .replace("8", "⁸")
+                .replace("9", "⁹");
     }
 
     private boolean esOrganica(String tipo) {
@@ -408,16 +572,8 @@ public class MoleculaRepresentacionService {
                 .trim();
     }
 
-    /*
-     * Ajusta estos getters si tu ElementoEntity usa otros nombres.
-     */
-
     private String getCategoria(ElementoEntity elemento) {
         return elemento.getCategoria();
-    }
-
-    private String getSimbolo(ElementoEntity elemento) {
-        return elemento.getSimbolo();
     }
 
     private Integer getGrupo(ElementoEntity elemento) {
