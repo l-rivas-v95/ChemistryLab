@@ -1,4 +1,4 @@
-import { getClaseCategoria } from "../../utils/categoriaUtils";
+import { getClaseCategoria } from "../../utils/categoriaUtils.js";
 
 function ElementTile({ elemento, onClick }) {
     return (

@@ -13,6 +13,20 @@ function App() {
     const [elementoSeleccionado, setElementoSeleccionado] = useState(null);
 
     const [moleculas, setMoleculas] = useState([]);
+    const [paginaMoleculas, setPaginaMoleculas] = useState(0);
+    const [totalPaginasMoleculas, setTotalPaginasMoleculas] = useState(0);
+    const [totalMoleculas, setTotalMoleculas] = useState(0);
+
+    const [textoBusquedaMoleculas, setTextoBusquedaMoleculas] = useState("");
+    const [busquedaMoleculas, setBusquedaMoleculas] = useState("");
+
+    const [categoriaMoleculas, setCategoriaMoleculas] = useState("all");
+    const [familiaMoleculas, setFamiliaMoleculas] = useState("all");
+
+    const [requestKeyMoleculas, setRequestKeyMoleculas] = useState(0);
+    const [requestKeyMoleculasFinalizada, setRequestKeyMoleculasFinalizada] = useState(0);
+
+    const cargandoMoleculas = requestKeyMoleculas !== requestKeyMoleculasFinalizada;
 
     useEffect(() => {
         fetch("http://localhost:8080/api/elementos")
@@ -22,22 +36,121 @@ function App() {
     }, []);
 
     useEffect(() => {
-        fetch("http://localhost:8080/api/moleculas")
+        const controller = new AbortController();
+
+        const params = new URLSearchParams();
+        params.set("page", String(paginaMoleculas));
+        params.set("size", "10");
+
+        if (busquedaMoleculas.trim()) {
+            params.set("search", busquedaMoleculas.trim());
+        }
+
+        if (categoriaMoleculas && categoriaMoleculas !== "all") {
+            params.set("categoria", categoriaMoleculas);
+        }
+
+        if (familiaMoleculas && familiaMoleculas !== "all") {
+            params.set("familia", familiaMoleculas);
+        }
+
+        fetch(`http://localhost:8080/api/moleculas?${params.toString()}`, {
+            signal: controller.signal
+        })
             .then((response) => {
                 if (!response.ok) {
                     throw new Error("Error HTTP " + response.status);
                 }
+
                 return response.json();
             })
             .then((data) => {
-                console.log("Moléculas cargadas:", data);
-                setMoleculas(Array.isArray(data) ? data : []);
+                console.log("Página de moléculas cargada:", data);
+
+                setMoleculas(Array.isArray(data.content) ? data.content : []);
+                setTotalPaginasMoleculas(data.totalPages || 0);
+                setTotalMoleculas(data.totalElements || 0);
             })
             .catch((error) => {
+                if (error.name === "AbortError") {
+                    return;
+                }
+
                 console.error("Error cargando moléculas:", error);
                 setMoleculas([]);
+                setTotalPaginasMoleculas(0);
+                setTotalMoleculas(0);
+            })
+            .finally(() => {
+                setRequestKeyMoleculasFinalizada(requestKeyMoleculas);
             });
-    }, []);
+
+        return () => {
+            controller.abort();
+        };
+    }, [
+        paginaMoleculas,
+        busquedaMoleculas,
+        categoriaMoleculas,
+        familiaMoleculas,
+        requestKeyMoleculas
+    ]);
+
+    const cargarPaginaMoleculas = (nuevaPagina) => {
+        if (cargandoMoleculas) {
+            return;
+        }
+
+        setPaginaMoleculas(nuevaPagina);
+        setRequestKeyMoleculas((key) => key + 1);
+    };
+
+    const irPaginaMoleculasAnterior = () => {
+        const nuevaPagina = Math.max(paginaMoleculas - 1, 0);
+        cargarPaginaMoleculas(nuevaPagina);
+    };
+
+    const irPaginaMoleculasSiguiente = () => {
+        const ultimaPagina = Math.max(totalPaginasMoleculas - 1, 0);
+        const nuevaPagina = Math.min(paginaMoleculas + 1, ultimaPagina);
+        cargarPaginaMoleculas(nuevaPagina);
+    };
+
+    const cambiarTextoBusquedaMoleculas = (texto) => {
+        setTextoBusquedaMoleculas(texto);
+    };
+
+    const buscarMoleculas = () => {
+        if (cargandoMoleculas) {
+            return;
+        }
+
+        setBusquedaMoleculas(textoBusquedaMoleculas);
+        setPaginaMoleculas(0);
+        setRequestKeyMoleculas((key) => key + 1);
+    };
+
+    const limpiarBusquedaMoleculas = () => {
+        if (cargandoMoleculas) {
+            return;
+        }
+
+        setTextoBusquedaMoleculas("");
+        setBusquedaMoleculas("");
+        setPaginaMoleculas(0);
+        setRequestKeyMoleculas((key) => key + 1);
+    };
+
+    const cambiarFiltrosMoleculas = (nuevaCategoria, nuevaFamilia) => {
+        if (cargandoMoleculas) {
+            return;
+        }
+
+        setCategoriaMoleculas(nuevaCategoria);
+        setFamiliaMoleculas(nuevaFamilia);
+        setPaginaMoleculas(0);
+        setRequestKeyMoleculas((key) => key + 1);
+    };
 
     return (
         <main className="app">
@@ -66,16 +179,23 @@ function App() {
                 )}
 
                 {vistaActiva === "moleculas" && (
-                    <>
-                        {moleculas.length > 0 ? (
-                            <MoleculeList moleculas={moleculas} />
-                        ) : (
-                            <div style={{ padding: "40px", fontSize: "24px", fontWeight: "bold" }}>
-                                No se han cargado moléculas. Revisa si el backend está levantado y si existe
-                                el endpoint http://localhost:8080/api/moleculas
-                            </div>
-                        )}
-                    </>
+                    <MoleculeList
+                        moleculas={moleculas}
+                        paginaActual={paginaMoleculas}
+                        totalPaginas={totalPaginasMoleculas}
+                        totalMoleculas={totalMoleculas}
+                        cargando={cargandoMoleculas}
+                        textoBusqueda={textoBusquedaMoleculas}
+                        busqueda={busquedaMoleculas}
+                        categoria={categoriaMoleculas}
+                        familia={familiaMoleculas}
+                        onTextoBusquedaChange={cambiarTextoBusquedaMoleculas}
+                        onBuscar={buscarMoleculas}
+                        onLimpiarBusqueda={limpiarBusquedaMoleculas}
+                        onCambiarFiltros={cambiarFiltrosMoleculas}
+                        onPaginaAnterior={irPaginaMoleculasAnterior}
+                        onPaginaSiguiente={irPaginaMoleculasSiguiente}
+                    />
                 )}
             </section>
         </main>

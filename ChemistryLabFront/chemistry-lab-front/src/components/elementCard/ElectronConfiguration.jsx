@@ -1,4 +1,4 @@
-import { formatearConfiguracionMoller } from "../../utils/electronUtils";
+import { formatearConfiguracionMoller } from "../../utils/electronUtils.js";
 
 function ElectronConfiguration({ configuracion, bloque }) {
     const filas = formatearConfiguracionMoller(configuracion);

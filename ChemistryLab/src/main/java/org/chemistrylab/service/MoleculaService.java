@@ -3,6 +3,8 @@ package org.chemistrylab.service;
 import org.chemistrylab.dto.MoleculaDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.repository.MoleculaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +16,16 @@ public class MoleculaService {
 
     public MoleculaService(MoleculaRepository moleculaRepository) {
         this.moleculaRepository = moleculaRepository;
+    }
+
+    public Page<MoleculaDTO> findAllPaginado(String search, String categoria, String familia, Pageable pageable) {
+        return moleculaRepository.buscarPaginado(
+                        limpiarParametro(search),
+                        limpiarParametro(categoria),
+                        limpiarParametro(familia),
+                        pageable
+                )
+                .map(this::toDTO);
     }
 
     public List<MoleculaDTO> findAll() {
@@ -49,6 +61,14 @@ public class MoleculaService {
                 .stream()
                 .map(this::toDTO)
                 .toList();
+    }
+
+    private String limpiarParametro(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return "";
+        }
+
+        return value.trim();
     }
 
     private MoleculaDTO toDTO(MoleculaEntity entity) {

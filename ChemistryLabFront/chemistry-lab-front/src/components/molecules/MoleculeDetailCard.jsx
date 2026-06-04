@@ -1,35 +1,42 @@
+import { useState } from "react";
 import SdfViewer from "./SdfViewer";
-
-function MoleculeImage({ molecula }) {
-    const imagenPrincipal = molecula.imagen2d;
-    const imagenFallback = molecula.pubchemCid
-        ? `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${molecula.pubchemCid}/PNG`
-        : null;
-
-    const handleError = (event) => {
-        if (imagenFallback && event.currentTarget.src !== imagenFallback) {
-            event.currentTarget.src = imagenFallback;
-        }
-    };
-
-    return (
-        <img
-            src={imagenPrincipal || imagenFallback}
-            alt={molecula.nombre || "Molécula"}
-            onError={handleError}
-        />
-    );
-}
+import MoleculeStructure from "./MoleculeStructure";
+import {
+    cleanLongText,
+    getSafetySummary,
+    getSynonymSummary,
+    getUsesSummary
+} from "../../utils/moleculeSafety";
+import {
+    cleanText,
+    formatDescription,
+    formatPropertyShort,
+    hasValue
+} from "../../utils/moleculeFormatters";
 
 function MoleculeDetailCard({ molecula, onClose }) {
+    const [mostrarModelo3d, setMostrarModelo3d] = useState(false);
+
+    const safety = getSafetySummary(molecula.riesgos);
+    const usos = getUsesSummary(molecula.usos);
+    const sinonimos = getSynonymSummary(molecula.sinonimos);
+
     return (
-        <div className="molecule-modal-overlay">
-            <article className="molecule-detail-card">
-                <button className="molecule-detail-close" onClick={onClose}>
-                    X
+        <div className="molecule-modal-overlay" onClick={onClose}>
+            <article
+                className="molecule-detail-card molecule-detail-card-three"
+                onClick={(event) => event.stopPropagation()}
+            >
+                <button
+                    type="button"
+                    className="molecule-detail-close"
+                    onClick={onClose}
+                    aria-label="Cerrar detalle"
+                >
+                    ×
                 </button>
 
-                <section className="molecule-detail-main">
+                <section className="molecule-detail-column molecule-detail-main">
                     <div className="molecule-detail-title">
                         <div>
                             <h2>{molecula.nombre}</h2>
@@ -40,71 +47,35 @@ function MoleculeDetailCard({ molecula, onClose }) {
                     </div>
 
                     <div className="molecule-detail-image">
-                        {molecula.imagen2d ? (
-                            <MoleculeImage molecula={molecula} />
-                        ) : (
-                            <div className="molecule-no-image">⚗️</div>
-                        )}
+                        <MoleculeStructure molecula={molecula} size="detail"/>
                     </div>
 
                     <div className="molecule-detail-3d-box">
                         <h4>🧊 Modelo 3D</h4>
 
-                        {molecula.modelo3dUrl ? (
-                            <SdfViewer cid={molecula.pubchemCid} />
-                        ) : (
-                            <div className="molecule-3d-empty">
-                                Modelo 3D no disponible
-                            </div>
-                        )}
+                        <div className="molecule-detail-3d-content">
+                            {molecula.pubchemCid ? (
+                                mostrarModelo3d ? (
+                                    <SdfViewer cid={molecula.pubchemCid}/>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="molecule-load-3d-button"
+                                        onClick={() => setMostrarModelo3d(true)}
+                                    >
+                                        Cargar modelo 3D
+                                    </button>
+                                )
+                            ) : (
+                                <div className="molecule-3d-empty">
+                                    Modelo 3D no disponible
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="molecule-detail-type">
-                        {molecula.tipoCompuesto || "Inorgánico"}
-                    </div>
-
-                    <p className="molecule-detail-description">
-                        {molecula.descripcion || "Sin descripción disponible."}
-                    </p>
-
-                    <TextInfoCard
-                        icono="🏷️"
-                        titulo="Sinónimos"
-                        texto={molecula.sinonimos}
-                        vacio="Sin sinónimos registrados"
-                    />
-                </section>
-
-                <section className="molecule-detail-info">
-                    <h3>Información adicional</h3>
-
-                    <div className="molecule-detail-grid">
-                        <DetailItem icono="⚖️" label="Masa molecular" value={molecula.masaMolecular} unit="g/mol" />
-                        <DetailItem icono="⚡" label="Carga" value={molecula.carga} />
-                        <DetailItem icono="🔥" label="Punto de fusión" value={molecula.puntoFusion} />
-                        <DetailItem icono="🌋" label="Punto de ebullición" value={molecula.puntoEbullicion} />
-                        <DetailItem icono="💧" label="Solubilidad" value={molecula.solubilidad} />
-                        <DetailItem icono="🧪" label="pH" value={molecula.ph} />
-                        <DetailItem icono="🧲" label="Densidad" value={molecula.densidad} />
-                        <DetailItem icono="🧬" label="Átomos pesados" value={molecula.atomosPesados} />
-                        <DetailItem icono="🔗" label="Enlaces rotables" value={molecula.enlacesRotables} />
-                        <DetailItem icono="🧠" label="Complejidad" value={molecula.complejidad} />
-                    </div>
-
-                    <div className="molecule-detail-text-columns">
-                        <TextInfoCard
-                            icono="☣️"
-                            titulo="Riesgos"
-                            texto={molecula.riesgos}
-                            vacio="Sin riesgos registrados"
-                        />
-
-                        <TextInfoCard
-                            icono="🧰"
-                            titulo="Usos"
-                            texto={molecula.usos}
-                            vacio="Sin usos registrados"
-                        />
+                        {molecula.tipoCompuesto || "Sin clasificar"}
                     </div>
 
                     <div className="molecule-detail-actions">
@@ -118,6 +89,52 @@ function MoleculeDetailCard({ molecula, onClose }) {
                             </a>
                         )}
                     </div>
+
+                </section>
+
+                <section className="molecule-detail-column molecule-detail-info">
+                    <h3>Propiedades</h3>
+
+                    <div className="molecule-detail-grid molecule-detail-grid-compact">
+                        <DetailItem icono="⚖️" label="Masa molecular" value={molecula.masaMolecular} unit="g/mol"/>
+                        <DetailItem icono="⚡" label="Carga" value={molecula.carga}/>
+                        <DetailItem icono="🔥" label="Punto de fusión" value={molecula.puntoFusion}/>
+                        <DetailItem icono="🌋" label="Punto de ebullición" value={molecula.puntoEbullicion}/>
+                        <DetailItem icono="💧" label="Solubilidad" value={molecula.solubilidad}/>
+                        <DetailItem icono="🧪" label="pH" value={molecula.ph}/>
+                        <DetailItem icono="🧲" label="Densidad" value={molecula.densidad}/>
+                        <DetailItem icono="🧬" label="Átomos pesados" value={molecula.atomosPesados}/>
+                        <DetailItem icono="🔗" label="Enlaces rotables" value={molecula.enlacesRotables}/>
+                        <DetailItem icono="🧠" label="Complejidad" value={molecula.complejidad}/>
+                        <DetailItem icono="🫧" label="TPSA" value={molecula.tpsa}/>
+                        <DetailItem icono="🧪" label="XLogP" value={molecula.xlogp}/>
+                    </div>
+
+                    <div className="molecule-description-panel molecule-description-panel-center">
+                        <h3>Descripción</h3>
+                        <p title={cleanText(molecula.descripcion)}>
+                            {formatDescription(molecula.descripcion, 700)}
+                        </p>
+                    </div>
+                </section>
+
+                <section className="molecule-detail-column molecule-detail-side">
+                    <h3>Seguridad y usos</h3>
+
+                    <SafetyCard safety={safety}/>
+
+                    <BulletListCard
+                        icono="🧰"
+                        titulo="Usos principales"
+                        items={usos}
+                    />
+
+                    <TagListCard
+                        icono="🏷️"
+                        titulo="Sinónimos"
+                        items={sinonimos}
+                    />
+
                 </section>
             </article>
         </div>
@@ -125,17 +142,18 @@ function MoleculeDetailCard({ molecula, onClose }) {
 }
 
 function DetailItem({ icono, label, value, unit }) {
-    const tieneValor = value !== null && value !== undefined && value !== "";
-    const finalValue = tieneValor ? value : "N/A";
+    const tieneValor = hasValue(value);
+    const textoCompleto = tieneValor ? cleanText(value) : "";
+    const textoVisible = tieneValor ? formatPropertyShort(value, 42) : "N/A";
 
     return (
-        <div className="molecule-detail-item">
+        <div className="molecule-detail-item molecule-detail-item-compact" title={textoCompleto}>
             <span>{icono}</span>
 
             <div>
                 <small>{label}</small>
                 <strong>
-                    {finalValue}
+                    {textoVisible}
                     {tieneValor && unit ? ` ${unit}` : ""}
                 </strong>
             </div>
@@ -143,37 +161,70 @@ function DetailItem({ icono, label, value, unit }) {
     );
 }
 
-function TextInfoCard({ icono, titulo, texto, vacio }) {
-    const contenido = texto && texto.trim() !== "" ? texto : vacio;
-    const partes = contenido
-        .split("|")
-        .map((item) => item.trim())
-        .filter(Boolean);
-
-    const esTextoLargo = partes.some((item) => item.length > 90) || contenido.length > 260;
-
+function SafetyCard({ safety }) {
     return (
-        <div className="molecule-detail-text-card">
-            <div className="molecule-detail-text-card-header">
+        <div className={`molecule-safety-card molecule-safety-${safety.level}`}>
+            <div className="molecule-panel-header">
+                <span>☣️</span>
+                <h4>Riesgos</h4>
+            </div>
+
+            <strong className="molecule-safety-label">
+                {safety.label}
+            </strong>
+
+            <div className="molecule-hazard-list">
+                {safety.items.slice(0, 5).map((item, index) => (
+                    <div
+                        key={`${item.code || "hazard"}-${index}`}
+                        className={`molecule-hazard-item molecule-hazard-${item.severity}`}
+                    >
+                        <span>{item.icon}</span>
+                        <div>
+                            {item.code && <b>{item.code}</b>}
+                            <p>{item.description}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function BulletListCard({ icono, titulo, items }) {
+    return (
+        <div className="molecule-simple-list-card">
+            <div className="molecule-panel-header">
                 <span>{icono}</span>
                 <h4>{titulo}</h4>
             </div>
 
-            {esTextoLargo ? (
-                <div className="molecule-text-list">
-                    {partes.slice(0, 6).map((item, index) => (
-                        <p key={index}>{item}</p>
-                    ))}
-                </div>
-            ) : (
-                <div className="molecule-tags-list">
-                    {partes.slice(0, 10).map((item, index) => (
-                        <span key={index} className="molecule-tag">
-                            {item}
-                        </span>
-                    ))}
-                </div>
-            )}
+            <ul className="molecule-bullet-list">
+                {items.map((item) => (
+                    <li key={item} title={item}>
+                        {cleanLongText(item, 120)}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+function TagListCard({ icono, titulo, items }) {
+    return (
+        <div className="molecule-simple-list-card">
+            <div className="molecule-panel-header">
+                <span>{icono}</span>
+                <h4>{titulo}</h4>
+            </div>
+
+            <div className="molecule-simple-list">
+                {items.map((item) => (
+                    <span key={item} title={item}>
+                        {cleanLongText(item, 38)}
+                    </span>
+                ))}
+            </div>
         </div>
     );
 }

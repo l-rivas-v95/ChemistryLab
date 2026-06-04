@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getClaseCategoria } from "../../utils/categoriaUtils";
+import { getClaseCategoria } from "../../utils/categoriaUtils.js";
 import ElementExtraInfoLeft from "./ElementExtraInfoLeft";
 import ElementExtraInfoRight from "./ElementExtraInfoRight";
 import "./ElementCard.css";

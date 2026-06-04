@@ -1,7 +1,12 @@
 package org.chemistrylab.controller;
 
 import org.chemistrylab.dto.MoleculaDTO;
+import org.chemistrylab.dto.MoleculaRepresentacionDTO;
+import org.chemistrylab.service.MoleculaRepresentacionService;
 import org.chemistrylab.service.MoleculaService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,14 +17,29 @@ import java.util.List;
 public class MoleculaController {
 
     private final MoleculaService moleculaService;
+    private final MoleculaRepresentacionService moleculaRepresentacionService;
 
-    public MoleculaController(MoleculaService moleculaService) {
+    public MoleculaController(
+            MoleculaService moleculaService,
+            MoleculaRepresentacionService moleculaRepresentacionService
+    ) {
         this.moleculaService = moleculaService;
+        this.moleculaRepresentacionService = moleculaRepresentacionService;
+    }
+
+    @GetMapping("/{id}/representacion")
+    public ResponseEntity<MoleculaRepresentacionDTO> obtenerRepresentacion(@PathVariable Long id) {
+        return ResponseEntity.ok(moleculaRepresentacionService.obtenerRepresentacion(id));
     }
 
     @GetMapping
-    public List<MoleculaDTO> findAll() {
-        return moleculaService.findAll();
+    public Page<MoleculaDTO> findAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false, defaultValue = "all") String categoria,
+            @RequestParam(required = false, defaultValue = "all") String familia,
+            Pageable pageable
+    ) {
+        return moleculaService.findAllPaginado(search, categoria, familia, pageable);
     }
 
     @GetMapping("/{id}")
