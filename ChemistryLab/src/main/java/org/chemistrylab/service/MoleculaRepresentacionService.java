@@ -2,39 +2,31 @@ package org.chemistrylab.service;
 
 import org.chemistrylab.chemistry.formula.FormulaParserService;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
-import org.chemistrylab.entity.ElementoEntity;
 import org.chemistrylab.entity.MoleculaEntity;
-import org.chemistrylab.repository.ElementoRepository;
 import org.chemistrylab.repository.MoleculaRepository;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class MoleculaRepresentacionService {
 
     private final MoleculaRepository moleculaRepository;
-    private final ElementoRepository elementoRepository;
     private final FormulaParserService formulaParserService;
-
     private final Estructura2DService estructura2DService;
     private final MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService;
-
     private final MoleculaRepresentacionVseprService moleculaRepresentacionVseprService;
 
     public MoleculaRepresentacionService(
             MoleculaRepository moleculaRepository,
-            ElementoRepository elementoRepository,
             FormulaParserService formulaParserService,
             Estructura2DService estructura2DService,
-            MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService, MoleculaRepresentacionVseprService moleculaRepresentacionVseprService
+            MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService,
+            MoleculaRepresentacionVseprService moleculaRepresentacionVseprService
     ) {
         this.moleculaRepository = moleculaRepository;
-        this.elementoRepository = elementoRepository;
         this.formulaParserService = formulaParserService;
         this.estructura2DService = estructura2DService;
         this.moleculaRepresentacionIonicaService = moleculaRepresentacionIonicaService;
@@ -94,10 +86,6 @@ public class MoleculaRepresentacionService {
                 && !tipo.contains("inorganico");
     }
 
-    private Map<String, Integer> parsearFormula(String formula) {
-        return formulaParserService.parsearFormula(formula);
-    }
-
     private String limpiarFormula(String formula) {
         return formulaParserService.limpiarFormula(formula);
     }
@@ -115,66 +103,5 @@ public class MoleculaRepresentacionService {
                 .replaceAll("\\p{M}", "")
                 .toLowerCase(Locale.ROOT)
                 .trim();
-    }
-
-    private boolean esNoMetal(ElementoEntity elemento) {
-        if (elemento == null) {
-            return false;
-        }
-
-        String categoria = normalizar(getCategoria(elemento));
-
-        return categoria.contains("nonmetal")
-                || categoria.contains("halogen")
-                || categoria.contains("noble gas")
-                || categoria.contains("chalcogen")
-                || categoria.contains("pnictogen")
-                || categoria.contains("no metal")
-                || categoria.contains("metaloide")
-                || categoria.contains("metalloid");
-    }
-
-    private boolean esMetal(ElementoEntity elemento) {
-        if (elemento == null) {
-            return false;
-        }
-
-        String categoria = normalizar(getCategoria(elemento));
-
-        return categoria.contains("metal")
-                && !categoria.contains("nonmetal")
-                && !categoria.contains("no metal")
-                && !categoria.contains("metalloid")
-                && !categoria.contains("metaloide");
-    }
-
-    private boolean esComposicion(Map<String, Integer> atomos, Object... pares) {
-        if (atomos == null || pares == null || pares.length % 2 != 0) {
-            return false;
-        }
-
-        Map<String, Integer> esperada = new HashMap<>();
-
-        for (int i = 0; i < pares.length; i += 2) {
-            String simbolo = (String) pares[i];
-            Integer cantidad = (Integer) pares[i + 1];
-            esperada.put(simbolo, cantidad);
-        }
-
-        return atomos.equals(esperada);
-    }
-
-    private String getCategoria(ElementoEntity elemento) {
-        return elemento.getCategoria();
-    }
-
-    private Integer getGrupo(ElementoEntity elemento) {
-        return elemento.getGrupoPeriodico();
-    }
-
-    private Number getElectronegatividad(ElementoEntity elemento) {
-        return elemento.getElectronegatividad() != null
-                ? elemento.getElectronegatividad()
-                : 99.0;
     }
 }
