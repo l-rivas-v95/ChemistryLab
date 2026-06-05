@@ -87,11 +87,11 @@ public class MoleculaRepresentacionIonicaService {
     private String construirTextoAcido(String formulaVisual) {
         Map<String, Integer> atomos = parsearFormula(formulaVisual);
 
-        if (esComposicion(atomos, "H", 2, "C", 1, "O", 3)) {
+        if (formulaParserService.esComposicion(atomos, "H", 2, "C", 1, "O", 3)) {
             return "2H⁺ + CO3²⁻";
         }
 
-        if (esComposicion(atomos, "H", 3, "B", 1, "O", 3)) {
+        if (formulaParserService.esComposicion(atomos, "H", 3, "B", 1, "O", 3)) {
             return "B(OH)3";
         }
 
@@ -130,11 +130,11 @@ public class MoleculaRepresentacionIonicaService {
     private String construirTextoHidroxido(String formulaVisual) {
         Map<String, Integer> atomos = parsearFormula(formulaVisual);
 
-        if (esComposicion(atomos, "Al", 1, "O", 3, "H", 3)) {
+        if (formulaParserService.esComposicion(atomos, "Al", 1, "O", 3, "H", 3)) {
             return "Al³⁺ + 3OH⁻";
         }
 
-        if (esComposicion(atomos, "N", 1, "H", 5, "O", 1)) {
+        if (formulaParserService.esComposicion(atomos, "N", 1, "H", 5, "O", 1)) {
             return "NH4⁺ + OH⁻";
         }
 
@@ -183,7 +183,7 @@ public class MoleculaRepresentacionIonicaService {
     private String construirTextoOxido(String formulaVisual) {
         Map<String, Integer> atomos = parsearFormula(formulaVisual);
 
-        if (esComposicion(atomos, "Ti", 1, "O", 2)) {
+        if (formulaParserService.esComposicion(atomos, "Ti", 1, "O", 2)) {
             return "Ti⁴⁺ + 2O²⁻";
         }
 
@@ -240,15 +240,15 @@ public class MoleculaRepresentacionIonicaService {
     private String construirTextoSal(String formulaVisual) {
         Map<String, Integer> atomos = parsearFormula(formulaVisual);
 
-        if (esComposicion(atomos, "Na", 3, "P", 1, "O", 4)) {
+        if (formulaParserService.esComposicion(atomos, "Na", 3, "P", 1, "O", 4)) {
             return "3Na⁺ + PO4³⁻";
         }
 
-        if (esComposicion(atomos, "K", 3, "P", 1, "O", 4)) {
+        if (formulaParserService.esComposicion(atomos, "K", 3, "P", 1, "O", 4)) {
             return "3K⁺ + PO4³⁻";
         }
 
-        if (esComposicion(atomos, "N", 3, "H", 12, "P", 1, "O", 4)) {
+        if (formulaParserService.esComposicion(atomos, "N", 3, "H", 12, "P", 1, "O", 4)) {
             return "3NH4⁺ + PO4³⁻";
         }
 
@@ -307,22 +307,6 @@ public class MoleculaRepresentacionIonicaService {
                 && !categoria.contains("no metal")
                 && !categoria.contains("metalloid")
                 && !categoria.contains("metaloide");
-    }
-
-    private boolean esComposicion(Map<String, Integer> atomos, Object... pares) {
-        if (atomos == null || pares == null || pares.length % 2 != 0) {
-            return false;
-        }
-
-        Map<String, Integer> esperada = new HashMap<>();
-
-        for (int i = 0; i < pares.length; i += 2) {
-            String simbolo = (String) pares[i];
-            Integer cantidad = (Integer) pares[i + 1];
-            esperada.put(simbolo, cantidad);
-        }
-
-        return atomos.equals(esperada);
     }
 
     private String normalizar(String valor) {
