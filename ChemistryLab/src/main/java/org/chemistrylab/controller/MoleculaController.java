@@ -1,7 +1,11 @@
 package org.chemistrylab.controller;
 
+import jakarta.validation.Valid;
 import org.chemistrylab.dto.MoleculaDTO;
+import org.chemistrylab.dto.MoleculaImportRequest;
+import org.chemistrylab.dto.MoleculaImportResponse;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
+import org.chemistrylab.service.MoleculaImportService;
 import org.chemistrylab.service.MoleculaRepresentacionService;
 import org.chemistrylab.service.MoleculaService;
 import org.springframework.data.domain.Page;
@@ -18,13 +22,21 @@ public class MoleculaController {
 
     private final MoleculaService moleculaService;
     private final MoleculaRepresentacionService moleculaRepresentacionService;
+    private final MoleculaImportService moleculaImportService;
 
     public MoleculaController(
             MoleculaService moleculaService,
-            MoleculaRepresentacionService moleculaRepresentacionService
+            MoleculaRepresentacionService moleculaRepresentacionService,
+            MoleculaImportService moleculaImportService
     ) {
         this.moleculaService = moleculaService;
         this.moleculaRepresentacionService = moleculaRepresentacionService;
+        this.moleculaImportService = moleculaImportService;
+    }
+
+    @PostMapping("/importar")
+    public ResponseEntity<MoleculaImportResponse> importar(@Valid @RequestBody MoleculaImportRequest request) {
+        return ResponseEntity.ok(moleculaImportService.importar(request.getQuery()));
     }
 
     @GetMapping("/{id}/representacion")
