@@ -31,6 +31,7 @@ public class MoleculaRepresentacionService {
     private final FormulaParserService formulaParserService;
 
     private final Estructura2DService estructura2DService;
+    private final MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService;
 
     public MoleculaRepresentacionService(
             MoleculaRepository moleculaRepository,
@@ -38,7 +39,8 @@ public class MoleculaRepresentacionService {
             IonCatalogService ionCatalogService,
             IonicFormulaResolver ionicFormulaResolver,
             FormulaParserService formulaParserService,
-            Estructura2DService estructura2DService
+            Estructura2DService estructura2DService,
+            MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService
     ) {
         this.moleculaRepository = moleculaRepository;
         this.elementoRepository = elementoRepository;
@@ -46,6 +48,7 @@ public class MoleculaRepresentacionService {
         this.ionicFormulaResolver = ionicFormulaResolver;
         this.formulaParserService = formulaParserService;
         this.estructura2DService = estructura2DService;
+        this.moleculaRepresentacionIonicaService = moleculaRepresentacionIonicaService;
     }
 
     public MoleculaRepresentacionDTO obtenerRepresentacion(Long id) {
@@ -68,10 +71,10 @@ public class MoleculaRepresentacionService {
             );
         }
 
-        if (esRepresentacionIonicaPreferente(tipo, formulaVisual)) {
+        if (moleculaRepresentacionIonicaService.esRepresentacionIonicaPreferente(tipo, formulaVisual)) {
             return MoleculaRepresentacionDTO.ionica(
                     formulaVisual,
-                    construirTextoIonico(formulaVisual, tipo)
+                    moleculaRepresentacionIonicaService.construirTextoIonico(formulaVisual, tipo)
             );
         }
 
@@ -85,10 +88,10 @@ public class MoleculaRepresentacionService {
             return estructura2d.get();
         }
 
-        if (esRepresentacionIonica(tipo)) {
+        if (moleculaRepresentacionIonicaService.esRepresentacionIonica(tipo)) {
             return MoleculaRepresentacionDTO.ionica(
                     formulaVisual,
-                    construirTextoIonico(formulaVisual, tipo)
+                    moleculaRepresentacionIonicaService.construirTextoIonico(formulaVisual, tipo)
             );
         }
 
