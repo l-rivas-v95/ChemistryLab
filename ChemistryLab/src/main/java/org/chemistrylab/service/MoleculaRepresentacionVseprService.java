@@ -38,6 +38,22 @@ public class MoleculaRepresentacionVseprService {
                 ))
                 .toList();
 
+        if (esDioxidoDeNitrogeno(formulaVisual, connectivity, terminales)) {
+            return MoleculaRepresentacionDTO.vsepr(
+                    formulaVisual,
+                    "N",
+                    List.of("O", "O"),
+                    List.of(
+                            new EnlaceRepresentacionDTO("N", "O", 1),
+                            new EnlaceRepresentacionDTO("N", "O", 1)
+                    ),
+                    1,
+                    "AX2E",
+                    "Angular",
+                    "Polar"
+            );
+        }
+
         String vsepr = construirCodigoVsepr(terminales.size(), connectivity.getLonePairs());
 
         String geometria = obtenerGeometria(vsepr);
@@ -57,6 +73,41 @@ public class MoleculaRepresentacionVseprService {
                 geometria,
                 polaridad
         );
+    }
+
+    private boolean esDioxidoDeNitrogeno(
+            String formulaVisual,
+            MolecularConnectivity connectivity,
+            List<String> terminales
+    ) {
+        if ("NO2".equals(normalizarFormula(formulaVisual))) {
+            return true;
+        }
+
+        return "N".equals(connectivity.getCentral())
+                && terminales.size() == 2
+                && terminales.stream().allMatch("O"::equals);
+    }
+
+    private String normalizarFormula(String formula) {
+        if (formula == null) {
+            return "";
+        }
+
+        return formula
+                .replace("₀", "0")
+                .replace("₁", "1")
+                .replace("₂", "2")
+                .replace("₃", "3")
+                .replace("₄", "4")
+                .replace("₅", "5")
+                .replace("₆", "6")
+                .replace("₇", "7")
+                .replace("₈", "8")
+                .replace("₉", "9")
+                .replace(" ", "")
+                .trim()
+                .toUpperCase();
     }
 
     private String construirCodigoVsepr(int enlaces, int paresLibres) {
