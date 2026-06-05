@@ -301,13 +301,13 @@ function VseprStructure({ representacion }) {
             <rect x="0" y="0" width="260" height="180" rx="12" className="formula-bg" />
 
             {layout.bonds.map((bond, index) => (
-                <line
+                <BondLine
                     key={`bond-${index}`}
                     x1={bond.x1}
                     y1={bond.y1}
                     x2={bond.x2}
                     y2={bond.y2}
-                    className="vsepr-bond"
+                    orden={bond.orden}
                 />
             ))}
 
@@ -346,6 +346,68 @@ function VseprStructure({ representacion }) {
             </text>
         </svg>
     );
+}
+
+function BondLine({ x1, y1, x2, y2, orden = 1 }) {
+    if (orden === 2) {
+        const offset = calcularOffsetPerpendicular(x1, y1, x2, y2, 4);
+
+        return (
+            <>
+                <line
+                    x1={x1 + offset.dx}
+                    y1={y1 + offset.dy}
+                    x2={x2 + offset.dx}
+                    y2={y2 + offset.dy}
+                    className="vsepr-bond"
+                />
+                <line
+                    x1={x1 - offset.dx}
+                    y1={y1 - offset.dy}
+                    x2={x2 - offset.dx}
+                    y2={y2 - offset.dy}
+                    className="vsepr-bond"
+                />
+            </>
+        );
+    }
+
+    if (orden === 3) {
+        const offset = calcularOffsetPerpendicular(x1, y1, x2, y2, 5);
+
+        return (
+            <>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} className="vsepr-bond" />
+                <line
+                    x1={x1 + offset.dx}
+                    y1={y1 + offset.dy}
+                    x2={x2 + offset.dx}
+                    y2={y2 + offset.dy}
+                    className="vsepr-bond"
+                />
+                <line
+                    x1={x1 - offset.dx}
+                    y1={y1 - offset.dy}
+                    x2={x2 - offset.dx}
+                    y2={y2 - offset.dy}
+                    className="vsepr-bond"
+                />
+            </>
+        );
+    }
+
+    return <line x1={x1} y1={y1} x2={x2} y2={y2} className="vsepr-bond" />;
+}
+
+function getBondOrder(representacion, destino, index = 0) {
+    const enlaces = Array.isArray(representacion.enlaces) ? representacion.enlaces : [];
+    const candidatos = enlaces.filter((enlace) => enlace.destino === destino);
+
+    if (candidatos[index]) {
+        return candidatos[index].orden || 1;
+    }
+
+    return enlaces[index]?.orden || 1;
 }
 
 function IonicStructure({ texto }) {
@@ -397,7 +459,7 @@ function getVseprLayout(representacion) {
                 { symbol: terminales[0], x: 164, y: 78 }
             ],
             bonds: [
-                { x1: 118, y1: 78, x2: 142, y2: 78 }
+                { x1: 118, y1: 78, x2: 142, y2: 78, orden: getBondOrder(representacion, terminales[0], 0) }
             ],
             lonePairs: []
         };
@@ -411,8 +473,8 @@ function getVseprLayout(representacion) {
                 { symbol: terminales[1] || terminales[0], x: 190, y: 78 }
             ],
             bonds: [
-                { x1: 92, y1: 78, x2: 112, y2: 78 },
-                { x1: 148, y1: 78, x2: 168, y2: 78 }
+                { x1: 92, y1: 78, x2: 112, y2: 78, orden: getBondOrder(representacion, terminales[0], 0) },
+                { x1: 148, y1: 78, x2: 168, y2: 78, orden: getBondOrder(representacion, terminales[1] || terminales[0], 1) }
             ],
             lonePairs: []
         };
@@ -426,8 +488,8 @@ function getVseprLayout(representacion) {
                 { symbol: terminales[1] || terminales[0], x: 176, y: 116 }
             ],
             bonds: [
-                { x1: 114, y1: 90, x2: 98, y2: 105 },
-                { x1: 146, y1: 90, x2: 162, y2: 105 }
+                { x1: 114, y1: 90, x2: 98, y2: 105, orden: getBondOrder(representacion, terminales[0], 0) },
+                { x1: 146, y1: 90, x2: 162, y2: 105, orden: getBondOrder(representacion, terminales[1] || terminales[0], 1) }
             ],
             lonePairs: [
                 { x: 112, y: 48 },
@@ -445,9 +507,9 @@ function getVseprLayout(representacion) {
                 { symbol: terminales[2] || terminales[0], x: 182, y: 112 }
             ],
             bonds: [
-                { x1: 130, y1: 58, x2: 130, y2: 46 },
-                { x1: 114, y1: 90, x2: 94, y2: 104 },
-                { x1: 146, y1: 90, x2: 166, y2: 104 }
+                { x1: 130, y1: 58, x2: 130, y2: 46, orden: getBondOrder(representacion, terminales[0], 0) },
+                { x1: 114, y1: 90, x2: 94, y2: 104, orden: getBondOrder(representacion, terminales[1] || terminales[0], 1) },
+                { x1: 146, y1: 90, x2: 166, y2: 104, orden: getBondOrder(representacion, terminales[2] || terminales[0], 2) }
             ],
             lonePairs: []
         };
@@ -462,9 +524,9 @@ function getVseprLayout(representacion) {
                 { symbol: terminales[2] || terminales[0], x: 182, y: 110 }
             ],
             bonds: [
-                { x1: 130, y1: 94, x2: 130, y2: 108 },
-                { x1: 114, y1: 90, x2: 94, y2: 102 },
-                { x1: 146, y1: 90, x2: 166, y2: 102 }
+                { x1: 130, y1: 94, x2: 130, y2: 108, orden: getBondOrder(representacion, terminales[0], 0) },
+                { x1: 114, y1: 90, x2: 94, y2: 102, orden: getBondOrder(representacion, terminales[1] || terminales[0], 1) },
+                { x1: 146, y1: 90, x2: 166, y2: 102, orden: getBondOrder(representacion, terminales[2] || terminales[0], 2) }
             ],
             lonePairs: [
                 { x: 130, y: 42 }
