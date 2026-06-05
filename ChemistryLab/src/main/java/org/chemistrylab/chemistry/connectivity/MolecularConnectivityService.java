@@ -39,6 +39,11 @@ public class MolecularConnectivityService {
             return Optional.of(diatomica);
         }
 
+        MolecularConnectivity peroxido = construirPeroxidoHidrogenado(atomosFormula);
+        if (peroxido != null) {
+            return Optional.of(peroxido);
+        }
+
         String central = elegirAtomoCentral(atomosFormula, elementos);
 
         if (central == null) {
@@ -88,6 +93,24 @@ public class MolecularConnectivityService {
                         .order(order)
                         .build()))
                 .lonePairs(0)
+                .build();
+    }
+
+    private MolecularConnectivity construirPeroxidoHidrogenado(Map<String, Integer> atomosFormula) {
+        if (atomosFormula.size() != 2
+                || atomosFormula.getOrDefault("O", 0) < 2
+                || atomosFormula.getOrDefault("H", 0) < 2) {
+            return null;
+        }
+
+        return MolecularConnectivity.builder()
+                .central("O")
+                .bonds(List.of(
+                        MolecularBond.builder().from("O").to("H").order(1).build(),
+                        MolecularBond.builder().from("O").to("O").order(1).build(),
+                        MolecularBond.builder().from("O").to("H").order(1).build()
+                ))
+                .lonePairs(2)
                 .build();
     }
 
