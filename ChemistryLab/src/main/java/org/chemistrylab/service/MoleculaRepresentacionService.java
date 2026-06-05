@@ -26,18 +26,21 @@ public class MoleculaRepresentacionService {
     private final Estructura2DService estructura2DService;
     private final MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService;
 
+    private final MoleculaRepresentacionVseprService moleculaRepresentacionVseprService;
+
     public MoleculaRepresentacionService(
             MoleculaRepository moleculaRepository,
             ElementoRepository elementoRepository,
             FormulaParserService formulaParserService,
             Estructura2DService estructura2DService,
-            MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService
+            MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService, MoleculaRepresentacionVseprService moleculaRepresentacionVseprService
     ) {
         this.moleculaRepository = moleculaRepository;
         this.elementoRepository = elementoRepository;
         this.formulaParserService = formulaParserService;
         this.estructura2DService = estructura2DService;
         this.moleculaRepresentacionIonicaService = moleculaRepresentacionIonicaService;
+        this.moleculaRepresentacionVseprService = moleculaRepresentacionVseprService;
     }
 
     public MoleculaRepresentacionDTO obtenerRepresentacion(Long id) {
@@ -67,7 +70,7 @@ public class MoleculaRepresentacionService {
             );
         }
 
-        MoleculaRepresentacionDTO vsepr = intentarVsepr(formulaVisual);
+        MoleculaRepresentacionDTO vsepr = moleculaRepresentacionVseprService.intentarConstruir(formulaVisual);
         if (vsepr != null) {
             return vsepr;
         }
