@@ -24,12 +24,63 @@ public class Estructura2DService {
     public Optional<MoleculaRepresentacionDTO> intentarConstruir(String formulaVisual) {
         return molecularConnectivityService.construir(formulaVisual)
                 .filter(this::esCadenaRepresentable)
-                .map(connectivity -> construirCadenaSimple(formulaVisual, connectivity));
+                .map(connectivity -> construirEstructura(formulaVisual, connectivity));
     }
 
     private boolean esCadenaRepresentable(MolecularConnectivity connectivity) {
         return connectivity.getBonds() != null
                 && connectivity.getBonds().size() >= 2;
+    }
+
+    private MoleculaRepresentacionDTO construirEstructura(
+            String formulaVisual,
+            MolecularConnectivity connectivity
+    ) {
+        if (esPeroxidoDeHidrogeno(formulaVisual, connectivity)) {
+            return construirPeroxidoDeHidrogeno(formulaVisual);
+        }
+
+        return construirCadenaSimple(formulaVisual, connectivity);
+    }
+
+    private MoleculaRepresentacionDTO construirPeroxidoDeHidrogeno(String formulaVisual) {
+        List<AtomoRepresentacionDTO> atomos = List.of(
+                new AtomoRepresentacionDTO("H0", "H", 72, 58, null, 0),
+                new AtomoRepresentacionDTO("O1", "O", 112, 78, null, 2),
+                new AtomoRepresentacionDTO("O2", "O", 148, 102, null, 2),
+                new AtomoRepresentacionDTO("H3", "H", 188, 82, null, 0)
+        );
+
+        List<EnlaceRepresentacionDTO> enlaces = List.of(
+                new EnlaceRepresentacionDTO("H0", "O1", 1),
+                new EnlaceRepresentacionDTO("O1", "O2", 1),
+                new EnlaceRepresentacionDTO("O2", "H3", 1)
+        );
+
+        return MoleculaRepresentacionDTO.estructura2d(
+                formulaVisual,
+                atomos,
+                enlaces,
+                null,
+                "Polar"
+        );
+    }
+
+    private boolean esPeroxidoDeHidrogeno(String formulaVisual, MolecularConnectivity connectivity) {
+        if ("H2O2".equals(normalizarFormula(formulaVisual))) {
+            return true;
+        }
+
+        long enlacesOxigenoOxigeno = connectivity.getBonds().stream()
+                .filter(bond -> "O".equals(bond.getFrom()) && "O".equals(bond.getTo()))
+                .count();
+
+        long enlacesHidrogenoOxigeno = connectivity.getBonds().stream()
+                .filter(bond -> ("H".equals(bond.getFrom()) && "O".equals(bond.getTo()))
+                        || ("O".equals(bond.getFrom()) && "H".equals(bond.getTo())))
+                .count();
+
+        return enlacesOxigenoOxigeno == 1 && enlacesHidrogenoOxigeno == 2;
     }
 
     private MoleculaRepresentacionDTO construirCadenaSimple(
@@ -110,6 +161,27 @@ public class Estructura2DService {
         }
 
         return 0;
+    }
+
+    private String normalizarFormula(String formula) {
+        if (formula == null) {
+            return "";
+        }
+
+        return formula
+                .replace("₀", "0")
+                .replace("₁", "1")
+                .replace("₂", "2")
+                .replace("₃", "3")
+                .replace("₄", "4")
+                .replace("₅", "5")
+                .replace("₆", "6")
+                .replace("₇", "7")
+                .replace("₈", "8")
+                .replace("₉", "9")
+                .replace(" ", "")
+                .trim()
+                .toUpperCase();
     }
 
     private String crearId(String simbolo, int index) {
