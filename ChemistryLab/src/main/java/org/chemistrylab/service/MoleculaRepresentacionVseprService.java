@@ -38,37 +38,34 @@ public class MoleculaRepresentacionVseprService {
                 ))
                 .toList();
 
+        String central = connectivity.getCentral();
+        int paresLibres = connectivity.getLonePairs();
+
         if (esDioxidoDeNitrogeno(formulaVisual, connectivity, terminales)) {
-            return MoleculaRepresentacionDTO.vsepr(
-                    formulaVisual,
-                    "N",
-                    List.of("O", "O"),
-                    List.of(
-                            new EnlaceRepresentacionDTO("N", "O", 1),
-                            new EnlaceRepresentacionDTO("N", "O", 1)
-                    ),
-                    1,
-                    "AX2E",
-                    "Angular",
-                    "Polar"
+            central = "N";
+            terminales = List.of("O", "O");
+            enlaces = List.of(
+                    new EnlaceRepresentacionDTO("N", "O", 1),
+                    new EnlaceRepresentacionDTO("N", "O", 1)
             );
+            paresLibres = 1;
         }
 
-        String vsepr = construirCodigoVsepr(terminales.size(), connectivity.getLonePairs());
+        String vsepr = construirCodigoVsepr(terminales.size(), paresLibres);
 
         String geometria = obtenerGeometria(vsepr);
         if (geometria == null) {
             return null;
         }
 
-        String polaridad = estimarPolaridad(terminales, connectivity.getLonePairs(), vsepr);
+        String polaridad = estimarPolaridad(terminales, paresLibres, vsepr);
 
         return MoleculaRepresentacionDTO.vsepr(
                 formulaVisual,
-                connectivity.getCentral(),
+                central,
                 terminales,
                 enlaces,
-                connectivity.getLonePairs(),
+                paresLibres,
                 vsepr,
                 geometria,
                 polaridad
