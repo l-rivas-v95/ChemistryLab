@@ -1,6 +1,8 @@
 package org.chemistrylab.chemistry.connectivity;
 
 import lombok.RequiredArgsConstructor;
+import org.chemistrylab.chemistry.connectivity.rules.MolecularConnectivityContext;
+import org.chemistrylab.chemistry.connectivity.rules.MolecularConnectivityRule;
 import org.chemistrylab.chemistry.formula.FormulaParserService;
 import org.chemistrylab.entity.ElementoEntity;
 import org.chemistrylab.repository.ElementoRepository;
@@ -20,6 +22,7 @@ public class MolecularConnectivityService {
 
     private final ElementoRepository elementoRepository;
     private final FormulaParserService formulaParserService;
+    private final List<MolecularConnectivityRule> rules;
 
     public Optional<MolecularConnectivity> construir(String formulaVisual) {
         Map<String, Integer> atomosFormula = formulaParserService.parsearFormula(formulaVisual);
@@ -34,19 +37,18 @@ public class MolecularConnectivityService {
             return Optional.empty();
         }
 
-        MolecularConnectivity diatomica = construirDiatomica(atomosFormula);
-        if (diatomica != null) {
-            return Optional.of(diatomica);
-        }
+        MolecularConnectivityContext context = new MolecularConnectivityContext(
+                formulaVisual,
+                atomosFormula,
+                elementos
+        );
 
-        MolecularConnectivity peroxido = construirPeroxidoHidrogenado(atomosFormula);
-        if (peroxido != null) {
-            return Optional.of(peroxido);
-        }
+        for (MolecularConnectivityRule rule : rules) {
+            Optional<MolecularConnectivity> connectivity = rule.tryBuild(context);
 
-        MolecularConnectivity oxidoX2O = construirOxidoCovalenteX2O(atomosFormula);
-        if (oxidoX2O != null) {
-            return Optional.of(oxidoX2O);
+            if (connectivity.isPresent()) {
+                return connectivity;
+            }
         }
 
         String central = elegirAtomoCentral(atomosFormula, elementos);
@@ -71,78 +73,6 @@ public class MolecularConnectivityService {
                 .build());
     }
 
-    private MolecularConnectivity construirDiatomica(Map<String, Integer> atomosFormula) {
-        int totalAtomos = atomosFormula.values().stream()
-                .mapToInt(Integer::intValue)
-                .sum();
-
-        if (totalAtomos != 2) {
-            return null;
-        }
-
-        List<String> atomosExpandidos = expandirAtomos(atomosFormula);
-
-        if (atomosExpandidos.size() != 2) {
-            return null;
-        }
-
-        String from = atomosExpandidos.get(0);
-        String to = atomosExpandidos.get(1);
-        int order = estimarOrdenEnlaceDiatomico(from, to);
-
-        return MolecularConnectivity.builder()
-                .central(from)
-                .bonds(List.of(MolecularBond.builder()
-                        .from(from)
-                        .to(to)
-                        .order(order)
-                        .build()))
-                .lonePairs(0)
-                .build();
-    }
-
-    private MolecularConnectivity construirPeroxidoHidrogenado(Map<String, Integer> atomosFormula) {
-        if (atomosFormula.size() != 2
-                || atomosFormula.getOrDefault("O", 0) < 2
-                || atomosFormula.getOrDefault("H", 0) < 2) {
-            return null;
-        }
-
-        return MolecularConnectivity.builder()
-                .central("O")
-                .bonds(List.of(
-                        MolecularBond.builder().from("H").to("O").order(1).build(),
-                        MolecularBond.builder().from("O").to("O").order(1).build(),
-                        MolecularBond.builder().from("O").to("H").order(1).build()
-                ))
-                .lonePairs(2)
-                .build();
-    }
-
-    private MolecularConnectivity construirOxidoCovalenteX2O(Map<String, Integer> atomosFormula) {
-        if (atomosFormula.size() != 2 || atomosFormula.getOrDefault("O", 0) != 1) {
-            return null;
-        }
-
-        String elemento = atomosFormula.keySet().stream()
-                .filter(simbolo -> !"O".equals(simbolo))
-                .findFirst()
-                .orElse(null);
-
-        if (elemento == null || atomosFormula.getOrDefault(elemento, 0) != 2) {
-            return null;
-        }
-
-        return MolecularConnectivity.builder()
-                .central(elemento)
-                .bonds(List.of(
-                        MolecularBond.builder().from(elemento).to(elemento).order(3).build(),
-                        MolecularBond.builder().from(elemento).to("O").order(1).build()
-                ))
-                .lonePairs(0)
-                .build();
-    }
-
     private List<MolecularBond> construirEnlaces(
             String central,
             List<String> terminales,
@@ -164,14 +94,6 @@ public class MolecularConnectivityService {
     private int estimarOrdenEnlace(String central, String terminal, Map<String, Integer> atomosFormula) {
         if (esOxidoCovalenteBinario(central, terminal, atomosFormula)) {
             return 2;
-        }
-
-        return 1;
-    }
-
-    private int estimarOrdenEnlaceDiatomico(String from, String to) {
-        if (("C".equals(from) && "O".equals(to)) || ("O".equals(from) && "C".equals(to))) {
-            return 3;
         }
 
         return 1;
@@ -268,18 +190,6 @@ public class MolecularConnectivityService {
         }
 
         return terminales;
-    }
-
-    private List<String> expandirAtomos(Map<String, Integer> atomosFormula) {
-        List<String> atomosExpandidos = new ArrayList<>();
-
-        for (Map.Entry<String, Integer> entry : atomosFormula.entrySet()) {
-            for (int i = 0; i < entry.getValue(); i++) {
-                atomosExpandidos.add(entry.getKey());
-            }
-        }
-
-        return atomosExpandidos;
     }
 
     private Map<String, ElementoEntity> cargarElementosPorSimbolo(Map<String, Integer> atomosFormula) {
