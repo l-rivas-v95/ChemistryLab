@@ -161,7 +161,7 @@ function Molecular2DStructure({ atomos = [], enlaces = [], texto, polaridad }) {
             )}
 
             {polaridad && (
-                <text x="130" y="166" textAnchor="middle" className="formula-polarity">
+                <text x="130" y="158" textAnchor="middle" className="vsepr-caption-sub">
                     {polaridad}
                 </text>
             )}
@@ -170,10 +170,11 @@ function Molecular2DStructure({ atomos = [], enlaces = [], texto, polaridad }) {
 }
 
 function Bond2D({ origen, destino, orden = 1 }) {
-    const x1 = origen.x;
-    const y1 = origen.y;
-    const x2 = destino.x;
-    const y2 = destino.y;
+    const recortado = recortarLinea(origen.x, origen.y, destino.x, destino.y, 22);
+    const x1 = recortado.x1;
+    const y1 = recortado.y1;
+    const x2 = recortado.x2;
+    const y2 = recortado.y2;
 
     if (orden === 2) {
         const offset = calcularOffsetPerpendicular(x1, y1, x2, y2, 4);
@@ -264,22 +265,43 @@ function LonePairs({ atomo }) {
     }
 
     const posiciones = [
-        { x1: -8, y1: -30, x2: 8, y2: -30 },
-        { x1: -8, y1: 30, x2: 8, y2: 30 },
-        { x1: -24, y1: -8, x2: -24, y2: 8 },
-        { x1: 24, y1: -8, x2: 24, y2: 8 }
+        { x: atomo.x, y: atomo.y - 34 },
+        { x: atomo.x, y: atomo.y + 34 },
+        { x: atomo.x - 30, y: atomo.y },
+        { x: atomo.x + 30, y: atomo.y }
     ];
 
     return (
-        <g className="lone-pairs">
+        <>
             {posiciones.slice(0, pares).map((posicion, index) => (
-                <g key={`${atomo.id}-lp-${index}`}>
-                    <circle cx={atomo.x + posicion.x1} cy={atomo.y + posicion.y1} r="2" />
-                    <circle cx={atomo.x + posicion.x2} cy={atomo.y + posicion.y2} r="2" />
-                </g>
+                <text
+                    key={`${atomo.id}-lp-${index}`}
+                    x={posicion.x}
+                    y={posicion.y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="vsepr-lone-pair"
+                >
+                    ··
+                </text>
             ))}
-        </g>
+        </>
     );
+}
+
+function recortarLinea(x1, y1, x2, y2, margen) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const longitud = Math.sqrt(dx * dx + dy * dy) || 1;
+    const ux = dx / longitud;
+    const uy = dy / longitud;
+
+    return {
+        x1: x1 + ux * margen,
+        y1: y1 + uy * margen,
+        x2: x2 - ux * margen,
+        y2: y2 - uy * margen
+    };
 }
 
 function calcularOffsetPerpendicular(x1, y1, x2, y2, distancia) {
