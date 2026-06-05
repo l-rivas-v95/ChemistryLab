@@ -24,10 +24,6 @@ public class CompoundFamilyService {
         Map<String, Integer> atomos = formulaParserService.parsearFormula(molecula.getFormula());
         Map<String, ElementoEntity> elementos = cargarElementosPorSimbolo(atomos);
 
-        if (tieneSmiles(molecula)) {
-            return CompoundFamily.ORGANIC;
-        }
-
         if (esPeroxido(atomos)) {
             return CompoundFamily.PEROXIDE;
         }
@@ -50,7 +46,11 @@ public class CompoundFamilyService {
             return CompoundFamily.SALT;
         }
 
-        if (esOrganica(atomos)) {
+        if (esCovalenteSimple(atomos)) {
+            return CompoundFamily.COVALENT;
+        }
+
+        if (esOrganica(atomos) || tieneSmiles(molecula)) {
             return CompoundFamily.ORGANIC;
         }
 
