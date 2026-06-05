@@ -59,17 +59,23 @@ function MoleculeStructure({ molecula }) {
         );
     }
 
+    if (representacion.tipoRepresentacion === "ESTRUCTURA_2D") {
+        return (
+            <Molecular2DStructure
+                atomos={representacion.atomos2d}
+                enlaces={representacion.enlaces2d}
+                texto={representacion.texto}
+                polaridad={representacion.polaridad}
+            />
+        );
+    }
+
     if (representacion.tipoRepresentacion === "VSEPR") {
         return <VseprStructure representacion={representacion} />;
     }
 
     if (representacion.tipoRepresentacion === "IONICA") {
-        return (
-            <IonicStructure
-                formula={representacion.formulaVisual}
-                texto={representacion.texto}
-            />
-        );
+        return <IonicStructure texto={representacion.texto} />;
     }
 
     return <FormulaStructure formula={representacion.formulaVisual || molecula?.formula} />;
@@ -155,6 +161,177 @@ function SmilesStructure({ smiles, nombre, formula }) {
     );
 }
 
+function Molecular2DStructure({ atomos = [], enlaces = [], texto, polaridad }) {
+    const atomosValidos = Array.isArray(atomos) ? atomos : [];
+    const enlacesValidos = Array.isArray(enlaces) ? enlaces : [];
+
+    const atomosPorId = new Map(atomosValidos.map((atomo) => [atomo.id, atomo]));
+
+    return (
+        <svg viewBox="0 0 260 180" className="formula-structure molecular-2d-structure">
+            <rect x="0" y="0" width="260" height="180" rx="12" className="formula-bg" />
+
+            {enlacesValidos.map((enlace, index) => {
+                const origen = atomosPorId.get(enlace.origen);
+                const destino = atomosPorId.get(enlace.destino);
+
+                if (!origen || !destino) {
+                    return null;
+                }
+
+                return (
+                    <Bond2D
+                        key={`${enlace.origen}-${enlace.destino}-${index}`}
+                        origen={origen}
+                        destino={destino}
+                        orden={enlace.orden}
+                    />
+                );
+            })}
+
+            {atomosValidos.map((atomo) => (
+                <Atom2D key={atomo.id} atomo={atomo} />
+            ))}
+
+            {texto && (
+                <text x="130" y="148" textAnchor="middle" className="formula-label">
+                    {texto}
+                </text>
+            )}
+
+            {polaridad && (
+                <text x="130" y="166" textAnchor="middle" className="formula-polarity">
+                    {polaridad}
+                </text>
+            )}
+        </svg>
+    );
+}
+
+function Bond2D({ origen, destino, orden = 1 }) {
+    const x1 = origen.x;
+    const y1 = origen.y;
+    const x2 = destino.x;
+    const y2 = destino.y;
+
+    if (orden === 2) {
+        const offset = calcularOffsetPerpendicular(x1, y1, x2, y2, 4);
+
+        return (
+            <>
+                <line
+                    x1={x1 + offset.dx}
+                    y1={y1 + offset.dy}
+                    x2={x2 + offset.dx}
+                    y2={y2 + offset.dy}
+                    className="vsepr-bond"
+                />
+                <line
+                    x1={x1 - offset.dx}
+                    y1={y1 - offset.dy}
+                    x2={x2 - offset.dx}
+                    y2={y2 - offset.dy}
+                    className="vsepr-bond"
+                />
+            </>
+        );
+    }
+
+    if (orden === 3) {
+        const offset = calcularOffsetPerpendicular(x1, y1, x2, y2, 5);
+
+        return (
+            <>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} className="vsepr-bond" />
+                <line
+                    x1={x1 + offset.dx}
+                    y1={y1 + offset.dy}
+                    x2={x2 + offset.dx}
+                    y2={y2 + offset.dy}
+                    className="vsepr-bond"
+                />
+                <line
+                    x1={x1 - offset.dx}
+                    y1={y1 - offset.dy}
+                    x2={x2 - offset.dx}
+                    y2={y2 - offset.dy}
+                    className="vsepr-bond"
+                />
+            </>
+        );
+    }
+
+    return <line x1={x1} y1={y1} x2={x2} y2={y2} className="vsepr-bond" />;
+}
+
+function Atom2D({ atomo }) {
+    const carga = formatearCarga(atomo.carga);
+
+    return (
+        <g>
+            <LonePairs atomo={atomo} />
+
+            <text
+                x={atomo.x}
+                y={atomo.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className={`vsepr-atom vsepr-atom-${atomo.simbolo}`}
+            >
+                {atomo.simbolo}
+            </text>
+
+            {carga && (
+                <text
+                    x={atomo.x + 16}
+                    y={atomo.y - 16}
+                    textAnchor="middle"
+                    className="atom-charge"
+                >
+                    {carga}
+                </text>
+            )}
+        </g>
+    );
+}
+
+function LonePairs({ atomo }) {
+    const pares = Number(atomo.paresLibres || 0);
+
+    if (pares <= 0) {
+        return null;
+    }
+
+    const posiciones = [
+        { x1: -8, y1: -30, x2: 8, y2: -30 },
+        { x1: -8, y1: 30, x2: 8, y2: 30 },
+        { x1: -24, y1: -8, x2: -24, y2: 8 },
+        { x1: 24, y1: -8, x2: 24, y2: 8 }
+    ];
+
+    return (
+        <g className="lone-pairs">
+            {posiciones.slice(0, pares).map((posicion, index) => (
+                <g key={`${atomo.id}-lp-${index}`}>
+                    <circle cx={atomo.x + posicion.x1} cy={atomo.y + posicion.y1} r="2" />
+                    <circle cx={atomo.x + posicion.x2} cy={atomo.y + posicion.y2} r="2" />
+                </g>
+            ))}
+        </g>
+    );
+}
+
+function calcularOffsetPerpendicular(x1, y1, x2, y2, distancia) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const longitud = Math.sqrt(dx * dx + dy * dy) || 1;
+
+    return {
+        dx: (-dy / longitud) * distancia,
+        dy: (dx / longitud) * distancia
+    };
+}
+
 function VseprStructure({ representacion }) {
     const layout = getVseprLayout(representacion);
 
@@ -210,20 +387,16 @@ function VseprStructure({ representacion }) {
     );
 }
 
-function IonicStructure({ formula, texto }) {
+function IonicStructure({ texto }) {
     return (
-        <svg viewBox="0 0 260 180" className="formula-structure">
+        <svg viewBox="0 0 260 180" className="formula-structure ionic-structure">
             <rect x="0" y="0" width="260" height="180" rx="12" className="formula-bg" />
 
-            <text x="130" y="54" textAnchor="middle" className="formula-big">
-                {formula || "Sin fórmula"}
-            </text>
-
-            <text x="130" y="98" textAnchor="middle" className="formula-ion-view">
+            <text x="130" y="78" textAnchor="middle" className="formula-ion-view">
                 {texto || "representación iónica"}
             </text>
 
-            <text x="130" y="132" textAnchor="middle" className="formula-caption">
+            <text x="130" y="118" textAnchor="middle" className="formula-caption">
                 representación formal
             </text>
         </svg>
@@ -352,6 +525,17 @@ function getLayoutName(vsepr) {
     if (vsepr === "AX3") return "trigonal";
     if (vsepr === "AX3E") return "pyramidal";
     return "formula";
+}
+
+function formatearCarga(carga) {
+    if (carga === null || carga === undefined || carga === 0) {
+        return null;
+    }
+
+    if (carga === 1) return "+";
+    if (carga === -1) return "−";
+
+    return carga > 0 ? `${carga}+` : `${Math.abs(carga)}−`;
 }
 
 export default MoleculeStructure;

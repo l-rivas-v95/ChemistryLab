@@ -1,0 +1,1272 @@
+[
+  {
+    "formula": "H",
+    "nombre": "hidrógeno",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico",
+    "aliases": [
+      "proton"
+    ]
+  },
+  {
+    "formula": "Li",
+    "nombre": "litio",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Na",
+    "nombre": "sodio",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "K",
+    "nombre": "potasio",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Rb",
+    "nombre": "rubidio",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Cs",
+    "nombre": "cesio",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Fr",
+    "nombre": "francio",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Be",
+    "nombre": "berilio",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Mg",
+    "nombre": "magnesio",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ca",
+    "nombre": "calcio",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Sr",
+    "nombre": "estroncio",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ba",
+    "nombre": "bario",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ra",
+    "nombre": "radio",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Al",
+    "nombre": "aluminio",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ga",
+    "nombre": "galio",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "In",
+    "nombre": "indio",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Tl",
+    "nombre": "talio(I)",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Tl",
+    "nombre": "talio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ag",
+    "nombre": "plata",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Zn",
+    "nombre": "zinc",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Cd",
+    "nombre": "cadmio",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Hg",
+    "nombre": "mercurio(I)",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Hg",
+    "nombre": "mercurio(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Cu",
+    "nombre": "cobre(I)",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Cu",
+    "nombre": "cobre(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Fe",
+    "nombre": "hierro(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Fe",
+    "nombre": "hierro(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Co",
+    "nombre": "cobalto(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Co",
+    "nombre": "cobalto(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ni",
+    "nombre": "níquel(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ni",
+    "nombre": "níquel(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Mn",
+    "nombre": "manganeso(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Mn",
+    "nombre": "manganeso(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Cr",
+    "nombre": "cromo(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Cr",
+    "nombre": "cromo(VI)",
+    "carga": 6,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Sn",
+    "nombre": "estaño(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Sn",
+    "nombre": "estaño(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Pb",
+    "nombre": "plomo(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Pb",
+    "nombre": "plomo(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Au",
+    "nombre": "oro(I)",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Au",
+    "nombre": "oro(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Pt",
+    "nombre": "platino(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Pt",
+    "nombre": "platino(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "NH4",
+    "nombre": "amonio",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "H3O",
+    "nombre": "oxonio",
+    "carga": 1,
+    "tipo": "CATION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "F",
+    "nombre": "fluoruro",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Cl",
+    "nombre": "cloruro",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Br",
+    "nombre": "bromuro",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "I",
+    "nombre": "yoduro",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "O",
+    "nombre": "óxido",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "S",
+    "nombre": "sulfuro",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Se",
+    "nombre": "seleniuro",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Te",
+    "nombre": "telururo",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "N",
+    "nombre": "nitruro",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "P",
+    "nombre": "fosfuro",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "H",
+    "nombre": "hidruro",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "OH",
+    "nombre": "hidróxido",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "CN",
+    "nombre": "cianuro",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "OCN",
+    "nombre": "cianato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "SCN",
+    "nombre": "tiocianato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "NH2",
+    "nombre": "amida",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "O2",
+    "nombre": "peróxido",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "O2",
+    "nombre": "superóxido",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "NO3",
+    "nombre": "nitrato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "NO2",
+    "nombre": "nitrito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "SO4",
+    "nombre": "sulfato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "SO3",
+    "nombre": "sulfito",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "HSO4",
+    "nombre": "hidrogenosulfato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "HSO3",
+    "nombre": "hidrogenosulfito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "S2O3",
+    "nombre": "tiosulfato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "S2O8",
+    "nombre": "peroxodisulfato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "CO3",
+    "nombre": "carbonato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "HCO3",
+    "nombre": "hidrogenocarbonato / bicarbonato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "C2O4",
+    "nombre": "oxalato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "CH3COO",
+    "nombre": "acetato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "organico"
+  },
+  {
+    "formula": "HCOO",
+    "nombre": "formiato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "organico"
+  },
+  {
+    "formula": "PO4",
+    "nombre": "fosfato",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "PO3",
+    "nombre": "fosfito",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "HPO4",
+    "nombre": "hidrogenofosfato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "H2PO4",
+    "nombre": "dihidrogenofosfato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "P2O7",
+    "nombre": "pirofosfato",
+    "carga": -4,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "ClO",
+    "nombre": "hipoclorito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "ClO2",
+    "nombre": "clorito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "ClO3",
+    "nombre": "clorato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "ClO4",
+    "nombre": "perclorato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "BrO",
+    "nombre": "hipobromito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "BrO3",
+    "nombre": "bromato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "BrO4",
+    "nombre": "perbromato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "IO",
+    "nombre": "hipoyodito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "IO3",
+    "nombre": "yodato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "IO4",
+    "nombre": "periodato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "MnO4",
+    "nombre": "permanganato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "MnO4",
+    "nombre": "manganato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "CrO4",
+    "nombre": "cromato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "Cr2O7",
+    "nombre": "dicromato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "MoO4",
+    "nombre": "molibdato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "WO4",
+    "nombre": "wolframato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "VO3",
+    "nombre": "vanadato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "VO4",
+    "nombre": "ortovanadato",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "BO3",
+    "nombre": "borato",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "BO2",
+    "nombre": "metaborato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "SiO3",
+    "nombre": "silicato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "SiO4",
+    "nombre": "ortosilicato",
+    "carga": -4,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "AlO2",
+    "nombre": "aluminato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "Sc",
+    "nombre": "escandio",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Y",
+    "nombre": "itrio",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "La",
+    "nombre": "lantano",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ce",
+    "nombre": "cerio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ce",
+    "nombre": "cerio(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Pr",
+    "nombre": "praseodimio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Nd",
+    "nombre": "neodimio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Sm",
+    "nombre": "samario(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Eu",
+    "nombre": "europio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Gd",
+    "nombre": "gadolinio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Tb",
+    "nombre": "terbio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Dy",
+    "nombre": "disprosio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ho",
+    "nombre": "holmio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Er",
+    "nombre": "erbio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Tm",
+    "nombre": "tulio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Yb",
+    "nombre": "iterbio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Lu",
+    "nombre": "lutecio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ti",
+    "nombre": "titanio(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ti",
+    "nombre": "titanio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ti",
+    "nombre": "titanio(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "V",
+    "nombre": "vanadio(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "V",
+    "nombre": "vanadio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "V",
+    "nombre": "vanadio(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "V",
+    "nombre": "vanadio(V)",
+    "carga": 5,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Cr",
+    "nombre": "cromo(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Mn",
+    "nombre": "manganeso(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Mn",
+    "nombre": "manganeso(VII)",
+    "carga": 7,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Zr",
+    "nombre": "zirconio(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Hf",
+    "nombre": "hafnio(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Mo",
+    "nombre": "molibdeno(VI)",
+    "carga": 6,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "W",
+    "nombre": "wolframio(VI)",
+    "carga": 6,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Pd",
+    "nombre": "paladio(II)",
+    "carga": 2,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Pd",
+    "nombre": "paladio(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ir",
+    "nombre": "iridio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ir",
+    "nombre": "iridio(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Rh",
+    "nombre": "rodio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ru",
+    "nombre": "rutenio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Os",
+    "nombre": "osmio(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Bi",
+    "nombre": "bismuto(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Bi",
+    "nombre": "bismuto(V)",
+    "carga": 5,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Sb",
+    "nombre": "antimonio(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Sb",
+    "nombre": "antimonio(V)",
+    "carga": 5,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "As",
+    "nombre": "arsénico(III)",
+    "carga": 3,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "As",
+    "nombre": "arsénico(V)",
+    "carga": 5,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "Ge",
+    "nombre": "germanio(IV)",
+    "carga": 4,
+    "tipo": "CATION",
+    "categoria": "monoatomico"
+  },
+  {
+    "formula": "ClO5",
+    "nombre": "perclorato hidratado",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "BrO2",
+    "nombre": "bromito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "IO2",
+    "nombre": "yodito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "AsO4",
+    "nombre": "arseniato",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "HAsO4",
+    "nombre": "hidrogenoarseniato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "H2AsO4",
+    "nombre": "dihidrogenoarseniato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "AsO3",
+    "nombre": "arsenito",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "SbO4",
+    "nombre": "antimoniato",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "SeO4",
+    "nombre": "selenato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "SeO3",
+    "nombre": "selenito",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "TeO4",
+    "nombre": "telurato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "TeO3",
+    "nombre": "telurito",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "NO",
+    "nombre": "hiponitrito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "N3",
+    "nombre": "azida",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "CNO",
+    "nombre": "fulminato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "HS",
+    "nombre": "hidrogenosulfuro",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "HS",
+    "nombre": "bisulfuro",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "poliatomico"
+  },
+  {
+    "formula": "HSO4",
+    "nombre": "bisulfato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "HCO3",
+    "nombre": "bicarbonato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "HSO3",
+    "nombre": "bisulfito",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion_acido"
+  },
+  {
+    "formula": "C2H3O2",
+    "nombre": "acetato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "organico"
+  },
+  {
+    "formula": "C2H5COO",
+    "nombre": "propionato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "organico"
+  },
+  {
+    "formula": "C3H5O3",
+    "nombre": "lactato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "organico"
+  },
+  {
+    "formula": "C4H4O6",
+    "nombre": "tartrato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "organico"
+  },
+  {
+    "formula": "C6H5O7",
+    "nombre": "citrato",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "organico"
+  },
+  {
+    "formula": "BO4",
+    "nombre": "perborato",
+    "carga": -1,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "B4O7",
+    "nombre": "tetraborato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "oxoanion"
+  },
+  {
+    "formula": "SiF6",
+    "nombre": "hexafluorosilicato",
+    "carga": -2,
+    "tipo": "ANION",
+    "categoria": "complejo"
+  },
+  {
+    "formula": "AlF6",
+    "nombre": "hexafluoroaluminato",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "complejo"
+  },
+  {
+    "formula": "Fe(CN)6",
+    "nombre": "hexacianoferrato",
+    "carga": -4,
+    "tipo": "ANION",
+    "categoria": "complejo"
+  },
+  {
+    "formula": "Fe(CN)6",
+    "nombre": "hexacianoferrato(III)",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "complejo"
+  },
+  {
+    "formula": "Co(NO2)6",
+    "nombre": "hexanitrocobaltato",
+    "carga": -3,
+    "tipo": "ANION",
+    "categoria": "complejo"
+  }
+]

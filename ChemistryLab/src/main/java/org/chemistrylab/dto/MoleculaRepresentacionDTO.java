@@ -20,6 +20,28 @@ public class MoleculaRepresentacionDTO {
     private String isomericSmiles;
     private String imagen2d;
 
+    private List<AtomoRepresentacionDTO> atomos2d;
+    private List<EnlaceRepresentacionDTO> enlaces2d;
+
+    public static MoleculaRepresentacionDTO estructura2d(
+            String formulaVisual,
+            List<AtomoRepresentacionDTO> atomos2d,
+            List<EnlaceRepresentacionDTO> enlaces2d,
+            String texto,
+            String polaridad
+    ) {
+        MoleculaRepresentacionDTO dto = new MoleculaRepresentacionDTO();
+
+        dto.setTipoRepresentacion("ESTRUCTURA_2D");
+        dto.setFormulaVisual(formulaVisual);
+        dto.setAtomos2d(atomos2d);
+        dto.setEnlaces2d(enlaces2d);
+        dto.setTexto(texto);
+        dto.setPolaridad(polaridad);
+
+        return dto;
+    }
+
     public MoleculaRepresentacionDTO() {
     }
 
@@ -163,5 +185,20 @@ public class MoleculaRepresentacionDTO {
 
     public void setImagen2d(String imagen2d) {
         this.imagen2d = imagen2d;
+    }
+    public List<AtomoRepresentacionDTO> getAtomos2d() {
+        return atomos2d;
+    }
+
+    public void setAtomos2d(List<AtomoRepresentacionDTO> atomos2d) {
+        this.atomos2d = atomos2d;
+    }
+
+    public List<EnlaceRepresentacionDTO> getEnlaces2d() {
+        return enlaces2d;
+    }
+
+    public void setEnlaces2d(List<EnlaceRepresentacionDTO> enlaces2d) {
+        this.enlaces2d = enlaces2d;
     }
 }

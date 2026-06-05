@@ -1262,6 +1262,96 @@
     font-weight: 900;
     fill: #2563eb;
 }
+.molecular-2d-structure .atom-symbol {
+    font-size: 34px;
+    font-weight: 900;
+}
+
+.atom-symbol {
+    font-size: 34px;
+    font-weight: 900;
+}
+
+.atom-oxygen {
+    fill: #ef4444;
+}
+
+.atom-nitrogen {
+    fill: #3498db;
+}
+
+.atom-sulfur {
+    fill: #f2a900;
+}
+
+.atom-phosphorus {
+    fill: #e67e22;
+}
+
+.atom-halogen {
+    fill: #16a34a;
+}
+
+.atom-hydrogen {
+    fill: #666666;
+}
+
+.atom-carbon {
+    fill: #111111;
+}
+
+.atom-default {
+    fill: #111111;
+}
+
+.atom-charge {
+    font-size: 15px;
+    font-weight: 800;
+    fill: #1e293b;
+}
+
+.bond-line {
+    stroke: #334155;
+    stroke-width: 4;
+    stroke-linecap: round;
+}
+
+.lone-pairs circle {
+    fill: #334155;
+}
+
+.molecular-2d-structure .formula-label {
+    font-size: 14px;
+    font-weight: 900;
+    fill: #111827;
+}
+
+.molecular-2d-structure .formula-polarity {
+    font-size: 14px;
+    font-weight: 800;
+    fill: #2563eb;
+}
+.atom-charge {
+    font-size: 15px;
+    font-weight: 900;
+    fill: #1e293b;
+}
+
+.lone-pairs circle {
+    fill: #334155;
+}
+
+.molecular-2d-structure .formula-label {
+    font-size: 13px;
+    font-weight: 900;
+    fill: #142033;
+}
+
+.molecular-2d-structure .formula-polarity {
+    font-size: 12px;
+    font-weight: 900;
+    fill: #2563eb;
+}
 @media (max-width: 1250px) {
     .molecule-detail-card-three {
         grid-template-columns: 1fr;
