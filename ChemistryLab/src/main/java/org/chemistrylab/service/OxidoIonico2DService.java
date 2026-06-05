@@ -83,27 +83,27 @@ public class OxidoIonico2DService {
         List<EnlaceRepresentacionDTO> enlaces = new ArrayList<>();
 
         if (cantidadMetal == 1 && cantidadOxigeno == 1) {
-            agregarIon(atomos, metal + "0", metal, 82, 78, 0);
-            agregarIon(atomos, "O0", "O", 178, 78, 2);
+            agregarIon(atomos, metal + "0", metal, 94, 78, 0);
+            agregarIon(atomos, "O0", "O", 166, 78, 0);
             agregarEnlace(enlaces, metal + "0", "O0");
         } else if (cantidadMetal == 2 && cantidadOxigeno == 1) {
-            agregarIon(atomos, metal + "0", metal, 54, 78, 0);
-            agregarIon(atomos, "O0", "O", 130, 78, 2);
-            agregarIon(atomos, metal + "1", metal, 206, 78, 0);
+            agregarIon(atomos, metal + "0", metal, 58, 78, 0);
+            agregarIon(atomos, "O0", "O", 130, 78, 0);
+            agregarIon(atomos, metal + "1", metal, 202, 78, 0);
             agregarEnlace(enlaces, metal + "0", "O0");
             agregarEnlace(enlaces, "O0", metal + "1");
         } else if (cantidadMetal == 1 && cantidadOxigeno == 2) {
-            agregarIon(atomos, "O0", "O", 58, 78, 2);
+            agregarIon(atomos, "O0", "O", 58, 78, 0);
             agregarIon(atomos, metal + "0", metal, 130, 78, 0);
-            agregarIon(atomos, "O1", "O", 202, 78, 2);
+            agregarIon(atomos, "O1", "O", 202, 78, 0);
             agregarEnlace(enlaces, "O0", metal + "0");
             agregarEnlace(enlaces, metal + "0", "O1");
         } else if (cantidadMetal == 2 && cantidadOxigeno == 3) {
-            agregarIon(atomos, "O0", "O", 130, 28, 2);
+            agregarIon(atomos, "O0", "O", 130, 30, 0);
             agregarIon(atomos, metal + "0", metal, 66, 88, 0);
-            agregarIon(atomos, "O1", "O", 130, 88, 2);
+            agregarIon(atomos, "O1", "O", 130, 88, 0);
             agregarIon(atomos, metal + "1", metal, 194, 88, 0);
-            agregarIon(atomos, "O2", "O", 130, 144, 2);
+            agregarIon(atomos, "O2", "O", 130, 140, 0);
             agregarEnlace(enlaces, "O0", metal + "0");
             agregarEnlace(enlaces, "O0", metal + "1");
             agregarEnlace(enlaces, metal + "0", "O1");
@@ -131,15 +131,14 @@ public class OxidoIonico2DService {
             int cantidadOxigeno
     ) {
         List<String> simbolos = construirSimbolosOrdenados(metal, cantidadMetal, cantidadOxigeno);
-        int stepX = 58;
+        int stepX = 62;
         int startX = 130 - ((simbolos.size() - 1) * stepX) / 2;
 
         for (int i = 0; i < simbolos.size(); i++) {
             String simbolo = simbolos.get(i);
             String id = simbolo + i;
-            int paresLibres = "O".equals(simbolo) ? 2 : 0;
 
-            agregarIon(atomos, id, simbolo, startX + i * stepX, 78, paresLibres);
+            agregarIon(atomos, id, simbolo, startX + i * stepX, 78, 0);
 
             if (i > 0) {
                 agregarEnlace(enlaces, simbolos.get(i - 1) + (i - 1), id);
