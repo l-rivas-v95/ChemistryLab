@@ -28,11 +28,6 @@ public class MoleculaRepresentacionVseprService {
             return null;
         }
 
-        MoleculaRepresentacionDTO excepcion = intentarExcepcionVsepr(formulaVisual);
-        if (excepcion != null) {
-            return excepcion;
-        }
-
         MoleculaRepresentacionDTO diatomica = intentarDiatomica(formulaVisual, atomosFormula);
         if (diatomica != null) {
             return diatomica;
@@ -116,72 +111,6 @@ public class MoleculaRepresentacionVseprService {
                 "Lineal",
                 polaridad
         );
-    }
-
-    private MoleculaRepresentacionDTO intentarExcepcionVsepr(String formulaVisual) {
-        Map<String, Integer> atomos = parsearFormula(formulaVisual);
-
-        if (formulaParserService.esComposicion(atomos, "C", 1, "O", 2)) {
-            return MoleculaRepresentacionDTO.vsepr(
-                    formulaVisual,
-                    "C",
-                    List.of("O", "O"),
-                    0,
-                    "AX2",
-                    "Lineal",
-                    "No polar"
-            );
-        }
-
-        if (formulaParserService.esComposicion(atomos, "C", 1, "O", 1)) {
-            return MoleculaRepresentacionDTO.vsepr(
-                    formulaVisual,
-                    "C",
-                    List.of("O"),
-                    0,
-                    "AX1",
-                    "Lineal",
-                    "Polar"
-            );
-        }
-
-        if (formulaParserService.esComposicion(atomos, "N", 2, "O", 1)) {
-            return MoleculaRepresentacionDTO.vsepr(
-                    formulaVisual,
-                    "N",
-                    List.of("N", "O"),
-                    0,
-                    "AX2",
-                    "Lineal",
-                    "Polar"
-            );
-        }
-
-        if (formulaParserService.esComposicion(atomos, "S", 1, "O", 3)) {
-            return MoleculaRepresentacionDTO.vsepr(
-                    formulaVisual,
-                    "S",
-                    List.of("O", "O", "O"),
-                    0,
-                    "AX3",
-                    "Trigonal plana",
-                    "No polar"
-            );
-        }
-
-        if (formulaParserService.esComposicion(atomos, "Si", 1, "O", 2)) {
-            return MoleculaRepresentacionDTO.vsepr(
-                    formulaVisual,
-                    "Si",
-                    List.of("O", "O"),
-                    0,
-                    "AX2",
-                    "Lineal",
-                    "No polar"
-            );
-        }
-
-        return null;
     }
 
     private Map<String, ElementoEntity> cargarElementosPorSimbolo(Map<String, Integer> atomosFormula) {
