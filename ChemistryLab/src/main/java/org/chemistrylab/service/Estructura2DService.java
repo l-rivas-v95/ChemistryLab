@@ -23,21 +23,21 @@ public class Estructura2DService {
 
     public Optional<MoleculaRepresentacionDTO> intentarConstruir(String formulaVisual) {
         return molecularConnectivityService.construir(formulaVisual)
-                .filter(this::esCadenaSimple)
+                .filter(this::esCadenaRepresentable)
                 .map(connectivity -> construirCadenaSimple(formulaVisual, connectivity));
     }
 
-    private boolean esCadenaSimple(MolecularConnectivity connectivity) {
+    private boolean esCadenaRepresentable(MolecularConnectivity connectivity) {
         return connectivity.getBonds() != null
-                && connectivity.getBonds().size() >= 2
-                && connectivity.getBonds().stream().allMatch(bond -> bond.getOrder() == 1);
+                && connectivity.getBonds().size() >= 2;
     }
 
     private MoleculaRepresentacionDTO construirCadenaSimple(
             String formulaVisual,
             MolecularConnectivity connectivity
     ) {
-        List<String> simbolosOrdenados = construirSimbolosOrdenados(connectivity.getBonds());
+        List<MolecularBond> bonds = connectivity.getBonds();
+        List<String> simbolosOrdenados = construirSimbolosOrdenados(bonds);
         List<AtomoRepresentacionDTO> atomos = new ArrayList<>();
         List<EnlaceRepresentacionDTO> enlaces = new ArrayList<>();
         Map<Integer, String> idsPorIndice = new LinkedHashMap<>();
@@ -61,11 +61,13 @@ public class Estructura2DService {
             ));
         }
 
-        for (int i = 0; i < simbolosOrdenados.size() - 1; i++) {
+        for (int i = 0; i < bonds.size(); i++) {
+            MolecularBond bond = bonds.get(i);
+
             enlaces.add(new EnlaceRepresentacionDTO(
                     idsPorIndice.get(i),
                     idsPorIndice.get(i + 1),
-                    1
+                    bond.getOrder()
             ));
         }
 
