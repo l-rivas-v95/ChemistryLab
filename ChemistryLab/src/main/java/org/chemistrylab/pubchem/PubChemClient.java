@@ -3,10 +3,9 @@ package org.chemistrylab.pubchem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriUtils;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,10 +44,13 @@ public class PubChemClient {
             return Optional.of(Long.parseLong(valor));
         }
 
-        String nombre = UriUtils.encodePathSegment(valor, StandardCharsets.UTF_8);
-        String url = BASE_URL + "/pug/compound/name/" + nombre + "/cids/JSON";
+        Map<?, ?> response;
+        try {
+            response = getMapByPathSegments("pug", "compound", "name", valor, "cids", "JSON");
+        } catch (WebClientResponseException.NotFound ignored) {
+            return Optional.empty();
+        }
 
-        Map<?, ?> response = getMap(url);
         Object identifierList = response.get("IdentifierList");
 
         if (!(identifierList instanceof Map<?, ?> identifierMap)) {
@@ -268,6 +270,21 @@ public class PubChemClient {
         Object response = webClientBuilder.build()
                 .get()
                 .uri(url)
+                .retrieve()
+                .bodyToMono(Object.class)
+                .block();
+
+        if (!(response instanceof Map<?, ?> responseMap)) {
+            throw new RuntimeException("Respuesta inválida desde PubChem");
+        }
+
+        return responseMap;
+    }
+
+    private Map<?, ?> getMapByPathSegments(String... pathSegments) {
+        Object response = webClientBuilder.baseUrl(BASE_URL).build()
+                .get()
+                .uri(uriBuilder -> uriBuilder.pathSegment(pathSegments).build())
                 .retrieve()
                 .bodyToMono(Object.class)
                 .block();
