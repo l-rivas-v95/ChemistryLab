@@ -1,49 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import SmilesDrawer from "smiles-drawer";
-
-const API_BASE_URL = "http://localhost:8080/api";
+import { useMoleculeRepresentation } from "../../hooks/useMoleculeRepresentation";
 
 function MoleculeStructure({ molecula }) {
-    const [representacion, setRepresentacion] = useState(null);
-    const [error, setError] = useState(false);
-
     const moleculaId = molecula?.id;
-
-    useEffect(() => {
-        if (!moleculaId) {
-            return;
-        }
-
-        const controller = new AbortController();
-
-        fetch(`${API_BASE_URL}/moleculas/${moleculaId}/representacion`, {
-            signal: controller.signal
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Error HTTP " + response.status);
-                }
-
-                return response.json();
-            })
-            .then((data) => {
-                setRepresentacion(data);
-                setError(false);
-            })
-            .catch((fetchError) => {
-                if (fetchError.name === "AbortError") {
-                    return;
-                }
-
-                console.error("Error cargando representación:", fetchError);
-                setError(true);
-                setRepresentacion(null);
-            });
-
-        return () => {
-            controller.abort();
-        };
-    }, [moleculaId]);
+    const { representacion, error } = useMoleculeRepresentation(moleculaId);
 
     if (error || !representacion) {
         return <FormulaStructure formula={molecula?.formula} />;
