@@ -170,12 +170,14 @@ function Molecular2DStructure({ atomos = [], enlaces = [], texto, polaridad }) {
 }
 
 function Bond2D({ origen, destino, orden = 1 }) {
+    const trimmed = trimBond(origen.x, origen.y, destino.x, destino.y, 20);
+
     return (
         <BondLine
-            x1={origen.x}
-            y1={origen.y}
-            x2={destino.x}
-            y2={destino.y}
+            x1={trimmed.x1}
+            y1={trimmed.y1}
+            x2={trimmed.x2}
+            y2={trimmed.y2}
             orden={orden}
         />
     );
@@ -242,6 +244,21 @@ function LonePairs({ atomo }) {
             ))}
         </>
     );
+}
+
+function trimBond(x1, y1, x2, y2, padding) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const longitud = Math.sqrt(dx * dx + dy * dy) || 1;
+    const ux = dx / longitud;
+    const uy = dy / longitud;
+
+    return {
+        x1: x1 + ux * padding,
+        y1: y1 + uy * padding,
+        x2: x2 - ux * padding,
+        y2: y2 - uy * padding
+    };
 }
 
 function calcularOffsetPerpendicular(x1, y1, x2, y2, distancia) {
