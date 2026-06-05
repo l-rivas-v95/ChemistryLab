@@ -1,6 +1,7 @@
 import { useState } from "react";
 import MoleculeCard from "./MoleculeCard";
 import MoleculeDetailCard from "./MoleculeDetailCard";
+import { importMolecule } from "../../services/moleculeService";
 import "./Molecule.css";
 
 const FILTROS_PRINCIPALES = [
@@ -46,6 +47,10 @@ function MoleculeList({
                           onPaginaSiguiente
                       }) {
     const [moleculaSeleccionada, setMoleculaSeleccionada] = useState(null);
+    const [importQuery, setImportQuery] = useState("");
+    const [importando, setImportando] = useState(false);
+    const [importMessage, setImportMessage] = useState(null);
+    const [importError, setImportError] = useState(null);
 
     const filtrosSecundarios =
         categoria === "organic"
@@ -66,6 +71,39 @@ function MoleculeList({
         }
 
         onCambiarFiltros("all", "all");
+    };
+
+    const importarMolecula = async () => {
+        const query = importQuery.trim();
+
+        if (!query || importando) {
+            return;
+        }
+
+        setImportando(true);
+        setImportMessage(null);
+        setImportError(null);
+
+        try {
+            const response = await importMolecule(query);
+
+            if (response.status === "ALREADY_EXISTS") {
+                setImportMessage(`Ya existe: ${response.nombre || query}`);
+            } else {
+                setImportMessage(`Importada: ${response.nombre || query}`);
+            }
+
+            if (response.nombre) {
+                onTextoBusquedaChange(response.nombre);
+            }
+
+            onBuscar();
+        } catch (error) {
+            console.error("Error importando molécula:", error);
+            setImportError("No se pudo importar la molécula. Revisa el nombre o CID.");
+        } finally {
+            setImportando(false);
+        }
     };
 
     return (
@@ -103,6 +141,35 @@ function MoleculeList({
                         Limpiar
                     </button>
                 )}
+            </div>
+
+            <div className="moleculas-import-panel">
+                <div>
+                    <h3>Añadir molécula desde PubChem</h3>
+                    <p>Introduce un nombre o CID. Si ya existe en la base de datos, no se volverá a insertar.</p>
+                </div>
+
+                <div className="moleculas-import-row">
+                    <input
+                        type="text"
+                        value={importQuery}
+                        onChange={(event) => setImportQuery(event.target.value)}
+                        onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                                importarMolecula();
+                            }
+                        }}
+                        placeholder="Ej: Hydrogen sulfide o 402"
+                        disabled={importando}
+                    />
+
+                    <button type="button" onClick={importarMolecula} disabled={importando || !importQuery.trim()}>
+                        {importando ? "Importando..." : "Importar"}
+                    </button>
+                </div>
+
+                {importMessage && <p className="moleculas-import-message">{importMessage}</p>}
+                {importError && <p className="moleculas-import-error">{importError}</p>}
             </div>
 
             <div className="moleculas-filter-panel">
