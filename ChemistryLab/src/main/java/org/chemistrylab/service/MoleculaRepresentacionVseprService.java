@@ -121,7 +121,7 @@ public class MoleculaRepresentacionVseprService {
     private MoleculaRepresentacionDTO intentarExcepcionVsepr(String formulaVisual) {
         Map<String, Integer> atomos = parsearFormula(formulaVisual);
 
-        if (esComposicion(atomos, "C", 1, "O", 2)) {
+        if (formulaParserService.esComposicion(atomos, "C", 1, "O", 2)) {
             return MoleculaRepresentacionDTO.vsepr(
                     formulaVisual,
                     "C",
@@ -133,7 +133,7 @@ public class MoleculaRepresentacionVseprService {
             );
         }
 
-        if (esComposicion(atomos, "C", 1, "O", 1)) {
+        if (formulaParserService.esComposicion(atomos, "C", 1, "O", 1)) {
             return MoleculaRepresentacionDTO.vsepr(
                     formulaVisual,
                     "C",
@@ -145,7 +145,7 @@ public class MoleculaRepresentacionVseprService {
             );
         }
 
-        if (esComposicion(atomos, "N", 2, "O", 1)) {
+        if (formulaParserService.esComposicion(atomos, "N", 2, "O", 1)) {
             return MoleculaRepresentacionDTO.vsepr(
                     formulaVisual,
                     "N",
@@ -157,7 +157,7 @@ public class MoleculaRepresentacionVseprService {
             );
         }
 
-        if (esComposicion(atomos, "S", 1, "O", 3)) {
+        if (formulaParserService.esComposicion(atomos, "S", 1, "O", 3)) {
             return MoleculaRepresentacionDTO.vsepr(
                     formulaVisual,
                     "S",
@@ -169,7 +169,7 @@ public class MoleculaRepresentacionVseprService {
             );
         }
 
-        if (esComposicion(atomos, "Si", 1, "O", 2)) {
+        if (formulaParserService.esComposicion(atomos, "Si", 1, "O", 2)) {
             return MoleculaRepresentacionDTO.vsepr(
                     formulaVisual,
                     "Si",
@@ -359,22 +359,6 @@ public class MoleculaRepresentacionVseprService {
                 || categoria.contains("no metal")
                 || categoria.contains("metaloide")
                 || categoria.contains("metalloid");
-    }
-
-    private boolean esComposicion(Map<String, Integer> atomos, Object... pares) {
-        if (atomos == null || pares == null || pares.length % 2 != 0) {
-            return false;
-        }
-
-        Map<String, Integer> esperada = new HashMap<>();
-
-        for (int i = 0; i < pares.length; i += 2) {
-            String simbolo = (String) pares[i];
-            Integer cantidad = (Integer) pares[i + 1];
-            esperada.put(simbolo, cantidad);
-        }
-
-        return atomos.equals(esperada);
     }
 
     private Map<String, Integer> parsearFormula(String formula) {
