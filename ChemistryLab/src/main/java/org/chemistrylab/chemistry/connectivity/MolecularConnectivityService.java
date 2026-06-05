@@ -44,6 +44,11 @@ public class MolecularConnectivityService {
             return Optional.of(peroxido);
         }
 
+        MolecularConnectivity oxidoX2O = construirOxidoCovalenteX2O(atomosFormula);
+        if (oxidoX2O != null) {
+            return Optional.of(oxidoX2O);
+        }
+
         String central = elegirAtomoCentral(atomosFormula, elementos);
 
         if (central == null) {
@@ -111,6 +116,30 @@ public class MolecularConnectivityService {
                         MolecularBond.builder().from("O").to("H").order(1).build()
                 ))
                 .lonePairs(2)
+                .build();
+    }
+
+    private MolecularConnectivity construirOxidoCovalenteX2O(Map<String, Integer> atomosFormula) {
+        if (atomosFormula.size() != 2 || atomosFormula.getOrDefault("O", 0) != 1) {
+            return null;
+        }
+
+        String elemento = atomosFormula.keySet().stream()
+                .filter(simbolo -> !"O".equals(simbolo))
+                .findFirst()
+                .orElse(null);
+
+        if (elemento == null || atomosFormula.getOrDefault(elemento, 0) != 2) {
+            return null;
+        }
+
+        return MolecularConnectivity.builder()
+                .central(elemento)
+                .bonds(List.of(
+                        MolecularBond.builder().from(elemento).to(elemento).order(3).build(),
+                        MolecularBond.builder().from(elemento).to("O").order(1).build()
+                ))
+                .lonePairs(0)
                 .build();
     }
 
