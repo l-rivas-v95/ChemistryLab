@@ -240,21 +240,82 @@ public class MoleculaRepresentacionIonicaService {
     private String construirTextoSal(String formulaVisual) {
         Map<String, Integer> atomos = parsearFormula(formulaVisual);
 
-        if (formulaParserService.esComposicion(atomos, "Na", 3, "P", 1, "O", 4)) {
-            return "3Na⁺ + PO4³⁻";
-        }
-
-        if (formulaParserService.esComposicion(atomos, "K", 3, "P", 1, "O", 4)) {
-            return "3K⁺ + PO4³⁻";
-        }
-
-        if (formulaParserService.esComposicion(atomos, "N", 3, "H", 12, "P", 1, "O", 4)) {
-            return "3NH4⁺ + PO4³⁻";
+        Optional<String> fosfato = construirTextoFosfato(atomos);
+        if (fosfato.isPresent()) {
+            return fosfato.get();
         }
 
         return ionicFormulaResolver.resolver(formulaVisual)
                 .map(this::formatearResolucionIonica)
                 .orElse("catión + anión");
+    }
+
+    private Optional<String> construirTextoFosfato(Map<String, Integer> atomos) {
+        int fosforo = atomos.getOrDefault("P", 0);
+        int oxigeno = atomos.getOrDefault("O", 0);
+
+        if (fosforo <= 0 || oxigeno != fosforo * 4) {
+            return Optional.empty();
+        }
+
+        int hidrogeno = atomos.getOrDefault("H", 0);
+        String anionFormula;
+        int cargaAnion;
+
+        if (hidrogeno == 0) {
+            anionFormula = "PO4";
+            cargaAnion = -3;
+        } else if (hidrogeno == fosforo) {
+            anionFormula = "HPO4";
+            cargaAnion = -2;
+        } else if (hidrogeno == fosforo * 2) {
+            anionFormula = "H2PO4";
+            cargaAnion = -1;
+        } else {
+            return Optional.empty();
+        }
+
+        int cantidadAnion = fosforo;
+        int cargaTotalAnion = cantidadAnion * cargaAnion;
+        int cargaPositivaNecesaria = -cargaTotalAnion;
+
+        Optional<CationCalculado> cation = calcularCationFosfato(atomos, cargaPositivaNecesaria);
+        if (cation.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String cationTexto = formatearCantidad(cation.get().cantidad(),
+                cation.get().simbolo() + ionCatalogService.formatearCarga(cation.get().carga()));
+
+        String anionTexto = formatearCantidad(cantidadAnion,
+                anionFormula + ionCatalogService.formatearCarga(cargaAnion));
+
+        return Optional.of(cationTexto + " + " + anionTexto);
+    }
+
+    private Optional<CationCalculado> calcularCationFosfato(Map<String, Integer> atomos, int cargaPositivaNecesaria) {
+        List<String> cationes = atomos.keySet().stream()
+                .filter(simbolo -> !"P".equals(simbolo))
+                .filter(simbolo -> !"O".equals(simbolo))
+                .filter(simbolo -> !"H".equals(simbolo))
+                .toList();
+
+        if (cationes.size() == 1) {
+            String simbolo = cationes.get(0);
+            int cantidad = atomos.getOrDefault(simbolo, 1);
+            if (cantidad > 0 && cargaPositivaNecesaria % cantidad == 0) {
+                return Optional.of(new CationCalculado(simbolo, cantidad, cargaPositivaNecesaria / cantidad));
+            }
+        }
+
+        if (atomos.getOrDefault("N", 0) > 0 && atomos.getOrDefault("H", 0) >= atomos.getOrDefault("N", 0) * 4) {
+            int cantidadAmonio = atomos.getOrDefault("N", 0);
+            if (cantidadAmonio > 0 && cargaPositivaNecesaria == cantidadAmonio) {
+                return Optional.of(new CationCalculado("NH4", cantidadAmonio, 1));
+            }
+        }
+
+        return Optional.empty();
     }
 
     private String formatearResolucionIonica(IonicFormulaResolution resolucion) {
@@ -318,5 +379,8 @@ public class MoleculaRepresentacionIonicaService {
                 .replaceAll("\\p{M}", "")
                 .toLowerCase(Locale.ROOT)
                 .trim();
+    }
+
+    private record CationCalculado(String simbolo, int cantidad, int carga) {
     }
 }
