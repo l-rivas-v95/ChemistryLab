@@ -50,6 +50,11 @@ public class MoleculaRepresentacionIonicaService {
     }
 
     public String construirTextoIonico(String formulaVisual, String tipo) {
+        Optional<String> fosfato = construirTextoFosfato(formulaVisual, parsearFormula(formulaVisual));
+        if (fosfato.isPresent()) {
+            return fosfato.get();
+        }
+
         if (tipo.contains("hidroxido") || tipo.contains("base")) {
             return construirTextoHidroxido(formulaVisual);
         }
@@ -253,6 +258,13 @@ public class MoleculaRepresentacionIonicaService {
     }
 
     private Optional<String> construirTextoFosfato(String formulaVisual, Map<String, Integer> atomos) {
+        String formula = normalizarFormulaQuimica(formulaVisual);
+
+        Optional<String> fosfatoSimple = construirTextoFosfatoSimple(formula);
+        if (fosfatoSimple.isPresent()) {
+            return fosfatoSimple;
+        }
+
         GrupoFosfato grupo = detectarGrupoFosfato(formulaVisual, atomos);
         if (grupo == null) {
             return Optional.empty();
@@ -270,6 +282,20 @@ public class MoleculaRepresentacionIonicaService {
                 grupo.formula() + ionCatalogService.formatearCarga(grupo.carga()));
 
         return Optional.of(cationTexto + " + " + anionTexto);
+    }
+
+    private Optional<String> construirTextoFosfatoSimple(String formula) {
+        if ("(NH4)3PO4".equals(formula)) {
+            return Optional.of("3NH4⁺ + PO4³⁻");
+        }
+
+        Matcher matcher = Pattern.compile("^([A-Z][a-z]?)(3)PO4$").matcher(formula);
+        if (matcher.matches()) {
+            String metal = matcher.group(1);
+            return Optional.of("3" + metal + "⁺ + PO4³⁻");
+        }
+
+        return Optional.empty();
     }
 
     private GrupoFosfato detectarGrupoFosfato(String formulaVisual, Map<String, Integer> atomos) {
