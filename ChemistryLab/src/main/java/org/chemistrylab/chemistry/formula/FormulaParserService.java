@@ -2,6 +2,7 @@ package org.chemistrylab.chemistry.formula;
 
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -124,6 +125,22 @@ public class FormulaParserService {
 
     public boolean estaVacia(Map<String, Integer> composicion) {
         return composicion == null || composicion.values().stream().allMatch(valor -> valor == null || valor == 0);
+    }
+
+    public boolean esComposicion(Map<String, Integer> atomos, Object... pares) {
+        if (atomos == null || pares == null || pares.length % 2 != 0) {
+            return false;
+        }
+
+        Map<String, Integer> esperada = new HashMap<>();
+
+        for (int i = 0; i < pares.length; i += 2) {
+            String simbolo = (String) pares[i];
+            Integer cantidad = (Integer) pares[i + 1];
+            esperada.put(simbolo, cantidad);
+        }
+
+        return atomos.equals(esperada);
     }
 
     public String limpiarFormula(String formula) {
