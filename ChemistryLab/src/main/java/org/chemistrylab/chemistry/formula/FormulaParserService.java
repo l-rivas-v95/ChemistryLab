@@ -143,6 +143,22 @@ public class FormulaParserService {
         return atomos.equals(esperada);
     }
 
+    public String normalizarFormulaVisual(String formula) {
+        String formulaLimpia = limpiarFormula(formula);
+        Map<String, Integer> atomos = parsearFormula(formulaLimpia);
+
+        if (atomos.size() == 2 && formulaLimpia.startsWith("O") && atomos.containsKey("O")) {
+            return atomos.keySet().stream()
+                    .filter(simbolo -> !"O".equals(simbolo))
+                    .findFirst()
+                    .map(otroElemento -> formatearElemento(otroElemento, atomos.get(otroElemento))
+                            + formatearElemento("O", atomos.get("O")))
+                    .orElse(formulaLimpia);
+        }
+
+        return formulaLimpia;
+    }
+
     public String limpiarFormula(String formula) {
         if (formula == null) {
             return "";
@@ -152,5 +168,13 @@ public class FormulaParserService {
                 .replaceAll("[+-]\\d*$", "")
                 .replaceAll("\\d*[+-]$", "")
                 .replaceAll("\\s", "");
+    }
+
+    private String formatearElemento(String simbolo, Integer cantidad) {
+        if (cantidad == null || cantidad <= 1) {
+            return simbolo;
+        }
+
+        return simbolo + cantidad;
     }
 }
