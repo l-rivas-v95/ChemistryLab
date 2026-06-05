@@ -39,25 +39,23 @@ public class Estructura2DService {
         List<EnlaceRepresentacionDTO> enlaces = new ArrayList<>();
 
         List<MolecularBond> bonds = connectivity.getBonds();
-        int startX = 45;
-        int stepX = 55;
-        int y = 80;
+        int startX = 50;
+        int stepX = 52;
+        int y = 82;
 
-        String previous = null;
         int index = 0;
 
         for (MolecularBond bond : bonds) {
             String fromId = crearId(bond.getFrom(), index);
             String toId = crearId(bond.getTo(), index + 1);
 
-            if (previous == null) {
+            if (index == 0) {
                 atomos.add(new AtomoRepresentacionDTO(fromId, bond.getFrom(), startX + index * stepX, y, null, obtenerParesLibres(bond.getFrom(), connectivity)));
             }
 
             atomos.add(new AtomoRepresentacionDTO(toId, bond.getTo(), startX + (index + 1) * stepX, y, null, obtenerParesLibres(bond.getTo(), connectivity)));
             enlaces.add(new EnlaceRepresentacionDTO(fromId, toId, bond.getOrder()));
 
-            previous = bond.getTo();
             index++;
         }
 
@@ -65,7 +63,7 @@ public class Estructura2DService {
                 formulaVisual,
                 atomos,
                 enlaces,
-                construirTexto(atomos),
+                null,
                 "Polar"
         );
     }
@@ -88,12 +86,5 @@ public class Estructura2DService {
 
     private String crearId(String simbolo, int index) {
         return simbolo + index;
-    }
-
-    private String construirTexto(List<AtomoRepresentacionDTO> atomos) {
-        return atomos.stream()
-                .map(AtomoRepresentacionDTO::getSimbolo)
-                .reduce((a, b) -> a + "—" + b)
-                .orElse("");
     }
 }
