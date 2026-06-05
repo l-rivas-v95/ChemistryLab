@@ -1,5 +1,6 @@
 package org.chemistrylab.service;
 
+import lombok.RequiredArgsConstructor;
 import org.chemistrylab.dto.MoleculaDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.repository.MoleculaRepository;
@@ -10,13 +11,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MoleculaService {
 
     private final MoleculaRepository moleculaRepository;
-
-    public MoleculaService(MoleculaRepository moleculaRepository) {
-        this.moleculaRepository = moleculaRepository;
-    }
+    private final MoleculaFormulaService moleculaFormulaService;
 
     public Page<MoleculaDTO> findAllPaginado(String search, String categoria, String familia, Pageable pageable) {
         return moleculaRepository.buscarPaginado(
@@ -76,7 +75,7 @@ public class MoleculaService {
                 .id(entity.getId())
                 .pubchemCid(entity.getPubchemCid())
                 .nombre(entity.getNombre())
-                .formula(entity.getFormula())
+                .formula(moleculaFormulaService.obtenerFormulaVisible(entity.getNombre(), entity.getFormula()))
                 .masaMolecular(entity.getMasaMolecular())
                 .nombreIupac(entity.getNombreIupac())
                 .descripcion(entity.getDescripcion())
