@@ -26,7 +26,7 @@ public class CovalentX2OConnectivityRule implements MolecularConnectivityRule {
                 .findFirst()
                 .orElse(null);
 
-        if (elemento == null || atomosFormula.getOrDefault(elemento, 0) != 2) {
+        if (elemento == null || "H".equals(elemento) || atomosFormula.getOrDefault(elemento, 0) != 2) {
             return Optional.empty();
         }
 
