@@ -21,34 +21,33 @@ public class CompoundFamilyService {
     private final ElementoRepository elementoRepository;
 
     public CompoundFamily clasificar(MoleculaEntity molecula) {
-        String tipo = normalizar(molecula.getTipoCompuesto());
         Map<String, Integer> atomos = formulaParserService.parsearFormula(molecula.getFormula());
         Map<String, ElementoEntity> elementos = cargarElementosPorSimbolo(atomos);
 
-        if (esOrganica(tipo)) {
-            return CompoundFamily.ORGANIC;
-        }
-
-        if (esPeroxido(tipo, atomos)) {
+        if (esPeroxido(atomos)) {
             return CompoundFamily.PEROXIDE;
         }
 
-        if (tipo.contains("hidroxido") || tipo.contains("hydroxide") || tipo.contains("base")) {
+        if (esHidroxido(atomos, elementos)) {
             return CompoundFamily.HYDROXIDE;
         }
 
-        if (tipo.contains("acido") || tipo.contains("acid")) {
+        if (esAcido(atomos, elementos)) {
             return CompoundFamily.ACID;
         }
 
-        if (tipo.contains("sal") || tipo.contains("salt")) {
-            return CompoundFamily.SALT;
-        }
-
-        if (tipo.contains("oxido") || tipo.contains("oxide")) {
+        if (esOxido(atomos)) {
             return esOxidoMetalico(atomos, elementos)
                     ? CompoundFamily.METALLIC_OXIDE
                     : CompoundFamily.COVALENT_OXIDE;
+        }
+
+        if (esSal(atomos, elementos)) {
+            return CompoundFamily.SALT;
+        }
+
+        if (esOrganica(atomos)) {
+            return CompoundFamily.ORGANIC;
         }
 
         if (esCovalente(atomos, elementos)) {
@@ -58,14 +57,45 @@ public class CompoundFamilyService {
         return CompoundFamily.UNKNOWN;
     }
 
-    private boolean esPeroxido(String tipo, Map<String, Integer> atomos) {
-        if (tipo.contains("peroxido") || tipo.contains("peroxide")) {
-            return true;
-        }
+    private boolean esOrganica(Map<String, Integer> atomos) {
+        return atomos.containsKey("C") && atomos.containsKey("H");
+    }
 
+    private boolean esPeroxido(Map<String, Integer> atomos) {
         return atomos.size() == 2
                 && atomos.getOrDefault("O", 0) >= 2
                 && atomos.containsKey("H");
+    }
+
+    private boolean esHidroxido(Map<String, Integer> atomos, Map<String, ElementoEntity> elementos) {
+        if (!atomos.containsKey("O") || !atomos.containsKey("H") || atomos.size() < 3) {
+            return false;
+        }
+
+        return atomos.keySet().stream()
+                .filter(simbolo -> !"O".equals(simbolo))
+                .filter(simbolo -> !"H".equals(simbolo))
+                .map(elementos::get)
+                .anyMatch(this::esMetal);
+    }
+
+    private boolean esAcido(Map<String, Integer> atomos, Map<String, ElementoEntity> elementos) {
+        if (!atomos.containsKey("H") || atomos.size() < 2) {
+            return false;
+        }
+
+        if (atomos.containsKey("C") && atomos.containsKey("H")) {
+            return false;
+        }
+
+        return atomos.keySet().stream()
+                .filter(simbolo -> !"H".equals(simbolo))
+                .map(elementos::get)
+                .noneMatch(this::esMetal);
+    }
+
+    private boolean esOxido(Map<String, Integer> atomos) {
+        return atomos.containsKey("O") && atomos.size() == 2;
     }
 
     private boolean esOxidoMetalico(Map<String, Integer> atomos, Map<String, ElementoEntity> elementos) {
@@ -77,6 +107,20 @@ public class CompoundFamilyService {
                 .filter(simbolo -> !"O".equals(simbolo))
                 .map(elementos::get)
                 .anyMatch(this::esMetal);
+    }
+
+    private boolean esSal(Map<String, Integer> atomos, Map<String, ElementoEntity> elementos) {
+        boolean tieneMetalOAmonio = atomos.keySet().stream()
+                .map(elementos::get)
+                .anyMatch(this::esMetal)
+                || (atomos.getOrDefault("N", 0) > 0 && atomos.getOrDefault("H", 0) >= atomos.getOrDefault("N", 0) * 4);
+
+        boolean tieneNoMetal = atomos.keySet().stream()
+                .filter(simbolo -> !"H".equals(simbolo))
+                .map(elementos::get)
+                .anyMatch(this::esNoMetalOMetaloide);
+
+        return tieneMetalOAmonio && tieneNoMetal;
     }
 
     private boolean esCovalente(Map<String, Integer> atomos, Map<String, ElementoEntity> elementos) {
@@ -129,13 +173,6 @@ public class CompoundFamilyService {
                 || categoria.contains("no metal")
                 || categoria.contains("metaloide")
                 || categoria.contains("metalloid");
-    }
-
-    private boolean esOrganica(String tipo) {
-        return (tipo.contains("organica") || tipo.contains("organico") || tipo.contains("organic"))
-                && !tipo.contains("inorganica")
-                && !tipo.contains("inorganico")
-                && !tipo.contains("inorganic");
     }
 
     private String normalizar(String valor) {
