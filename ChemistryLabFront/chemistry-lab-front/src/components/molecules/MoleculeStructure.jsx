@@ -170,7 +170,7 @@ function Molecular2DStructure({ atomos = [], enlaces = [], texto, polaridad }) {
 }
 
 function Bond2D({ origen, destino, orden = 1 }) {
-    const recortado = recortarLinea(origen.x, origen.y, destino.x, destino.y, 22);
+    const recortado = recortarLinea(origen.x, origen.y, destino.x, destino.y, 12);
     const x1 = recortado.x1;
     const y1 = recortado.y1;
     const x2 = recortado.x2;
