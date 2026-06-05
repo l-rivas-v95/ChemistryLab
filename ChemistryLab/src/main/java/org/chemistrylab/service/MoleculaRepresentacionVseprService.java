@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.chemistrylab.chemistry.connectivity.MolecularBond;
 import org.chemistrylab.chemistry.connectivity.MolecularConnectivity;
 import org.chemistrylab.chemistry.connectivity.MolecularConnectivityService;
+import org.chemistrylab.dto.EnlaceRepresentacionDTO;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,14 @@ public class MoleculaRepresentacionVseprService {
                 .map(MolecularBond::getTo)
                 .toList();
 
+        List<EnlaceRepresentacionDTO> enlaces = connectivity.getBonds().stream()
+                .map(bond -> new EnlaceRepresentacionDTO(
+                        bond.getFrom(),
+                        bond.getTo(),
+                        bond.getOrder()
+                ))
+                .toList();
+
         String vsepr = construirCodigoVsepr(terminales.size(), connectivity.getLonePairs());
 
         String geometria = obtenerGeometria(vsepr);
@@ -42,6 +51,7 @@ public class MoleculaRepresentacionVseprService {
                 formulaVisual,
                 connectivity.getCentral(),
                 terminales,
+                enlaces,
                 connectivity.getLonePairs(),
                 vsepr,
                 geometria,
