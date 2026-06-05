@@ -11,6 +11,7 @@ public class MoleculaRepresentacionDTO {
 
     private String atomoCentral;
     private List<String> atomosTerminales;
+    private List<EnlaceRepresentacionDTO> enlaces;
     private Integer paresLibres;
     private String vsepr;
     private String geometria;
@@ -74,6 +75,7 @@ public class MoleculaRepresentacionDTO {
             String formulaVisual,
             String atomoCentral,
             List<String> atomosTerminales,
+            List<EnlaceRepresentacionDTO> enlaces,
             Integer paresLibres,
             String vsepr,
             String geometria,
@@ -84,6 +86,7 @@ public class MoleculaRepresentacionDTO {
         dto.setFormulaVisual(formulaVisual);
         dto.setAtomoCentral(atomoCentral);
         dto.setAtomosTerminales(atomosTerminales);
+        dto.setEnlaces(enlaces);
         dto.setParesLibres(paresLibres);
         dto.setVsepr(vsepr);
         dto.setGeometria(geometria);
@@ -129,6 +132,14 @@ public class MoleculaRepresentacionDTO {
 
     public void setAtomosTerminales(List<String> atomosTerminales) {
         this.atomosTerminales = atomosTerminales;
+    }
+
+    public List<EnlaceRepresentacionDTO> getEnlaces() {
+        return enlaces;
+    }
+
+    public void setEnlaces(List<EnlaceRepresentacionDTO> enlaces) {
+        this.enlaces = enlaces;
     }
 
     public Integer getParesLibres() {
