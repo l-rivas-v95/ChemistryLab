@@ -106,7 +106,7 @@ public class MolecularConnectivityService {
         return MolecularConnectivity.builder()
                 .central("O")
                 .bonds(List.of(
-                        MolecularBond.builder().from("O").to("H").order(1).build(),
+                        MolecularBond.builder().from("H").to("O").order(1).build(),
                         MolecularBond.builder().from("O").to("O").order(1).build(),
                         MolecularBond.builder().from("O").to("H").order(1).build()
                 ))
