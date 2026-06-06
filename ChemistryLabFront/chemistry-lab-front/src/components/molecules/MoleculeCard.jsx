@@ -1,4 +1,5 @@
 import MoleculeStructure from "./MoleculeStructure";
+import ChemicalFormulaText from "./ChemicalFormulaText";
 import {
     cleanText,
     formatPropertyShort,
@@ -39,7 +40,9 @@ function MoleculeCard({ molecula, onClick }) {
 
             <div className="molecule-main-info">
                 <h3>{molecula.nombre}</h3>
-                <strong>{formulaVisible}</strong>
+                <strong>
+                    <ChemicalFormulaText value={formulaVisible} />
+                </strong>
             </div>
 
             <p className="molecule-description">
