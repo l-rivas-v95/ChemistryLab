@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -143,17 +144,27 @@ public class PubChemClient {
             return Map.of();
         }
 
-        return Map.of(
-                "descripcion", buscarTexto(sectionList, "Description"),
-                "puntoFusion", buscarTexto(sectionList, "Melting Point"),
-                "puntoEbullicion", buscarTexto(sectionList, "Boiling Point"),
-                "densidad", buscarTexto(sectionList, "Density"),
-                "solubilidad", buscarTexto(sectionList, "Solubility"),
-                "ph", buscarTexto(sectionList, "pH"),
-                "usos", String.join(" | ", buscarLista(sectionList, "Use and Manufacturing", 5)),
-                "riesgos", String.join(" | ", buscarLista(sectionList, "GHS Classification", 5)),
-                "sinonimos", String.join(", ", buscarLista(sectionList, "Depositor-Supplied Synonyms", 8))
-        );
+        Map<String, String> result = new LinkedHashMap<>();
+        result.put("descripcion", buscarTexto(sectionList, List.of("Record Description", "Description", "Physical Description", "General Description")));
+        result.put("puntoFusion", buscarTexto(sectionList, List.of("Melting Point", "Freezing Point", "Decomposition")));
+        result.put("puntoEbullicion", buscarTexto(sectionList, List.of("Boiling Point")));
+        result.put("densidad", buscarTexto(sectionList, List.of("Density", "Vapor Density", "Relative Density")));
+        result.put("solubilidad", buscarTexto(sectionList, List.of("Solubility", "Solubility in Water")));
+        result.put("ph", buscarTexto(sectionList, List.of("pH", "pKa", "Dissociation Constants")));
+        result.put("usos", String.join(" | ", buscarLista(sectionList, List.of("Use and Manufacturing", "Uses", "Industry Uses", "Consumer Uses", "Use Classification"), 8)));
+        result.put("riesgos", String.join(" | ", buscarLista(sectionList, List.of("GHS Classification", "Hazards Identification", "Safety and Hazards", "Health Hazards", "Fire Hazards"), 8)));
+        result.put("sinonimos", String.join(", ", buscarLista(sectionList, List.of("Depositor-Supplied Synonyms", "Synonyms", "MeSH Entry Terms"), 12)));
+        return result;
+    }
+
+    private String buscarTexto(List<?> sections, List<String> titulos) {
+        for (String titulo : titulos) {
+            String encontrado = buscarTexto(sections, titulo);
+            if (encontrado != null && !encontrado.isBlank()) {
+                return encontrado;
+            }
+        }
+        return "";
     }
 
     private String buscarTexto(List<?> sections, String titulo) {
@@ -182,9 +193,14 @@ public class PubChemClient {
         return "";
     }
 
-    private List<String> buscarLista(List<?> sections, String titulo, int limite) {
+    private List<String> buscarLista(List<?> sections, List<String> titulos, int limite) {
         List<String> resultados = new ArrayList<>();
-        buscarListaRecursiva(sections, titulo, limite, resultados);
+        for (String titulo : titulos) {
+            buscarListaRecursiva(sections, titulo, limite, resultados);
+            if (resultados.size() >= limite) {
+                break;
+            }
+        }
         return resultados;
     }
 
