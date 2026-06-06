@@ -9,6 +9,7 @@ import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.repository.MoleculaRepository;
 import org.chemistrylab.representation.RepresentationInputResult;
 import org.chemistrylab.representation.RepresentationInputService;
+import org.chemistrylab.representation.RepresentationInputSource;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -72,7 +73,7 @@ public class MoleculaRepresentacionService {
             if (input.hasValue()) {
                 MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.smiles(
                         formulaVisual,
-                        molecula.getCanonicalSmiles(),
+                        valorDibujable(input, molecula.getCanonicalSmiles()),
                         molecula.getIsomericSmiles(),
                         molecula.getImagen2d()
                 );
@@ -116,6 +117,15 @@ public class MoleculaRepresentacionService {
         }
 
         return MoleculaRepresentacionDTO.formula(formulaVisual);
+    }
+
+    private String valorDibujable(RepresentationInputResult input, String canonicalSmiles) {
+        if (input.getSource() == RepresentationInputSource.CANONICAL_SMILES
+                || input.getSource() == RepresentationInputSource.ISOMERIC_SMILES) {
+            return input.getValue();
+        }
+
+        return canonicalSmiles;
     }
 
     private void completarEntradaRepresentacion(MoleculaRepresentacionDTO dto, RepresentationInputResult input) {
