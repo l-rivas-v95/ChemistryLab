@@ -11,6 +11,15 @@ function MoleculeStructure({ molecula }) {
         return <FormulaStructure formula={molecula?.formula} />;
     }
 
+    if (representacion.imagenRepresentacionSource === "PUBCHEM_IMAGE_2D" && representacion.imagen2d) {
+        return (
+            <ExternalImageStructure
+                src={representacion.imagen2d}
+                alt={molecula?.nombre || representacion.formulaVisual || "Molécula"}
+            />
+        );
+    }
+
     if (representacion.tipoRepresentacion === "SMILES") {
         return (
             <SmilesStructure
@@ -41,6 +50,27 @@ function MoleculeStructure({ molecula }) {
     }
 
     return <FormulaStructure formula={representacion.formulaVisual || molecula?.formula} />;
+}
+
+function ExternalImageStructure({ src, alt }) {
+    const [error, setError] = useState(false);
+
+    if (error || !src) {
+        return <FormulaStructure formula={alt} />;
+    }
+
+    return (
+        <div className="formula-structure formula-structure-html external-image-structure-html">
+            <div className="formula-bg-html" />
+            <img
+                src={src}
+                alt={alt}
+                className="external-molecule-image"
+                loading="lazy"
+                onError={() => setError(true)}
+            />
+        </div>
+    );
 }
 
 function SmilesStructure({ smiles, nombre, formula }) {
@@ -518,23 +548,26 @@ function getVseprLayout(representacion) {
 }
 
 function getLayoutName(vsepr) {
-    if (vsepr === "AX1") return "diatomic";
-    if (vsepr === "AX2") return "linear";
-    if (vsepr === "AX2E" || vsepr === "AX2E2") return "bent";
-    if (vsepr === "AX3") return "trigonal";
-    if (vsepr === "AX3E") return "pyramidal";
-    return "formula";
+    const normalized = String(vsepr || "").toUpperCase();
+
+    if (normalized.startsWith("AX1")) return "diatomic";
+    if (normalized.startsWith("AX2E")) return "bent";
+    if (normalized.startsWith("AX2")) return "linear";
+    if (normalized.startsWith("AX3E")) return "pyramidal";
+    if (normalized.startsWith("AX3")) return "trigonal";
+
+    return "single";
 }
 
 function formatearCarga(carga) {
-    if (carga === null || carga === undefined || carga === 0) {
-        return null;
+    if (carga === null || carga === undefined || Number(carga) === 0) {
+        return "";
     }
 
-    if (carga === 1) return "+";
-    if (carga === -1) return "−";
+    const numero = Math.abs(Number(carga));
+    const signo = Number(carga) > 0 ? "+" : "−";
 
-    return carga > 0 ? `${carga}+` : `${Math.abs(carga)}−`;
+    return `${numero === 1 ? "" : numero}${signo}`;
 }
 
 export default MoleculeStructure;
