@@ -1,5 +1,8 @@
 package org.chemistrylab.representation;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class RepresentationInputService {
 
     public RepresentationInputResult resolveInput(String canonicalSmiles, String isomericSmiles, String inchi) {
