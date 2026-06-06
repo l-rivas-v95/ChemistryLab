@@ -93,10 +93,12 @@ public class MoleculaRepresentacionService {
                 || family == CompoundFamily.SALT
                 || family == CompoundFamily.HYDROXIDE
                 || family == CompoundFamily.ACID) {
-            return MoleculaRepresentacionDTO.ionica(
+            MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.ionica(
                     formulaVisual,
                     moleculaRepresentacionIonicaService.construirTextoIonico(formulaVisual, tipo)
             );
+            completarImagen2dExterna(dto, molecula);
+            return dto;
         }
 
         MoleculaRepresentacionDTO vsepr = moleculaRepresentacionVseprService.intentarConstruir(formulaVisual);
@@ -110,10 +112,12 @@ public class MoleculaRepresentacionService {
         }
 
         if (family == CompoundFamily.UNKNOWN && moleculaRepresentacionIonicaService.esRepresentacionIonica(tipo)) {
-            return MoleculaRepresentacionDTO.ionica(
+            MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.ionica(
                     formulaVisual,
                     moleculaRepresentacionIonicaService.construirTextoIonico(formulaVisual, tipo)
             );
+            completarImagen2dExterna(dto, molecula);
+            return dto;
         }
 
         return MoleculaRepresentacionDTO.formula(formulaVisual);
@@ -132,6 +136,16 @@ public class MoleculaRepresentacionService {
         dto.setRepresentationInput(input.getValue());
         dto.setRepresentationInputSource(input.getSource().name());
         dto.setRepresentationInputReason(input.getReason());
+    }
+
+    private void completarImagen2dExterna(MoleculaRepresentacionDTO dto, MoleculaEntity molecula) {
+        if (molecula.getImagen2d() == null || molecula.getImagen2d().isBlank()) {
+            return;
+        }
+
+        dto.setImagen2d(molecula.getImagen2d());
+        dto.setImagenRepresentacionSource("PUBCHEM_IMAGE_2D");
+        dto.setImagenRepresentacionReason("La representación iónica se mantiene como texto de tarjeta y la imagen molecular usa la imagen 2D externa.");
     }
 
     private String limpiarFormula(String formula) {
