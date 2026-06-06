@@ -40,7 +40,8 @@ public class RepresentationSmilesOverrideService {
         salesBinariasCompactas(overrides);
         oxidosCovalentes(overrides);
         oxidosMetalicosCompactos(overrides);
-        oxoanionesYSales(overrides);
+        oxoacidos(overrides);
+        oxisalesCompactas(overrides);
         casosIonicLegacyUtiles(overrides);
 
         return Map.copyOf(overrides);
@@ -73,8 +74,12 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "Ca(OH)2", "[H]O[Ca]O[H]");
         put(overrides, "Mg(OH)2", "[H]O[Mg]O[H]");
         put(overrides, "Ba(OH)2", "[H]O[Ba]O[H]");
+        put(overrides, "Cu(OH)2", "[H]O[Cu]O[H]");
+        put(overrides, "Zn(OH)2", "[H]O[Zn]O[H]");
+        put(overrides, "Fe(OH)2", "[H]O[Fe]O[H]");
+        put(overrides, "Fe(OH)3", "O[Fe](O)O");
         put(overrides, "Al(OH)3", "O[Al](O)O");
-        put(overrides, "NH4OH", "[NH4]O[H]");
+        put(overrides, "NH4OH", "[NH4+].[OH-]");
     }
 
     private static void salesBinariasCompactas(Map<String, String> overrides) {
@@ -103,6 +108,8 @@ public class RepresentationSmilesOverrideService {
     }
 
     private static void oxidosMetalicosCompactos(Map<String, String> overrides) {
+        put(overrides, "Na2O", "[Na]O[Na]", "ONa2");
+        put(overrides, "K2O", "[K]O[K]", "OK2");
         put(overrides, "CaO", "[Ca]=O", "OCa");
         put(overrides, "MgO", "[Mg]=O", "OMg");
         put(overrides, "FeO", "[Fe]=O", "OFe");
@@ -113,30 +120,71 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "Fe2O3", "O[Fe]O[Fe]O", "O3Fe2");
     }
 
-    private static void oxoanionesYSales(Map<String, String> overrides) {
-        put(overrides, "HNO3", "O[N+](=O)[O-]");
-        put(overrides, "HNO2", "ON=O");
-        put(overrides, "H2SO4", "OS(=O)(=O)O");
-        put(overrides, "H2SO3", "OS(=O)O");
-        put(overrides, "H2CO3", "OC(=O)O");
-        put(overrides, "H3PO4", "OP(=O)(O)O");
-        put(overrides, "H3BO3", "OB(O)O");
-        put(overrides, "B(OH)3", "OB(O)O");
+    private static void oxoacidos(Map<String, String> overrides) {
+        put(overrides, "HNO3", "O=N(=O)O[H]");
+        put(overrides, "HNO2", "O=NO[H]");
+        put(overrides, "H2SO4", "O=S(=O)(O[H])O[H]");
+        put(overrides, "H2SO3", "O=S(O[H])O[H]");
+        put(overrides, "H2CO3", "O=C(O[H])O[H]");
+        put(overrides, "H3PO4", "O=P(O[H])(O[H])O[H]");
+        put(overrides, "H3BO3", "B(O[H])(O[H])O[H]");
+        put(overrides, "B(OH)3", "B(O[H])(O[H])O[H]");
+        put(overrides, "HClO", "ClO[H]");
+        put(overrides, "HClO2", "O=ClO[H]");
+        put(overrides, "HClO3", "O=Cl(=O)O[H]");
+        put(overrides, "HClO4", "O=Cl(=O)(=O)O[H]");
+        put(overrides, "HMnO4", "O=[Mn](=O)(=O)O[H]");
+        put(overrides, "H2CrO4", "O=[Cr](=O)(O[H])O[H]");
+        put(overrides, "H2Cr2O7", "O=[Cr](=O)(O[H])O[Cr](=O)(=O)O[H]");
+    }
 
+    private static void oxisalesCompactas(Map<String, String> overrides) {
         put(overrides, "NaNO3", "[Na]O[N+](=O)[O-]");
         put(overrides, "KNO3", "[K]O[N+](=O)[O-]");
+        put(overrides, "AgNO3", "[Ag]O[N+](=O)[O-]");
+        put(overrides, "Ca(NO3)2", "O=N(=O)O[Ca]O[N+](=O)[O-]");
+        put(overrides, "Cu(NO3)2", "O=N(=O)O[Cu]O[N+](=O)[O-]");
+        put(overrides, "Fe(NO3)3", "O=N(=O)O[Fe](O[N+](=O)[O-])O[N+](=O)[O-]");
+
         put(overrides, "NaNO2", "[Na]ON=O");
         put(overrides, "KNO2", "[K]ON=O");
+
         put(overrides, "Na2CO3", "[Na]OC(=O)O[Na]");
         put(overrides, "K2CO3", "[K]OC(=O)O[K]");
+        put(overrides, "MgCO3", "O=C(O[Mg])O");
         put(overrides, "CaCO3", "O=C(O[Ca])O");
+        put(overrides, "KHCO3", "[K]OC(=O)O[H]");
         put(overrides, "NaHCO3", "[Na]OC(=O)O[H]");
+
         put(overrides, "Na2SO4", "[Na]OS(=O)(=O)O[Na]");
         put(overrides, "K2SO4", "[K]OS(=O)(=O)O[K]");
         put(overrides, "CaSO4", "O=S(=O)(O[Ca])O");
+        put(overrides, "MgSO4", "O=S(=O)(O[Mg])O");
+        put(overrides, "CuSO4", "O=S(=O)(O[Cu])O");
+        put(overrides, "ZnSO4", "O=S(=O)(O[Zn])O");
+        put(overrides, "FeSO4", "O=S(=O)(O[Fe])O");
+        put(overrides, "Al2(SO4)3", "O=S(=O)(O[Al]OS(=O)(=O)O[Al]OS(=O)(=O)O)O");
+        put(overrides, "(NH4)2SO4", "[NH4]OS(=O)(=O)O[NH4]");
+
         put(overrides, "Na3PO4", "[Na]OP(=O)(O[Na])O[Na]");
         put(overrides, "K3PO4", "[K]OP(=O)(O[K])O[K]");
         put(overrides, "Ca3(PO4)2", "O=P(O[Ca]OP(=O)(O[Ca])O[Ca])O");
+        put(overrides, "Mg3(PO4)2", "O=P(O[Mg]OP(=O)(O[Mg])O[Mg])O");
+        put(overrides, "AlPO4", "O=P(O[Al])(O)O");
+        put(overrides, "FePO4", "O=P(O[Fe])(O)O");
+        put(overrides, "NaH2PO4", "[Na]OP(=O)(O[H])O[H]");
+        put(overrides, "Na2HPO4", "[Na]OP(=O)(O[Na])O[H]");
+        put(overrides, "CaHPO4", "O=P(O[Ca])(O[H])O");
+
+        put(overrides, "NaClO", "[Na]OCl");
+        put(overrides, "NaClO2", "[Na]OCl=O");
+        put(overrides, "NaClO3", "[Na]OCl(=O)=O");
+        put(overrides, "KClO3", "[K]OCl(=O)=O");
+        put(overrides, "NaClO4", "[Na]OCl(=O)(=O)=O");
+        put(overrides, "KClO4", "[K]OCl(=O)(=O)=O");
+        put(overrides, "KMnO4", "[K]O[Mn](=O)(=O)=O");
+        put(overrides, "K2Cr2O7", "[K]O[Cr](=O)(=O)O[Cr](=O)(=O)O[K]");
+        put(overrides, "Na2Cr2O7", "[Na]O[Cr](=O)(=O)O[Cr](=O)(=O)O[Na]");
     }
 
     private static void casosIonicLegacyUtiles(Map<String, String> overrides) {
