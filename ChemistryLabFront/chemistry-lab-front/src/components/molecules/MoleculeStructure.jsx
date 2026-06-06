@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import SmilesDrawer from "smiles-drawer";
 import { useMoleculeRepresentation } from "../../hooks/useMoleculeRepresentation";
+import ChemicalFormulaText from "./ChemicalFormulaText";
 
 function MoleculeStructure({ molecula }) {
     const moleculaId = molecula?.id;
@@ -391,33 +392,29 @@ function getBondOrder(representacion, destino, index = 0) {
 
 function IonicStructure({ texto }) {
     return (
-        <svg viewBox="0 0 260 180" className="formula-structure ionic-structure">
-            <rect x="0" y="0" width="260" height="180" rx="12" className="formula-bg" />
-
-            <text x="130" y="78" textAnchor="middle" className="formula-ion-view">
-                {texto || "representación iónica"}
-            </text>
-
-            <text x="130" y="118" textAnchor="middle" className="formula-caption">
+        <div className="formula-structure formula-structure-html ionic-structure-html">
+            <div className="formula-bg-html" />
+            <div className="formula-ion-view-html">
+                <ChemicalFormulaText value={texto || "representación iónica"} />
+            </div>
+            <div className="formula-caption-html">
                 representación formal
-            </text>
-        </svg>
+            </div>
+        </div>
     );
 }
 
 function FormulaStructure({ formula }) {
     return (
-        <svg viewBox="0 0 260 180" className="formula-structure">
-            <rect x="0" y="0" width="260" height="180" rx="12" className="formula-bg" />
-
-            <text x="130" y="74" textAnchor="middle" className="formula-big">
-                {formula || "Sin estructura"}
-            </text>
-
-            <text x="130" y="116" textAnchor="middle" className="formula-caption">
+        <div className="formula-structure formula-structure-html">
+            <div className="formula-bg-html" />
+            <div className="formula-big-html">
+                <ChemicalFormulaText value={formula || "Sin estructura"} />
+            </div>
+            <div className="formula-caption-html">
                 fórmula química
-            </text>
-        </svg>
+            </div>
+        </div>
     );
 }
 
