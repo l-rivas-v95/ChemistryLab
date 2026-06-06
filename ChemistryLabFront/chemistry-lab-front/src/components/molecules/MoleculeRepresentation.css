@@ -1,0 +1,33 @@
+.molecule-representation-frame {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.molecule-representation-image {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+    mix-blend-mode: multiply;
+}
+
+.molecule-representation-image-ionic,
+.molecule-representation-image-acid,
+.molecule-representation-image-salt,
+.molecule-representation-image-base,
+.molecule-representation-image-oxide {
+    transform: scale(1.35);
+    transform-origin: center center;
+}
+
+.molecule-representation-image-organic {
+    transform: none;
+}
