@@ -68,7 +68,8 @@ public class CdkDepictionPlayground {
                 new TestMolecule("Potassium ferricyanide", "K3Fe(CN)6", "COMPLEJO", "[K+].[K+].[K+].N#C[Fe](C#N)(C#N)(C#N)(C#N)C#N", "Complejo: sorprendentemente reconocible, pero puede saturar tarjeta."),
                 new TestMolecule("Sodium dichromate", "Na2Cr2O7", "OXISAL", "[Na+].[Na+].[O-][Cr](=O)(=O)O[Cr](=O)(=O)[O-]", "Probar si CDK gestiona bien oxoanión puente."),
                 new TestMolecule("Potassium permanganate", "KMnO4", "OXISAL", "[K+].[O-][Mn](=O)(=O)=O", "Probar metal central con oxígenos."),
-                new TestMolecule("Tetrahydrocannabinol", "C21H30O2", "ORGANICA", "CCCCCC1=CC(=C2C3C=C(CC(C3CC(CC2=C1O)(C)C)O)C)O", "Orgánica: CDK debería ganar o empatar con SmilesDrawer.")
+                new TestMolecule("Tetrahydrocannabinol", "C21H30O2", "ORGANICA", "CCCCCC1=CC(=C2C3C=C(CC(C3CC(CC2=C1O)(C)C)O)C)O", "Orgánica: CDK debería ganar o empatar con SmilesDrawer."),
+                new TestMolecule("ATP", "C10H16N5O13P3", "ORGANOFOSFATO", "Nc1ncnc2c1ncn2C3OC(COP(=O)(O)OP(=O)(O)OP(=O)(O)O)C(O)C3O", "Molécula grande con fosfatos. Buen test para orgánica + grupos inorgánicos.")
         );
 
         StringBuilder report = new StringBuilder();
@@ -89,7 +90,7 @@ public class CdkDepictionPlayground {
                 .append(".error{background:#fef2f2;border-color:#fecaca;color:#991b1b;}")
                 .append("</style>")
                 .append("</head><body><h1>Depiction engine comparison</h1>")
-                .append("<p class='intro'>Prueba independiente. Este informe compara cómo dibuja CDK distintas familias químicas desde SMILES. Los puntos débiles marcados sirven para decidir si conviene usar CDK, SmilesDrawer, OpenBabel, Indigo o un fallback propio.</p>")
+                .append("<p class='intro'>Prueba independiente. Este informe compara cómo dibuja CDK distintas familias químicas desde SMILES. Los puntos débiles marcados sirven para decidir si conviene usar CDK, SmilesDrawer, OpenBabel, Indigo o un fallback propio. ATP queda incluido desde ahora como caso de molécula grande con grupos fosfato.</p>")
                 .append("<div class='grid'>");
 
         for (TestMolecule molecule : molecules) {
