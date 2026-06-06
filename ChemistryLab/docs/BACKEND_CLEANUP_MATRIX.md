@@ -286,10 +286,10 @@ No es una representación de enlace real perfecta, pero es mejor para una tarjet
 | RepresentationInputService | representation | REVISAR | Decide qué input químico usar: canonical SMILES, isomeric SMILES o InChI. | Probablemente útil, pero la vía nueva puede hacerlo más simple. Revisar si se reutiliza. |
 | RepresentationInputResult | representation | REVISAR | Resultado de decidir el input de representación. | Mantener solo si `RepresentationInputService` queda. |
 | RepresentationInputSource | representation | REVISAR | Enum de origen del input: canonical, isomeric, InChI, etc. | Mantener solo si `RepresentationInputService` queda. |
-| RepresentationDecisionService | representation | REVISAR | Servicio de decisión de estrategia de representación. | Puede ser parte del refactor nuevo o resto intermedio. Revisar antes de borrar. |
-| RepresentationDecision | representation | REVISAR | Resultado de decisión de representación. | Mantener solo si se usa desde el flujo nuevo. |
-| RepresentationFamily | representation | REVISAR | Familia de representación. | Puede duplicar `CompoundFamily`. Revisar. |
-| RepresentationStrategy | representation | REVISAR | Estrategia seleccionada de representación. | Revisar si aporta frente al flujo simple. |
+| RepresentationDecisionService | representation | REVISAR / POSIBLE BORRAR | Decide estrategia por familia: educational candidate, special case, fallback o direct smiles. Actualmente es muy pequeño y no está anotado como `@Service`. | Puede borrarse si no se usa; su lógica puede integrarse en `MoleculeCardRepresentationService`. |
+| RepresentationDecision | representation | REVISAR / POSIBLE BORRAR | Resultado de decisión de representación. | Mantener solo si se conserva `RepresentationDecisionService`. |
+| RepresentationFamily | representation | REVISAR / POSIBLE DUPLICADO | Familia de representación. Puede duplicar `CompoundFamily`. | Revisar usos. |
+| RepresentationStrategy | representation | REVISAR / POSIBLE BORRAR | Enum de estrategia seleccionada. | Mantener solo si se conserva `RepresentationDecisionService`. |
 | ImageRepresentationSource | representation | REVISAR | Enum/origen de imagen representacional. | Mantener si `MoleculaRepresentacionDTO` lo usa realmente. |
 
 ## Servicios/motores antiguos de representación
@@ -331,8 +331,8 @@ No es una representación de enlace real perfecta, pero es mejor para una tarjet
 | CompoundFamily | MANTENER | Enum de familia química. | Mantener; lo usa clasificación. |
 | CompoundFamilyService | MANTENER / REVISAR | Clasifica moléculas por familia química. | Mantener si se usa en filtros/listados o representación. |
 | CompoundTypeLabelService | MANTENER / REVISAR | Genera etiqueta visual/tipo de compuesto. | Mantener si alimenta tarjetas/filtros. |
-| chemistry.smiles.SmilesGenerationService | REVISAR | Generación propia de SMILES desde fórmula/conectividad. | Revisar si duplica `RepresentationSmilesOverrideService` o si contiene lógica educational aprovechable. |
-| chemistry.smiles.SmilesGenerationResult | REVISAR | Resultado de generación SMILES. | Mantener solo si se usa `SmilesGenerationService`. |
+| chemistry.smiles.SmilesGenerationService | POSIBLE BORRAR | Supuestamente completaría SMILES desde canonical/isomeric/InChI, pero actualmente `generarDesdeInchi` siempre devuelve vacío. | Borrar si nadie lo usa o implementarlo de verdad. No contiene educational útil ahora. |
+| chemistry.smiles.SmilesGenerationResult | POSIBLE BORRAR | Resultado de generación SMILES. | Mantener solo si se usa `SmilesGenerationService`. |
 
 ## Chemistry - conectividad
 
@@ -394,20 +394,18 @@ Antes de tocar más sales, recuperar/ampliar:
 
 ```text
 RepresentationSmilesOverrideService
-chemistry.smiles.SmilesGenerationService
 ```
 
-El primero debe ser la capa principal de overrides por fórmula. El segundo puede contener lógica aprovechable para generar SMILES educativos; hay que revisarlo antes de borrar nada de `chemistry.smiles`.
+`chemistry.smiles.SmilesGenerationService` ha sido revisado y ahora mismo no contiene lógica educational útil. Solo devuelve el SMILES canonical si existe y no implementa conversión desde InChI.
 
 ## Orden recomendado de trabajo
 
 1. Congelar flujo actual: `MoleculeCardRepresentationService` como única entrada.
 2. Ampliar `RepresentationSmilesOverrideService` con educational SMILES.
-3. Revisar `chemistry.smiles.SmilesGenerationService` para rescatar lógica useful.
-4. Limitar `IonicSmilesBuilderService` a casos donde mejore visualmente.
-5. Borrar representación manual antigua si ya no se usa.
-6. Simplificar DTOs.
-7. Simplificar frontend si quedan componentes viejos sin uso.
+3. Limitar `IonicSmilesBuilderService` a casos donde mejore visualmente.
+4. Borrar representación manual antigua si ya no se usa.
+5. Simplificar DTOs.
+6. Simplificar frontend si quedan componentes viejos sin uso.
 
 ---
 
@@ -415,7 +413,7 @@ El primero debe ser la capa principal de overrides por fórmula. El segundo pued
 
 ## Barrida 1 - RepresentationSmilesOverrideService
 
-Estado: revisado parcialmente.
+Estado: revisado.
 
 Hallazgo:
 
@@ -425,6 +423,12 @@ Hallazgo:
   - `NH3 -> N`, cuando debería ser `[H]N([H])[H]`.
   - `H2O2 -> OO`, cuando debería ser `[H]OO[H]`.
   - Óxidos metálicos como `CaO -> [Ca+2].[O-2]`, lo que puede volver a separar fragmentos.
+- Contiene buenos overrides para algunos covalentes pequeños:
+  - `SO3 -> O=S(=O)=O`
+  - `SO2 -> O=S=O`
+  - `NO -> N=O`
+  - `NO2 -> O=[N+][O-]`
+  - `CO2 -> O=C=O`
 
 Decisión:
 
@@ -532,3 +536,41 @@ Decisión:
 
 - Revisar `RepresentationDecisionService` antes de borrar, porque puede contener reglas útiles para elegir entre educational/CDK/PubChem.
 - Evitar tener dos orquestadores finales. La app debería quedarse con uno solo.
+
+## Barrida 7 - RepresentationDecisionService
+
+Estado: revisado.
+
+Hallazgo:
+
+- Clase muy pequeña.
+- No tiene `@Service`.
+- Decide por `RepresentationFamily`:
+  - sales binarias, hidróxidos, oxisales y oxisales ácidas -> `EDUCATIONAL_CANDIDATE`;
+  - complejos y organofosfatos -> `SPECIAL_CASE`;
+  - desconocida -> `FALLBACK`;
+  - resto -> `DIRECT_SMILES`.
+- Es una buena idea conceptual, pero ahora mismo no parece imprescindible.
+
+Decisión:
+
+- Revisar usos.
+- Si no se usa, borrar o fusionar su lógica en `MoleculeCardRepresentationService`.
+- Si se conserva, añadir `@Service` y convertirlo en parte oficial del flujo.
+
+## Barrida 8 - SmilesGenerationService
+
+Estado: revisado.
+
+Hallazgo:
+
+- `completarSmiles` devuelve canonical si existe.
+- `generarDesdeInchi` siempre devuelve `Optional.empty()`.
+- No contiene lógica educational.
+- No convierte realmente InChI a SMILES.
+
+Decisión:
+
+- Candidato a borrar si nadie lo usa.
+- Alternativa: implementarlo de verdad más adelante si se quiere convertir InChI a SMILES.
+- No depende de la representación visual actual.
