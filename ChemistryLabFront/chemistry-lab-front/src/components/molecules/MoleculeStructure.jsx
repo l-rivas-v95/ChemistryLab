@@ -16,6 +16,7 @@ function MoleculeStructure({ molecula }) {
             <ExternalImageStructure
                 src={representacion.imagen2d}
                 alt={molecula?.nombre || representacion.formulaVisual || "Molécula"}
+                formula={representacion.formulaVisual || molecula?.formula}
             />
         );
     }
@@ -52,11 +53,11 @@ function MoleculeStructure({ molecula }) {
     return <FormulaStructure formula={representacion.formulaVisual || molecula?.formula} />;
 }
 
-function ExternalImageStructure({ src, alt }) {
+function ExternalImageStructure({ src, alt, formula }) {
     const [error, setError] = useState(false);
 
     if (error || !src) {
-        return <FormulaStructure formula={alt} />;
+        return <FormulaStructure formula={formula || alt} />;
     }
 
     return (
