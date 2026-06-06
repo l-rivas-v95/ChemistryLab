@@ -67,6 +67,16 @@ public class MoleculaRepresentacionDTO {
         return dto;
     }
 
+    public static MoleculaRepresentacionDTO imagenExterna(String formulaVisual, String imagen2d, String reason) {
+        MoleculaRepresentacionDTO dto = new MoleculaRepresentacionDTO();
+        dto.setTipoRepresentacion("IMAGEN_2D");
+        dto.setFormulaVisual(formulaVisual);
+        dto.setImagen2d(imagen2d);
+        dto.setImagenRepresentacionSource("PUBCHEM_IMAGE_2D");
+        dto.setImagenRepresentacionReason(reason);
+        return dto;
+    }
+
     public static MoleculaRepresentacionDTO ionica(String formulaVisual, String texto) {
         MoleculaRepresentacionDTO dto = new MoleculaRepresentacionDTO();
         dto.setTipoRepresentacion("IONICA");
