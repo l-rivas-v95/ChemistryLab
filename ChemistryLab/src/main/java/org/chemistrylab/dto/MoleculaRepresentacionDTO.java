@@ -20,6 +20,9 @@ public class MoleculaRepresentacionDTO {
     private String canonicalSmiles;
     private String isomericSmiles;
     private String imagen2d;
+    private String representationInput;
+    private String representationInputSource;
+    private String representationInputReason;
 
     private List<AtomoRepresentacionDTO> atomos2d;
     private List<EnlaceRepresentacionDTO> enlaces2d;
@@ -197,6 +200,31 @@ public class MoleculaRepresentacionDTO {
     public void setImagen2d(String imagen2d) {
         this.imagen2d = imagen2d;
     }
+
+    public String getRepresentationInput() {
+        return representationInput;
+    }
+
+    public void setRepresentationInput(String representationInput) {
+        this.representationInput = representationInput;
+    }
+
+    public String getRepresentationInputSource() {
+        return representationInputSource;
+    }
+
+    public void setRepresentationInputSource(String representationInputSource) {
+        this.representationInputSource = representationInputSource;
+    }
+
+    public String getRepresentationInputReason() {
+        return representationInputReason;
+    }
+
+    public void setRepresentationInputReason(String representationInputReason) {
+        this.representationInputReason = representationInputReason;
+    }
+
     public List<AtomoRepresentacionDTO> getAtomos2d() {
         return atomos2d;
     }
