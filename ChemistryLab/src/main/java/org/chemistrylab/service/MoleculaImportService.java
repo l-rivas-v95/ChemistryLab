@@ -1,6 +1,8 @@
 package org.chemistrylab.service;
 
 import lombok.RequiredArgsConstructor;
+import org.chemistrylab.chemistry.smiles.SmilesGenerationResult;
+import org.chemistrylab.chemistry.smiles.SmilesGenerationService;
 import org.chemistrylab.dto.MoleculaImportResponse;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.pubchem.PubChemClient;
@@ -15,6 +17,7 @@ public class MoleculaImportService {
 
     private final MoleculaRepository moleculaRepository;
     private final PubChemClient pubChemClient;
+    private final SmilesGenerationService smilesGenerationService;
 
     @Transactional
     public MoleculaImportResponse importar(String query) {
@@ -48,7 +51,12 @@ public class MoleculaImportService {
 
     private MoleculaImportResponse descargarGuardarYResponder(Long cid) {
         PubChemCompoundData data = pubChemClient.descargarCompuesto(cid);
-        MoleculaEntity entity = construirEntidad(data);
+        SmilesGenerationResult smiles = smilesGenerationService.completarSmiles(
+                data.getCanonicalSmiles(),
+                data.getIsomericSmiles(),
+                data.getInchi()
+        );
+        MoleculaEntity entity = construirEntidad(data, smiles);
         MoleculaEntity guardada = moleculaRepository.save(entity);
 
         return MoleculaImportResponse.builder()
@@ -61,7 +69,7 @@ public class MoleculaImportService {
                 .build();
     }
 
-    private MoleculaEntity construirEntidad(PubChemCompoundData data) {
+    private MoleculaEntity construirEntidad(PubChemCompoundData data, SmilesGenerationResult smiles) {
         return MoleculaEntity.builder()
                 .pubchemCid(data.getPubchemCid())
                 .nombre(data.getNombre())
@@ -81,8 +89,8 @@ public class MoleculaImportService {
                 .riesgos(data.getRiesgos())
                 .usos(data.getUsos())
                 .sinonimos(data.getSinonimos())
-                .canonicalSmiles(data.getCanonicalSmiles())
-                .isomericSmiles(data.getIsomericSmiles())
+                .canonicalSmiles(smiles.canonicalSmiles())
+                .isomericSmiles(smiles.isomericSmiles())
                 .inchi(data.getInchi())
                 .inchiKey(data.getInchiKey())
                 .xlogp(data.getXlogp())
