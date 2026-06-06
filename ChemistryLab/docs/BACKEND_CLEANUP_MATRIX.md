@@ -18,6 +18,106 @@
 
 ---
 
+# Árbol real del backend observado
+
+Según capturas del árbol local en IntelliJ, el backend actual tiene esta estructura principal:
+
+```text
+src/main/java/org/chemistrylab
+├── ChemistryLabApplication
+├── chemistry
+│   ├── analyzer.formula
+│   │   ├── ElementNode
+│   │   ├── FormulaNode
+│   │   └── GroupNode
+│   ├── catalog
+│   │   └── IonCatalogService
+│   ├── classification
+│   │   ├── CompoundFamily
+│   │   ├── CompoundFamilyService
+│   │   └── CompoundTypeLabelService
+│   ├── config
+│   │   └── IonConfig
+│   ├── connectivity
+│   │   ├── rules
+│   │   ├── MolecularBond
+│   │   ├── MolecularConnectivity
+│   │   └── MolecularConnectivityService
+│   ├── formula
+│   │   ├── FormulaParserService
+│   │   └── IonicFormulaResolution
+│   ├── ionic
+│   │   ├── IonicFormulaResolution
+│   │   ├── IonicFormulaResolver
+│   │   └── IonMatch
+│   └── smiles
+│       ├── SmilesGenerationResult
+│       └── SmilesGenerationService
+├── config
+│   ├── CorsConfig
+│   └── WebClientConfig
+├── controller
+│   ├── ElementoController
+│   └── MoleculaController
+├── dto
+│   ├── AtomoRepresentacionDTO
+│   ├── ElementoDTO
+│   ├── EnlaceRepresentacionDTO
+│   ├── MoleculaDTO
+│   ├── MoleculaImportRequest
+│   ├── MoleculaImportResponse
+│   └── MoleculaRepresentacionDTO
+├── entity
+│   ├── ElementoEntity
+│   ├── EstadoOxidacionEntity
+│   └── MoleculaEntity
+├── mapper
+│   ├── ElementoMapper
+│   └── MoleculaMapper
+├── pubchem
+│   ├── PubChemClient
+│   └── PubChemCompoundData
+├── repository
+│   ├── ElementoRepository
+│   └── MoleculaRepository
+├── representation
+│   ├── ImageRepresentationSource
+│   ├── IonicSmilesBuilderService
+│   ├── RepresentationDecision
+│   ├── RepresentationDecisionService
+│   ├── RepresentationFamily
+│   ├── RepresentationInputResult
+│   ├── RepresentationInputService
+│   ├── RepresentationInputSource
+│   ├── RepresentationSmilesOverrideService
+│   ├── RepresentationStrategy
+│   └── SmilesToSvgService
+├── service
+│   ├── ElementoService
+│   ├── Estructura2DService
+│   ├── MoleculaFormulaService
+│   ├── MoleculaImportService
+│   ├── MoleculaRepresentacionIonicaService
+│   ├── MoleculaRepresentacionService
+│   ├── MoleculaRepresentacionVseprService
+│   ├── MoleculaService
+│   ├── MoleculeCardRepresentationService
+│   └── OxidoIonico2DService
+└── tools
+```
+
+Recursos:
+
+```text
+src/main/resources
+├── chemistry
+│   └── ions.json
+├── data
+└── application.properties
+```
+
+---
+
 # Índice de representación actual
 
 ## Objetivo visual actual
@@ -183,6 +283,14 @@ No es una representación de enlace real perfecta, pero es mejor para una tarjet
 | SmilesToSvgService | representation | MANTENER | Convierte SMILES a SVG con CDK. | Mantener. |
 | RepresentationSmilesOverrideService | representation | MANTENER / PRIORIDAD | Capa `educational`: overrides de fórmula a SMILES curado. | Ampliar y convertir en pieza central. |
 | IonicSmilesBuilderService | representation | TEMPORAL / REVISAR | Construye SMILES desde fórmula iónica. | Mantener solo si genera SMILES visuales compactos; no usar disociación fea. |
+| RepresentationInputService | representation | REVISAR | Decide qué input químico usar: canonical SMILES, isomeric SMILES o InChI. | Probablemente útil, pero la vía nueva puede hacerlo más simple. Revisar si se reutiliza. |
+| RepresentationInputResult | representation | REVISAR | Resultado de decidir el input de representación. | Mantener solo si `RepresentationInputService` queda. |
+| RepresentationInputSource | representation | REVISAR | Enum de origen del input: canonical, isomeric, InChI, etc. | Mantener solo si `RepresentationInputService` queda. |
+| RepresentationDecisionService | representation | REVISAR | Servicio de decisión de estrategia de representación. | Puede ser parte del refactor nuevo o resto intermedio. Revisar antes de borrar. |
+| RepresentationDecision | representation | REVISAR | Resultado de decisión de representación. | Mantener solo si se usa desde el flujo nuevo. |
+| RepresentationFamily | representation | REVISAR | Familia de representación. | Puede duplicar `CompoundFamily`. Revisar. |
+| RepresentationStrategy | representation | REVISAR | Estrategia seleccionada de representación. | Revisar si aporta frente al flujo simple. |
+| ImageRepresentationSource | representation | REVISAR | Enum/origen de imagen representacional. | Mantener si `MoleculaRepresentacionDTO` lo usa realmente. |
 
 ## Servicios/motores antiguos de representación
 
@@ -191,7 +299,7 @@ No es una representación de enlace real perfecta, pero es mejor para una tarjet
 | MoleculaRepresentacionService | service | REVISAR / POSIBLE BORRAR | Motor anterior de representación: mezcla family classification, entrada química, iónica, estructura2D y VSEPR. | No debe alimentar tarjetas. Revisar si `MoleculaController` todavía lo inyecta. Si no se usa, borrar junto con dependencias antiguas. |
 | MoleculaRepresentacionIonicaService | service | CANDIDATA A BORRAR | Representación iónica antigua. | Borrar si no hay lógica educational útil dentro. |
 | MoleculaRepresentacionVseprService | service | CANDIDATA A BORRAR | VSEPR/geometría molecular. | Sacar del flujo de tarjetas. Mantener solo si se crea módulo educativo aparte. |
-| Estructura2DService | service | CANDIDATA A BORRAR | Representación 2D manual. | Borrar si CDK SVG reemplaza. |
+| Estructura2DService | service | CANDIDATA A BORRAR | Representación 2D manual basada en `MolecularConnectivityService`, `AtomoRepresentacionDTO` y `EnlaceRepresentacionDTO`. | Borrar si CDK SVG reemplaza. Revisar si alguna lógica de conectividad sirve para educational. |
 | OxidoIonico2DService | service | CANDIDATA A BORRAR | Óxidos iónicos manuales. | Borrar si no se rescata nada útil. |
 
 ## PubChem
@@ -217,15 +325,23 @@ No es una representación de enlace real perfecta, pero es mejor para una tarjet
 | Clase/paquete | Estado | Qué hace | Decisión |
 |---|---|---|---|
 | FormulaParserService | MANTENER | Parseo de fórmulas con paréntesis y cantidades. | Mantener. |
-| chemistry.classification.* | MANTENER / REVISAR | Clasifica orgánica/inorgánica/ácido/base/óxido/sal. | Existe en `MoleculaRepresentacionService`, pero la búsqueda de GitHub no lo devuelve bien. Confirmar árbol real local antes de borrar. |
-| chemistry.analyzer.formula.* | REVISAR | Análisis de fórmulas. | No apareció en búsqueda por `Analyzer`; confirmar árbol real local. |
-| chemistry.smiles.* | REVISAR | Utilidades SMILES. | Revisar si duplican `representation`. |
+| ElementNode | MANTENER / REVISAR | Nodo de elemento en árbol de fórmula. | Mantener si `FormulaParserService` lo usa. |
+| FormulaNode | MANTENER / REVISAR | Interfaz/base de nodo de fórmula. | Mantener si el parser lo usa. |
+| GroupNode | MANTENER / REVISAR | Nodo de grupo con multiplicador. | Mantener si el parser lo usa. |
+| CompoundFamily | MANTENER | Enum de familia química. | Mantener; lo usa clasificación. |
+| CompoundFamilyService | MANTENER / REVISAR | Clasifica moléculas por familia química. | Mantener si se usa en filtros/listados o representación. |
+| CompoundTypeLabelService | MANTENER / REVISAR | Genera etiqueta visual/tipo de compuesto. | Mantener si alimenta tarjetas/filtros. |
+| chemistry.smiles.SmilesGenerationService | REVISAR | Generación propia de SMILES desde fórmula/conectividad. | Revisar si duplica `RepresentationSmilesOverrideService` o si contiene lógica educational aprovechable. |
+| chemistry.smiles.SmilesGenerationResult | REVISAR | Resultado de generación SMILES. | Mantener solo si se usa `SmilesGenerationService`. |
 
 ## Chemistry - conectividad
 
 | Clase/paquete | Estado | Qué hace | Decisión |
 |---|---|---|---|
-| chemistry.connectivity.* | REVISAR | Reglas para deducir enlaces/conectividad. | Si solo alimenta motor manual, borrar. Si ayuda a educational, conservar parcialmente. |
+| MolecularConnectivityService | REVISAR / POSIBLE BORRAR | Construye conectividad molecular desde fórmula. Usado por `Estructura2DService`. | Si solo alimenta estructura manual, candidato a borrar. Revisar si contiene reglas educational útiles. |
+| MolecularConnectivity | REVISAR | Modelo de conectividad: átomos/enlaces. | Mantener solo si se conserva connectivity. |
+| MolecularBond | REVISAR | Enlace molecular. | Mantener solo si se conserva connectivity. |
+| chemistry.connectivity.rules.* | REVISAR | Reglas de conectividad. | Revisar una por una; probablemente motor viejo. |
 
 ## Tools / Playgrounds
 
@@ -250,6 +366,10 @@ MoleculaRepresentacionService
 MoleculaRepresentacionIonicaService
 MoleculaRepresentacionVseprService
 OxidoIonico2DService
+MolecularConnectivityService
+MolecularConnectivity
+MolecularBond
+chemistry.connectivity.rules.*
 ```
 
 Si solo se usan entre sí o desde endpoints antiguos, eliminarlos en bloque.
@@ -274,18 +394,20 @@ Antes de tocar más sales, recuperar/ampliar:
 
 ```text
 RepresentationSmilesOverrideService
+chemistry.smiles.SmilesGenerationService
 ```
 
-Debe contener overrides por fórmula para moléculas y compuestos pequeños. Esto es prioritario frente a intentar resolver todo con un generador iónico automático.
+El primero debe ser la capa principal de overrides por fórmula. El segundo puede contener lógica aprovechable para generar SMILES educativos; hay que revisarlo antes de borrar nada de `chemistry.smiles`.
 
 ## Orden recomendado de trabajo
 
 1. Congelar flujo actual: `MoleculeCardRepresentationService` como única entrada.
 2. Ampliar `RepresentationSmilesOverrideService` con educational SMILES.
-3. Limitar `IonicSmilesBuilderService` a casos donde mejore visualmente.
-4. Borrar representación manual antigua si ya no se usa.
-5. Simplificar DTOs.
-6. Simplificar frontend si quedan componentes viejos sin uso.
+3. Revisar `chemistry.smiles.SmilesGenerationService` para rescatar lógica useful.
+4. Limitar `IonicSmilesBuilderService` a casos donde mejore visualmente.
+5. Borrar representación manual antigua si ya no se usa.
+6. Simplificar DTOs.
+7. Simplificar frontend si quedan componentes viejos sin uso.
 
 ---
 
@@ -313,14 +435,19 @@ Decisión:
 
 ## Barrida 2 - Búsquedas de paquetes classification
 
-Estado: pendiente de confirmar estructura real.
+Estado: resuelta con captura del árbol local.
 
-Se intentó localizar `CompoundFamily`, `classification` y `CompoundTypeLabelService` mediante búsqueda en GitHub, pero no aparecieron resultados en la rama actual. Sin embargo, `MoleculaRepresentacionService` importa esas clases, así que el paquete existe en el árbol real o el índice de búsqueda no lo está devolviendo.
+Hallazgo:
+
+- Sí existen:
+  - `CompoundFamily`
+  - `CompoundFamilyService`
+  - `CompoundTypeLabelService`
 
 Decisión:
 
-- No borrar nada relacionado con classification hasta revisar el árbol local o hasta compilar después de una limpieza.
-- Si `MoleculaRepresentacionService` se elimina, comprobar si classification sigue siendo usado por `MoleculaService` o filtros del frontend.
+- Mantener classification por ahora.
+- Revisar después si el frontend/filtros usan directamente esas familias.
 
 ## Barrida 3 - MoleculaRepresentacionService
 
@@ -350,16 +477,58 @@ Decisión:
 - Si `MoleculaController` ya usa `MoleculeCardRepresentationService`, esta clase queda como candidata clara a borrar.
 - Antes de borrarla, revisar si algún endpoint secundario o tool la usa.
 
-## Barrida 4 - OxidoIonico2DService / Analyzer
+## Barrida 4 - Árbol real del backend
 
-Estado: búsqueda inicial.
+Estado: actualizado con capturas del usuario.
 
 Hallazgo:
 
-- La búsqueda por `OxidoIonico2DService` y `Analyzer` no devolvió resultados en GitHub.
-- Puede que esas clases ya no existan en la rama actual o que el índice no las devuelva.
+- El árbol real confirma paquetes que GitHub Search no devolvía:
+  - `chemistry.analyzer.formula`
+  - `chemistry.classification`
+  - `chemistry.connectivity`
+  - `chemistry.smiles`
+  - `representation.RepresentationInput*`
+  - `representation.RepresentationDecision*`
 
 Decisión:
 
-- No incluirlas como borrado directo hasta confirmar con árbol local.
-- Si aparecen en local, probablemente pertenecen a motores antiguos y deben revisarse junto con `Estructura2DService`.
+- Usar el árbol de IntelliJ como fuente para el inventario.
+- GitHub Search no es fiable para confirmar inexistencia de clases en esta rama.
+
+## Barrida 5 - Estructura2DService
+
+Estado: inspección parcial desde captura.
+
+Hallazgo:
+
+- La clase existe en `service`.
+- Importa:
+  - `MolecularBond`
+  - `MolecularConnectivity`
+  - `MolecularConnectivityService`
+  - `AtomoRepresentacionDTO`
+  - `EnlaceRepresentacionDTO`
+  - `MoleculaRepresentacionDTO`
+- Tiene método `intentarConstruir(String formulaVisual)`.
+- Parece convertir conectividad molecular interna en DTOs manuales de átomos/enlaces.
+
+Decisión:
+
+- Candidata a borrar si se elimina la representación manual.
+- Antes de borrar, revisar si `MolecularConnectivityService` contiene alguna lógica que sirva para educational SMILES.
+
+## Barrida 6 - representation package
+
+Estado: árbol identificado.
+
+Hallazgo:
+
+- Hay dos posibles capas de decisión:
+  - `MoleculeCardRepresentationService`, más simple y actual.
+  - `RepresentationDecisionService` + enums/modelos, posiblemente refactor intermedio.
+
+Decisión:
+
+- Revisar `RepresentationDecisionService` antes de borrar, porque puede contener reglas útiles para elegir entre educational/CDK/PubChem.
+- Evitar tener dos orquestadores finales. La app debería quedarse con uno solo.
