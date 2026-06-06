@@ -3,22 +3,9 @@ import SmilesDrawer from "smiles-drawer";
 import { useMoleculeRepresentation } from "../../hooks/useMoleculeRepresentation";
 import ChemicalFormulaText from "./ChemicalFormulaText";
 
-const TEMP_FORCE_SMILES_WHEN_AVAILABLE = true;
-
 function MoleculeStructure({ molecula }) {
     const moleculaId = molecula?.id;
     const { representacion, error } = useMoleculeRepresentation(moleculaId);
-    const smilesDirecto = molecula?.canonicalSmiles || molecula?.isomericSmiles;
-
-    if (TEMP_FORCE_SMILES_WHEN_AVAILABLE && smilesDirecto) {
-        return (
-            <SmilesStructure
-                smiles={smilesDirecto}
-                nombre={molecula?.nombre}
-                formula={molecula?.formula}
-            />
-        );
-    }
 
     if (error || !representacion) {
         return <FormulaStructure formula={molecula?.formula} />;
