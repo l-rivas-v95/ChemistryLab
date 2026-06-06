@@ -328,9 +328,9 @@ No es una representación de enlace real perfecta, pero es mejor para una tarjet
 | ElementNode | MANTENER / REVISAR | Nodo de elemento en árbol de fórmula. | Mantener si `FormulaParserService` lo usa. |
 | FormulaNode | MANTENER / REVISAR | Interfaz/base de nodo de fórmula. | Mantener si el parser lo usa. |
 | GroupNode | MANTENER / REVISAR | Nodo de grupo con multiplicador. | Mantener si el parser lo usa. |
-| CompoundFamily | MANTENER | Enum de familia química. | Mantener; lo usa clasificación. |
-| CompoundFamilyService | MANTENER / REVISAR | Clasifica moléculas por familia química. | Mantener si se usa en filtros/listados o representación. |
-| CompoundTypeLabelService | MANTENER / REVISAR | Genera etiqueta visual/tipo de compuesto. | Mantener si alimenta tarjetas/filtros. |
+| CompoundFamily | MANTENER | Enum de familia química: ORGANIC, ACID, HYDROXIDE, SALT, METALLIC_OXIDE, COVALENT_OXIDE, PEROXIDE, COVALENT, UNKNOWN. | Mantener. Es la clasificación principal actual. |
+| CompoundFamilyService | MANTENER / REVISAR | Clasifica moléculas usando fórmula parseada, categorías de elementos y presencia de SMILES. Detecta peróxido, hidróxido, ácido, óxido metálico/covalente, sal, covalente y orgánica. | Mantener. Revisar reglas finas, especialmente orgánica por `tieneSmiles`, porque puede clasificar como orgánico cualquier compuesto con SMILES. |
+| CompoundTypeLabelService | MANTENER | Convierte `CompoundFamily` a etiqueta visual: Orgánica, Ácido inorgánico, Base / hidróxido, Sal, Óxido metálico, Óxido covalente, Peróxido, Covalente, Indefinida. | Mantener si las tarjetas/filtros muestran tipo. |
 | chemistry.smiles.SmilesGenerationService | POSIBLE BORRAR | Supuestamente completaría SMILES desde canonical/isomeric/InChI, pero actualmente `generarDesdeInchi` siempre devuelve vacío. | Borrar si nadie lo usa o implementarlo de verdad. No contiene educational útil ahora. |
 | chemistry.smiles.SmilesGenerationResult | POSIBLE BORRAR | Resultado de generación SMILES. | Mantener solo si se usa `SmilesGenerationService`. |
 
@@ -643,3 +643,43 @@ Decisión:
 - Mantener temporalmente.
 - Evitar usarlo como solución genérica para todas las sales hasta que los resultados visuales sean mejores.
 - Las sales/hidróxidos más importantes deberían pasar primero por `RepresentationSmilesOverrideService` con overrides educational específicos.
+
+## Barrida 12 - CompoundFamilyService
+
+Estado: revisado.
+
+Hallazgo:
+
+- Es la clasificación química principal actual.
+- Usa `FormulaParserService` para parsear fórmula y `ElementoRepository` para cargar categorías de elementos.
+- Orden de clasificación:
+  1. peróxido;
+  2. hidróxido;
+  3. ácido inorgánico;
+  4. óxido metálico/covalente;
+  5. sal;
+  6. covalente simple;
+  7. orgánica o tiene SMILES;
+  8. covalente;
+  9. desconocida.
+- Posible problema: si una molécula tiene SMILES, la clasifica como orgánica aunque no lo sea, si no ha caído antes en otra categoría.
+
+Decisión:
+
+- Mantener. Es útil para filtros, etiquetas y decisiones de representación.
+- Revisar regla `esOrganica(atomos) || tieneSmiles(molecula)` porque puede ser demasiado amplia.
+
+## Barrida 13 - CompoundTypeLabelService y CompoundFamily
+
+Estado: revisado.
+
+Hallazgo:
+
+- `CompoundFamily` es un enum simple y limpio.
+- `CompoundTypeLabelService` solo convierte familia a etiqueta visible.
+- No hay lógica pesada ni deuda importante.
+
+Decisión:
+
+- Mantener ambos.
+- Son parte del núcleo limpio de clasificación.
