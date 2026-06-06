@@ -18,15 +18,37 @@ import java.util.Locale;
 
 public class CdkDepictionPlayground {
 
-    private static final Path OUTPUT_DIR = Path.of("depiction-test-output", "cdk");
+    private static final Path OUTPUT_ROOT = Path.of("depiction-test-output");
+    private static final Path CDK_DIR = OUTPUT_ROOT.resolve("cdk");
 
     public static void main(String[] args) throws IOException {
-        Files.createDirectories(OUTPUT_DIR);
+        Files.createDirectories(CDK_DIR);
 
-        List<TestMolecule> molecules = List.of(
-                new TestMolecule("Water", "H2O", "COVALENTE_SIMPLE", "O", "SMILES compacto: CDK añade H implícitos y queda demasiado grande."),
+        List<TestMolecule> molecules = testMolecules();
+
+        for (TestMolecule molecule : molecules) {
+            Path output = CDK_DIR.resolve(slug(molecule.name()) + ".svg");
+
+            try {
+                String svg = generateCdkSvg(molecule.smiles());
+                Files.writeString(output, svg, StandardCharsets.UTF_8);
+            } catch (Exception exception) {
+                Files.writeString(output, errorSvg("CDK error", exception.getMessage()), StandardCharsets.UTF_8);
+            }
+        }
+
+        String comparison = buildComparisonReport(molecules);
+        Files.writeString(OUTPUT_ROOT.resolve("comparison.html"), comparison, StandardCharsets.UTF_8);
+        Files.writeString(OUTPUT_ROOT.resolve("report.html"), comparison, StandardCharsets.UTF_8);
+
+        System.out.println("Generado: depiction-test-output/comparison.html");
+    }
+
+    private static List<TestMolecule> testMolecules() {
+        return List.of(
+                new TestMolecule("Water", "H2O", "COVALENTE_SIMPLE", "O", "SMILES compacto: los motores añaden H implícitos; puede verse demasiado simple o grande."),
                 new TestMolecule("Water explicit", "H2O", "COVALENTE_SIMPLE", "[H]O[H]", "Comparar con Water compacto. Debería parecerse más a estructura real."),
-                new TestMolecule("Ammonia", "NH3", "COVALENTE_SIMPLE", "N", "SMILES compacto: CDK añade H implícitos y queda enorme."),
+                new TestMolecule("Ammonia", "NH3", "COVALENTE_SIMPLE", "N", "SMILES compacto: los motores añaden H implícitos."),
                 new TestMolecule("Ammonia explicit", "NH3", "COVALENTE_SIMPLE", "[H]N([H])[H]", "Comparar con Ammonia compacto."),
                 new TestMolecule("Hydrogen peroxide", "H2O2", "COVALENTE_SIMPLE", "OO", "Aceptable, pero conviene comparar con explícito."),
                 new TestMolecule("Hydrogen peroxide explicit", "H2O2", "COVALENTE_SIMPLE", "[H]OO[H]", "Versión con hidrógenos explícitos."),
@@ -38,14 +60,14 @@ public class CdkDepictionPlayground {
                 new TestMolecule("Nitrogen dioxide", "NO2", "OXIDO_COVALENTE", "O=[N+][O-]", "Bien, aunque muestra cargas formales."),
                 new TestMolecule("Dinitrogen monoxide", "N2O", "OXIDO_COVALENTE", "N#[N+][O-]", "Bien, aunque muestra cargas formales."),
                 new TestMolecule("Ozone", "O3", "COVALENTE_SIMPLE", "O=[O+][O-]", "Bien, aunque muestra cargas formales."),
-                new TestMolecule("Hydrogen cyanide", "HCN", "COVALENTE_SIMPLE", "C#N", "CDK oculta H implícito; probar también explícito."),
+                new TestMolecule("Hydrogen cyanide", "HCN", "COVALENTE_SIMPLE", "C#N", "Los H pueden quedar implícitos; probar también explícito."),
                 new TestMolecule("Hydrogen cyanide explicit", "HCN", "COVALENTE_SIMPLE", "[H]C#N", "Más claro para la app."),
-                new TestMolecule("Hydrochloric acid", "HCl", "HIDRACIDO", "Cl", "Compacto queda como HCl enorme por H implícito."),
+                new TestMolecule("Hydrochloric acid", "HCl", "HIDRACIDO", "Cl", "Compacto queda como cloro con H implícito."),
                 new TestMolecule("Hydrochloric acid explicit", "HCl", "HIDRACIDO", "[H]Cl", "Más correcto para mostrar enlace H-Cl."),
                 new TestMolecule("Nitric acid", "HNO3", "OXOACIDO", "O[N+](=O)[O-]", "Bastante bien. Estilo parecido a PubChem."),
                 new TestMolecule("Sulfuric acid", "H2SO4", "OXOACIDO", "OS(=O)(=O)O", "Bien."),
                 new TestMolecule("Phosphoric acid", "H3PO4", "OXOACIDO", "OP(=O)(O)O", "Bien."),
-                new TestMolecule("Carbonic acid", "H2CO3", "OXOACIDO", "OC(=O)O", "Muy buen candidato para usar CDK."),
+                new TestMolecule("Carbonic acid", "H2CO3", "OXOACIDO", "OC(=O)O", "Muy buen candidato para motor 2D automático."),
                 new TestMolecule("Sodium chloride", "NaCl", "SAL_BINARIA", "[Na+].[Cl-]", "Visualmente claro, aunque no representa red cristalina."),
                 new TestMolecule("Potassium chloride", "KCl", "SAL_BINARIA", "[K+].[Cl-]", "Visualmente claro, aunque no representa red cristalina."),
                 new TestMolecule("Calcium chloride", "CaCl2", "SAL_BINARIA", "[Ca+2].[Cl-].[Cl-]", "Aceptable, pero la colocación puede ser irregular."),
@@ -65,54 +87,15 @@ public class CdkDepictionPlayground {
                 new TestMolecule("Sodium phosphate", "Na3PO4", "OXISAL", "[Na+].[Na+].[Na+].[O-]P(=O)([O-])[O-]", "Bastante claro."),
                 new TestMolecule("Calcium phosphate", "Ca3(PO4)2", "OXISAL", "[Ca+2].[Ca+2].[Ca+2].[O-]P(=O)([O-])[O-].[O-]P(=O)([O-])[O-]", "Punto débil: muchos iones, se compacta."),
                 new TestMolecule("Ammonium sulfate", "(NH4)2SO4", "OXISAL", "[NH4+].[NH4+].[O-]S(=O)(=O)[O-]", "Punto débil: amonio puede verse raro."),
-                new TestMolecule("Potassium ferricyanide", "K3Fe(CN)6", "COMPLEJO", "[K+].[K+].[K+].N#C[Fe](C#N)(C#N)(C#N)(C#N)C#N", "Complejo: sorprendentemente reconocible, pero puede saturar tarjeta."),
-                new TestMolecule("Sodium dichromate", "Na2Cr2O7", "OXISAL", "[Na+].[Na+].[O-][Cr](=O)(=O)O[Cr](=O)(=O)[O-]", "Probar si CDK gestiona bien oxoanión puente."),
+                new TestMolecule("Potassium ferricyanide", "K3Fe(CN)6", "COMPLEJO", "[K+].[K+].[K+].N#C[Fe](C#N)(C#N)(C#N)(C#N)C#N", "Complejo: reconocible, pero puede saturar tarjeta."),
+                new TestMolecule("Sodium dichromate", "Na2Cr2O7", "OXISAL", "[Na+].[Na+].[O-][Cr](=O)(=O)O[Cr](=O)(=O)[O-]", "Probar si gestiona bien oxoanión puente."),
                 new TestMolecule("Potassium permanganate", "KMnO4", "OXISAL", "[K+].[O-][Mn](=O)(=O)=O", "Probar metal central con oxígenos."),
-                new TestMolecule("Tetrahydrocannabinol", "C21H30O2", "ORGANICA", "CCCCCC1=CC(=C2C3C=C(CC(C3CC(CC2=C1O)(C)C)O)C)O", "Orgánica: CDK debería ganar o empatar con SmilesDrawer."),
+                new TestMolecule("Tetrahydrocannabinol", "C21H30O2", "ORGANICA", "CCCCCC1=CC(=C2C3C=C(CC(C3CC(CC2=C1O)(C)C)O)C)O", "Orgánica: comparar calidad del layout."),
                 new TestMolecule("ATP", "C10H16N5O13P3", "ORGANOFOSFATO", "Nc1ncnc2c1ncn2C3OC(COP(=O)(O)OP(=O)(O)OP(=O)(O)O)C(O)C3O", "Molécula grande con fosfatos. Buen test para orgánica + grupos inorgánicos.")
         );
-
-        StringBuilder report = new StringBuilder();
-        report.append("<!doctype html><html><head><meta charset='UTF-8'><title>Depiction engine comparison</title>")
-                .append("<style>")
-                .append("body{font-family:Arial,sans-serif;background:#f7f4ec;padding:24px;color:#111827;}")
-                .append("h1{margin:0 0 6px;} .intro{margin:0 0 22px;color:#4b5563;max-width:980px;line-height:1.45;}")
-                .append(".grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}")
-                .append(".card{background:white;border:1px solid #ddd;border-radius:14px;padding:14px;box-shadow:0 4px 16px #0001;}")
-                .append(".head{display:flex;justify-content:space-between;gap:10px;align-items:start;margin-bottom:10px;}")
-                .append("h2{font-size:20px;margin:0;} .formula{font-weight:800;background:#111827;color:#fff8c6;border-radius:999px;padding:5px 10px;white-space:nowrap;}")
-                .append(".meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}")
-                .append(".tag{font-size:11px;font-weight:800;border:1px solid #d1d5db;border-radius:999px;padding:4px 8px;background:#f9fafb;}")
-                .append(".engine{background:#eef2ff;border-color:#c7d2fe;}")
-                .append("img{width:100%;height:210px;object-fit:contain;border:1px solid #eee;border-radius:10px;background:#fff;}")
-                .append("code{font-size:12px;word-break:break-all;display:block;background:#f3f4f6;border-radius:8px;padding:8px;margin-top:10px;}")
-                .append(".note{font-size:13px;line-height:1.35;color:#374151;margin-top:10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px;}")
-                .append(".error{background:#fef2f2;border-color:#fecaca;color:#991b1b;}")
-                .append("</style>")
-                .append("</head><body><h1>Depiction engine comparison</h1>")
-                .append("<p class='intro'>Prueba independiente. Este informe compara cómo dibuja CDK distintas familias químicas desde SMILES. Los puntos débiles marcados sirven para decidir si conviene usar CDK, SmilesDrawer, OpenBabel, Indigo o un fallback propio. ATP queda incluido desde ahora como caso de molécula grande con grupos fosfato.</p>")
-                .append("<div class='grid'>");
-
-        for (TestMolecule molecule : molecules) {
-            String filename = slug(molecule.name()) + ".svg";
-            Path output = OUTPUT_DIR.resolve(filename);
-
-            try {
-                String svg = generateSvg(molecule.smiles());
-                Files.writeString(output, svg, StandardCharsets.UTF_8);
-                appendSuccessCard(report, molecule, filename);
-            } catch (Exception exception) {
-                appendErrorCard(report, molecule, exception);
-            }
-        }
-
-        report.append("</div></body></html>");
-        Files.writeString(Path.of("depiction-test-output", "report.html"), report.toString(), StandardCharsets.UTF_8);
-
-        System.out.println("Generado: depiction-test-output/report.html");
     }
 
-    private static String generateSvg(String smiles) throws CDKException {
+    private static String generateCdkSvg(String smiles) throws CDKException {
         SmilesParser smilesParser = new SmilesParser(SilentChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
 
@@ -132,36 +115,118 @@ public class CdkDepictionPlayground {
         return depictionGenerator.depict(withCoordinates).toSvgStr();
     }
 
-    private static void appendSuccessCard(StringBuilder report, TestMolecule molecule, String filename) {
-        report.append("<div class='card'><div class='head'><h2>")
-                .append(escapeHtml(molecule.name()))
-                .append("</h2><span class='formula'>")
-                .append(escapeHtml(molecule.formula()))
-                .append("</span></div><div class='meta'><span class='tag engine'>CDK Depiction</span><span class='tag'>")
-                .append(escapeHtml(molecule.family()))
-                .append("</span></div><img src='cdk/")
-                .append(filename)
+    private static String buildComparisonReport(List<TestMolecule> molecules) {
+        StringBuilder report = new StringBuilder();
+        report.append("<!doctype html><html><head><meta charset='UTF-8'><title>Unified depiction comparison</title>")
+                .append("<script src='https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js'></script>")
+                .append("<style>")
+                .append("body{font-family:Arial,sans-serif;background:#f7f4ec;padding:24px;color:#111827;}")
+                .append("h1{margin:0 0 6px;} .intro{margin:0 0 22px;color:#4b5563;max-width:1200px;line-height:1.45;}")
+                .append(".molecule-card{background:white;border:1px solid #d7d0c4;border-radius:16px;padding:16px;margin-bottom:22px;box-shadow:0 4px 16px #0001;}")
+                .append(".head{display:flex;justify-content:space-between;gap:10px;align-items:start;margin-bottom:12px;}")
+                .append("h2{font-size:24px;margin:0;} .formula{font-weight:800;background:#111827;color:#fff8c6;border-radius:999px;padding:6px 12px;white-space:nowrap;}")
+                .append(".meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}")
+                .append(".tag{font-size:11px;font-weight:800;border:1px solid #d1d5db;border-radius:999px;padding:4px 8px;background:#f9fafb;}")
+                .append(".engines{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}")
+                .append(".engine-card{border:1px solid #e5e7eb;border-radius:14px;padding:10px;background:#fcfcfd;}")
+                .append(".engine-title{font-size:13px;font-weight:900;margin-bottom:8px;border-radius:999px;display:inline-block;padding:4px 8px;background:#eef2ff;border:1px solid #c7d2fe;}")
+                .append("img,.smiles-canvas{width:100%;height:210px;object-fit:contain;border:1px solid #eee;border-radius:10px;background:#fff;}")
+                .append(".placeholder{height:210px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px dashed #cbd5e1;border-radius:10px;background:#f8fafc;color:#64748b;font-weight:800;padding:10px;}")
+                .append("code{font-size:12px;word-break:break-all;display:block;background:#f3f4f6;border-radius:8px;padding:8px;margin-top:10px;}")
+                .append(".note{font-size:13px;line-height:1.35;color:#374151;margin-top:10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px;}")
+                .append("</style></head><body><h1>Unified depiction comparison</h1>")
+                .append("<p class='intro'>Una tarjeta por molécula y una columna por motor. CDK genera SVG desde Java. SmilesDrawer se dibuja en el navegador usando el mismo SMILES. OpenBabel, RDKit e Indigo quedan preparados para añadir sus salidas al mismo informe.</p>");
+
+        for (int i = 0; i < molecules.size(); i++) {
+            TestMolecule molecule = molecules.get(i);
+            String filename = slug(molecule.name()) + ".svg";
+            String canvasId = "smilesdrawer_" + i;
+
+            report.append("<section class='molecule-card'><div class='head'><h2>")
+                    .append(escapeHtml(molecule.name()))
+                    .append("</h2><span class='formula'>")
+                    .append(escapeHtml(molecule.formula()))
+                    .append("</span></div><div class='meta'><span class='tag'>")
+                    .append(escapeHtml(molecule.family()))
+                    .append("</span></div><div class='engines'>");
+
+            appendEngineWithImage(report, "CDK", "cdk/" + filename, molecule.smiles(), molecule.note());
+            appendSmilesDrawerEngine(report, canvasId, molecule.smiles());
+            appendPlaceholder(report, "OpenBabel", "Pendiente: requiere binario externo obabel.");
+            appendPlaceholder(report, "RDKit", "Pendiente: requiere Python/RDKit o integración aparte.");
+            appendPlaceholder(report, "Indigo", "Pendiente: requiere dependencia Java/Python.");
+
+            report.append("</div></section>");
+        }
+
+        appendSmilesDrawerScript(report, molecules);
+        report.append("</body></html>");
+        return report.toString();
+    }
+
+    private static void appendEngineWithImage(StringBuilder report, String engine, String imagePath, String smiles, String note) {
+        report.append("<div class='engine-card'><div class='engine-title'>")
+                .append(escapeHtml(engine))
+                .append("</div><img src='")
+                .append(escapeHtml(imagePath))
                 .append("'><code>")
-                .append(escapeHtml(molecule.smiles()))
+                .append(escapeHtml(smiles))
                 .append("</code><div class='note'>")
-                .append(escapeHtml(molecule.note()))
+                .append(escapeHtml(note))
                 .append("</div></div>");
     }
 
-    private static void appendErrorCard(StringBuilder report, TestMolecule molecule, Exception exception) {
-        report.append("<div class='card'><div class='head'><h2>")
-                .append(escapeHtml(molecule.name()))
-                .append("</h2><span class='formula'>")
-                .append(escapeHtml(molecule.formula()))
-                .append("</span></div><div class='meta'><span class='tag engine'>CDK Depiction</span><span class='tag'>")
-                .append(escapeHtml(molecule.family()))
-                .append("</span></div><div class='note error'>Error: ")
-                .append(escapeHtml(exception.getMessage()))
-                .append("</div><code>")
-                .append(escapeHtml(molecule.smiles()))
-                .append("</code><div class='note'>")
-                .append(escapeHtml(molecule.note()))
+    private static void appendSmilesDrawerEngine(StringBuilder report, String canvasId, String smiles) {
+        report.append("<div class='engine-card'><div class='engine-title'>SmilesDrawer</div><canvas class='smiles-canvas' id='")
+                .append(escapeHtml(canvasId))
+                .append("' width='420' height='300'></canvas><code>")
+                .append(escapeHtml(smiles))
+                .append("</code><div class='note'>Render JS desde el mismo SMILES usado por CDK.</div></div>");
+    }
+
+    private static void appendPlaceholder(StringBuilder report, String engine, String message) {
+        report.append("<div class='engine-card'><div class='engine-title'>")
+                .append(escapeHtml(engine))
+                .append("</div><div class='placeholder'>")
+                .append(escapeHtml(message))
                 .append("</div></div>");
+    }
+
+    private static void appendSmilesDrawerScript(StringBuilder report, List<TestMolecule> molecules) {
+        report.append("<script>\n")
+                .append("const drawer = new SmilesDrawer.Drawer({ width: 420, height: 300, padding: 28, compactDrawing: true, terminalCarbons: false });\n")
+                .append("const smilesJobs = [\n");
+
+        for (int i = 0; i < molecules.size(); i++) {
+            TestMolecule molecule = molecules.get(i);
+            report.append("{ id: 'smilesdrawer_")
+                    .append(i)
+                    .append("', smiles: ")
+                    .append(toJsString(molecule.smiles()))
+                    .append(" }");
+            if (i < molecules.size() - 1) {
+                report.append(",");
+            }
+            report.append("\n");
+        }
+
+        report.append("];\n")
+                .append("for (const job of smilesJobs) {\n")
+                .append("  const canvas = document.getElementById(job.id);\n")
+                .append("  if (!canvas) continue;\n")
+                .append("  SmilesDrawer.parse(job.smiles, tree => drawer.draw(tree, canvas, 'light', false), err => {\n")
+                .append("    const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); ctx.font='16px Arial'; ctx.fillStyle='#991b1b'; ctx.textAlign='center'; ctx.fillText('SmilesDrawer error', canvas.width/2, canvas.height/2); console.error(err);\n")
+                .append("  });\n")
+                .append("}\n")
+                .append("</script>");
+    }
+
+    private static String errorSvg(String title, String message) {
+        return "<svg xmlns='http://www.w3.org/2000/svg' width='420' height='300'>"
+                + "<rect width='100%' height='100%' fill='#fff1f2'/>"
+                + "<text x='210' y='130' text-anchor='middle' font-family='Arial' font-size='22' font-weight='700' fill='#991b1b'>" + escapeXml(title) + "</text>"
+                + "<text x='210' y='165' text-anchor='middle' font-family='Arial' font-size='13' fill='#7f1d1d'>" + escapeXml(message) + "</text>"
+                + "</svg>";
     }
 
     private static String slug(String value) {
@@ -180,6 +245,18 @@ public class CdkDepictionPlayground {
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")
                 .replace("'", "&#39;");
+    }
+
+    private static String escapeXml(String value) {
+        return escapeHtml(value);
+    }
+
+    private static String toJsString(String value) {
+        return "'" + String.valueOf(value)
+                .replace("\\", "\\\\")
+                .replace("'", "\\'")
+                .replace("\n", "\\n")
+                .replace("\r", "") + "'";
     }
 
     private record TestMolecule(String name, String formula, String family, String smiles, String note) {
