@@ -457,13 +457,72 @@ Hallazgo:
 - `HydrogenPeroxideConnectivityRule` fuerza H-O-O-H.
 - `NitrogenDioxideConnectivityRule` fuerza NO2 con N central y dos oxígenos.
 - `CovalentX2OConnectivityRule` intenta representar fórmulas X2O con enlace X-X y X-O.
-- Lo interesante de estas reglas no es la conectividad manual, sino que confirman qué casos deberían estar en educational overrides:
-  - CO
-  - H2O2
-  - NO2
-  - posibles X2O/N2O
+- Lo interesante de estas reglas no es la conectividad manual, sino que confirman qué casos deberían estar en educational overrides: CO, H2O2, NO2 y posibles X2O/N2O.
 
 Decisión:
 
 - Marcar `chemistry.connectivity.rules.*` como candidato fuerte a borrar junto con `MolecularConnectivityService` y `Estructura2DService`.
 - Rescatar antes sus casos como entradas de `RepresentationSmilesOverrideService`.
+
+## Barrida 15 - MoleculaRepresentacionIonicaService
+
+Estado: revisado.
+
+Hallazgo:
+
+- No genera estructuras ni SVG. Genera texto iónico tipo `Na⁺ + Cl⁻`, `Ca²⁺ + 2OH⁻`, `2H⁺ + CO3²⁻`.
+- Usa `IonicFormulaResolver`, `IonCatalogService`, `FormulaParserService` y `ElementoRepository`.
+- Contiene varios casos manuales:
+  - ácido carbónico -> `2H⁺ + CO3²⁻`;
+  - ácido bórico -> `B(OH)3`;
+  - hidróxido de aluminio -> `Al³⁺ + 3OH⁻`;
+  - hidróxido amónico -> `NH4⁺ + OH⁻`;
+  - dióxido de titanio -> `Ti⁴⁺ + 2O²⁻`;
+  - fosfatos y fosfatos ácidos.
+
+Decisión:
+
+- Candidata a borrar del flujo de representación visual.
+- Puede tener valor si se quiere mostrar una explicación textual de disociación iónica en una ficha educativa, pero no debe alimentar tarjetas.
+- Si se borra, revisar antes si algún texto útil se quiere conservar en otro servicio educativo.
+
+## Barrida 16 - MoleculaRepresentacionVseprService
+
+Estado: revisado.
+
+Hallazgo:
+
+- Depende directamente de `MolecularConnectivityService`.
+- Construye un DTO VSEPR con:
+  - átomo central;
+  - terminales;
+  - enlaces;
+  - pares libres;
+  - código AXE;
+  - geometría;
+  - polaridad.
+- Geometrías soportadas: lineal, angular, trigonal plana, piramidal trigonal y tetraédrica.
+- No genera SMILES ni SVG CDK.
+
+Decisión:
+
+- Candidata fuerte a borrar del flujo actual.
+- Solo tendría sentido conservarla si se crea una sección educativa específica de VSEPR, separada de tarjetas.
+
+## Barrida 17 - OxidoIonico2DService
+
+Estado: revisado.
+
+Hallazgo:
+
+- Servicio manual de dibujo de óxidos iónicos.
+- Genera `AtomoRepresentacionDTO` y `EnlaceRepresentacionDTO` con posiciones fijas.
+- Para óxidos 1:1 crea una red 3x3 de iones.
+- Para otros patrones construye layouts lineales o manuales.
+- Devuelve `MoleculaRepresentacionDTO.estructura2d(..., "red iónica", null)`.
+- Es exactamente el origen de las representaciones de óxidos grandes y feas que se querían eliminar.
+
+Decisión:
+
+- Candidata muy fuerte a borrar.
+- No rescatar para tarjetas. Los óxidos deben pasar por `RepresentationSmilesOverrideService`, `IonicSmilesBuilderService` limitado, SMILES de BD o imagen PubChem.
