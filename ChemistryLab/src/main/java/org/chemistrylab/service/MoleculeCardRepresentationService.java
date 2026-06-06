@@ -3,6 +3,7 @@ package org.chemistrylab.service;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.repository.MoleculaRepository;
+import org.chemistrylab.representation.RepresentationSmilesOverrideService;
 import org.chemistrylab.representation.SmilesToSvgService;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +14,16 @@ public class MoleculeCardRepresentationService {
 
     private final MoleculaRepository moleculaRepository;
     private final SmilesToSvgService smilesToSvgService;
+    private final RepresentationSmilesOverrideService representationSmilesOverrideService;
 
     public MoleculeCardRepresentationService(
             MoleculaRepository moleculaRepository,
-            SmilesToSvgService smilesToSvgService
+            SmilesToSvgService smilesToSvgService,
+            RepresentationSmilesOverrideService representationSmilesOverrideService
     ) {
         this.moleculaRepository = moleculaRepository;
         this.smilesToSvgService = smilesToSvgService;
+        this.representationSmilesOverrideService = representationSmilesOverrideService;
     }
 
     public MoleculaRepresentacionDTO obtenerRepresentacion(Long id) {
@@ -27,7 +31,8 @@ public class MoleculeCardRepresentationService {
                 .orElseThrow(() -> new RuntimeException("Molécula no encontrada"));
 
         String formula = limpiar(molecula.getFormula());
-        String smiles = primerTexto(molecula.getCanonicalSmiles(), molecula.getIsomericSmiles());
+        String smiles = representationSmilesOverrideService.findOverride(formula)
+                .orElseGet(() -> primerTexto(molecula.getCanonicalSmiles(), molecula.getIsomericSmiles()));
 
         if (tieneTexto(smiles)) {
             Optional<String> svg = smilesToSvgService.renderSvg(smiles);
@@ -40,7 +45,7 @@ public class MoleculeCardRepresentationService {
                 );
                 dto.setRepresentationInput(smiles);
                 dto.setRepresentationInputSource("CARD_SMILES_CDK");
-                dto.setRepresentationInputReason("Se usa el primer SMILES disponible de la base de datos para generar SVG 2D.");
+                dto.setRepresentationInputReason("Se usa override curado si existe; si no, el primer SMILES disponible de la base de datos.");
                 return dto;
             }
         }
