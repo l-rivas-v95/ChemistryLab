@@ -61,20 +61,8 @@ public class MoleculaRepresentacionService {
         CompoundFamily family = compoundFamilyService.clasificar(molecula);
 
         if (family == CompoundFamily.ORGANIC) {
-            RepresentationInputResult input = representationInputService.resolveInput(
-                    molecula.getCanonicalSmiles(),
-                    molecula.getIsomericSmiles(),
-                    molecula.getInchi()
-            );
-
-            if (input.hasValue()) {
-                MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.smiles(
-                        formulaVisual,
-                        valorDibujable(input, molecula.getCanonicalSmiles()),
-                        molecula.getIsomericSmiles(),
-                        molecula.getImagen2d()
-                );
-                completarEntradaRepresentacion(dto, input);
+            MoleculaRepresentacionDTO dto = intentarConstruirDesdeEntradaQuimica(molecula, formulaVisual);
+            if (dto != null) {
                 return dto;
             }
         }
@@ -91,14 +79,19 @@ public class MoleculaRepresentacionService {
             return dto;
         }
 
-        MoleculaRepresentacionDTO vsepr = moleculaRepresentacionVseprService.intentarConstruir(formulaVisual);
-        if (vsepr != null) {
-            return vsepr;
+        MoleculaRepresentacionDTO desdeEntradaQuimica = intentarConstruirDesdeEntradaQuimica(molecula, formulaVisual);
+        if (desdeEntradaQuimica != null) {
+            return desdeEntradaQuimica;
         }
 
         Optional<MoleculaRepresentacionDTO> estructura2d = estructura2DService.intentarConstruir(formulaVisual);
         if (estructura2d.isPresent()) {
             return estructura2d.get();
+        }
+
+        MoleculaRepresentacionDTO vsepr = moleculaRepresentacionVseprService.intentarConstruir(formulaVisual);
+        if (vsepr != null) {
+            return vsepr;
         }
 
         if (family == CompoundFamily.UNKNOWN && moleculaRepresentacionIonicaService.esRepresentacionIonica(tipo)) {
@@ -111,6 +104,27 @@ public class MoleculaRepresentacionService {
         }
 
         return MoleculaRepresentacionDTO.formula(formulaVisual);
+    }
+
+    private MoleculaRepresentacionDTO intentarConstruirDesdeEntradaQuimica(MoleculaEntity molecula, String formulaVisual) {
+        RepresentationInputResult input = representationInputService.resolveInput(
+                molecula.getCanonicalSmiles(),
+                molecula.getIsomericSmiles(),
+                molecula.getInchi()
+        );
+
+        if (!input.hasValue()) {
+            return null;
+        }
+
+        MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.smiles(
+                formulaVisual,
+                valorDibujable(input, molecula.getCanonicalSmiles()),
+                molecula.getIsomericSmiles(),
+                molecula.getImagen2d()
+        );
+        completarEntradaRepresentacion(dto, input);
+        return dto;
     }
 
     private String valorDibujable(RepresentationInputResult input, String canonicalSmiles) {
