@@ -3,6 +3,7 @@ package org.chemistrylab.service;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.repository.MoleculaRepository;
+import org.chemistrylab.representation.IonicSmilesBuilderService;
 import org.chemistrylab.representation.RepresentationSmilesOverrideService;
 import org.chemistrylab.representation.SmilesToSvgService;
 import org.springframework.stereotype.Service;
@@ -15,15 +16,18 @@ public class MoleculeCardRepresentationService {
     private final MoleculaRepository moleculaRepository;
     private final SmilesToSvgService smilesToSvgService;
     private final RepresentationSmilesOverrideService representationSmilesOverrideService;
+    private final IonicSmilesBuilderService ionicSmilesBuilderService;
 
     public MoleculeCardRepresentationService(
             MoleculaRepository moleculaRepository,
             SmilesToSvgService smilesToSvgService,
-            RepresentationSmilesOverrideService representationSmilesOverrideService
+            RepresentationSmilesOverrideService representationSmilesOverrideService,
+            IonicSmilesBuilderService ionicSmilesBuilderService
     ) {
         this.moleculaRepository = moleculaRepository;
         this.smilesToSvgService = smilesToSvgService;
         this.representationSmilesOverrideService = representationSmilesOverrideService;
+        this.ionicSmilesBuilderService = ionicSmilesBuilderService;
     }
 
     public MoleculaRepresentacionDTO obtenerRepresentacion(Long id) {
@@ -32,6 +36,7 @@ public class MoleculeCardRepresentationService {
 
         String formula = limpiar(molecula.getFormula());
         String smiles = representationSmilesOverrideService.findOverride(formula)
+                .or(() -> ionicSmilesBuilderService.build(formula))
                 .orElseGet(() -> primerTexto(molecula.getCanonicalSmiles(), molecula.getIsomericSmiles()));
 
         if (tieneTexto(smiles)) {
@@ -41,11 +46,11 @@ public class MoleculeCardRepresentationService {
                         formula,
                         svg.get(),
                         "CDK_SVG",
-                        "Representación 2D aislada generada desde SMILES con CDK."
+                        "Representación 2D aislada generada desde SMILES curado/iónico con CDK."
                 );
                 dto.setRepresentationInput(smiles);
-                dto.setRepresentationInputSource("CARD_SMILES_CDK");
-                dto.setRepresentationInputReason("Se usa override curado si existe; si no, el primer SMILES disponible de la base de datos.");
+                dto.setRepresentationInputSource("CARD_CURATED_OR_DATABASE_SMILES_CDK");
+                dto.setRepresentationInputReason("Orden: SMILES explícito curado, SMILES iónico por catálogo, SMILES de base de datos.");
                 return dto;
             }
         }
