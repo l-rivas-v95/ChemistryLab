@@ -16,38 +16,7 @@ public class IonicSmilesBuilderService {
 
     private final IonicFormulaResolver ionicFormulaResolver;
 
-    private static final Map<String, String> ION_SMILES = Map.ofEntries(
-            Map.entry("H", "[H+]"),
-            Map.entry("Li", "[Li+]"),
-            Map.entry("Na", "[Na+]"),
-            Map.entry("K", "[K+]"),
-            Map.entry("Rb", "[Rb+]"),
-            Map.entry("Cs", "[Cs+]"),
-            Map.entry("Be", "[Be+2]"),
-            Map.entry("Mg", "[Mg+2]"),
-            Map.entry("Ca", "[Ca+2]"),
-            Map.entry("Sr", "[Sr+2]"),
-            Map.entry("Ba", "[Ba+2]"),
-            Map.entry("Al", "[Al+3]"),
-            Map.entry("Ag", "[Ag+]"),
-            Map.entry("Zn", "[Zn+2]"),
-            Map.entry("Cu", "[Cu+2]"),
-            Map.entry("Fe", "[Fe+3]"),
-            Map.entry("NH4", "[NH4+]"),
-            Map.entry("H3O", "[OH3+]"),
-            Map.entry("F", "[F-]"),
-            Map.entry("Cl", "[Cl-]"),
-            Map.entry("Br", "[Br-]"),
-            Map.entry("I", "[I-]"),
-            Map.entry("O", "[O-2]"),
-            Map.entry("S", "[S-2]"),
-            Map.entry("N", "[N-3]"),
-            Map.entry("P", "[P-3]"),
-            Map.entry("OH", "[OH-]"),
-            Map.entry("CN", "[C-]#N"),
-            Map.entry("OCN", "[O-]C#N"),
-            Map.entry("SCN", "[S-]C#N"),
-            Map.entry("O2", "[O-]O[O-]"),
+    private static final Map<String, String> OXOANION_SMILES = Map.ofEntries(
             Map.entry("NO3", "[O-][N+](=O)[O-]"),
             Map.entry("NO2", "O=[N+][O-]"),
             Map.entry("SO4", "[O-]S(=O)(=O)[O-]"),
@@ -81,66 +50,163 @@ public class IonicSmilesBuilderService {
     }
 
     private Optional<String> buildFromResolution(IonicFormulaResolution resolution) {
+        IonMatch cationMatch = resolution.getCation();
+        IonMatch anionMatch = resolution.getAnion();
+
+        if (cationMatch == null || anionMatch == null || cationMatch.getIon() == null || anionMatch.getIon() == null) {
+            return Optional.empty();
+        }
+
+        IonConfig cation = cationMatch.getIon();
+        IonConfig anion = anionMatch.getIon();
+
+        Optional<String> compact = buildCompactVisual(cationMatch, anionMatch);
+        if (compact.isPresent()) {
+            return compact;
+        }
+
+        String anionSmiles = OXOANION_SMILES.get(anion.getFormula());
+        if (anionSmiles == null || anionSmiles.isBlank()) {
+            return Optional.empty();
+        }
+
         List<String> fragments = new ArrayList<>();
+        fragments.add(anionSmiles);
 
-        if (!addFragments(fragments, resolution.getCation(), true)) {
-            return Optional.empty();
+        String cationSmiles = monoatomicVisualSmiles(cation);
+        if (cationSmiles == null || cationSmiles.isBlank()) {
+            return Optional.of(anionSmiles);
         }
 
-        if (!addFragments(fragments, resolution.getAnion(), false)) {
-            return Optional.empty();
-        }
-
-        if (fragments.isEmpty()) {
-            return Optional.empty();
+        for (int i = 0; i < cationMatch.getCantidad(); i++) {
+            fragments.add(cationSmiles);
         }
 
         return Optional.of(String.join(".", fragments));
     }
 
-    private boolean addFragments(List<String> fragments, IonMatch match, boolean cation) {
-        if (match == null || match.getIon() == null || match.getCantidad() <= 0) {
-            return false;
+    private Optional<String> buildCompactVisual(IonMatch cationMatch, IonMatch anionMatch) {
+        IonConfig cation = cationMatch.getIon();
+        IonConfig anion = anionMatch.getIon();
+
+        String cationFormula = cation.getFormula();
+        String anionFormula = anion.getFormula();
+
+        if (isMonoatomic(anionFormula)) {
+            return buildMonoatomicSalt(cationMatch, anionMatch);
         }
 
-        IonConfig ion = match.getIon();
-        String smiles = ION_SMILES.get(ion.getFormula());
-        if (smiles == null || smiles.isBlank()) {
-            smiles = monoatomicIonSmiles(ion);
+        if ("OH".equals(anionFormula)) {
+            return buildHydroxide(cationMatch);
         }
 
-        if (smiles == null || smiles.isBlank()) {
-            return false;
+        if ("O".equals(anionFormula)) {
+            return buildOxide(cationMatch, anionMatch);
         }
 
-        for (int i = 0; i < match.getCantidad(); i++) {
-            fragments.add(smiles);
+        if ("CN".equals(anionFormula)) {
+            return buildCyanide(cationMatch);
         }
 
-        return true;
+        return Optional.empty();
     }
 
-    private String monoatomicIonSmiles(IonConfig ion) {
-        if (ion == null || ion.getFormula() == null || ion.getCarga() == null) {
+    private Optional<String> buildMonoatomicSalt(IonMatch cationMatch, IonMatch anionMatch) {
+        String cation = neutralAtom(cationMatch.getIon().getFormula());
+        String anion = neutralAtom(anionMatch.getIon().getFormula());
+
+        if (cation == null || anion == null) {
+            return Optional.empty();
+        }
+
+        if (cationMatch.getCantidad() == 1 && anionMatch.getCantidad() == 1) {
+            return Optional.of("[" + cation + "]" + anion);
+        }
+
+        List<String> chain = new ArrayList<>();
+        int max = Math.max(cationMatch.getCantidad(), anionMatch.getCantidad());
+        for (int i = 0; i < max; i++) {
+            if (i < anionMatch.getCantidad()) {
+                chain.add(anion);
+            }
+            if (i < cationMatch.getCantidad()) {
+                chain.add("[" + cation + "]");
+            }
+        }
+
+        if (chain.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(String.join("", chain));
+    }
+
+    private Optional<String> buildHydroxide(IonMatch cationMatch) {
+        String cation = neutralAtom(cationMatch.getIon().getFormula());
+        if (cation == null) {
+            return Optional.empty();
+        }
+
+        int cantidadOH = Math.max(1, cationMatch.getIon().getCarga());
+
+        if (cantidadOH == 1) {
+            return Optional.of("[" + cation + "]O[H]");
+        }
+        if (cantidadOH == 2) {
+            return Optional.of("[H]O[" + cation + "]O[H]");
+        }
+        if (cantidadOH == 3) {
+            return Optional.of("O([" + cation + "])(O)O");
+        }
+
+        return Optional.of("[H]O[" + cation + "]O[H]");
+    }
+
+    private Optional<String> buildOxide(IonMatch cationMatch, IonMatch anionMatch) {
+        String cation = neutralAtom(cationMatch.getIon().getFormula());
+        if (cation == null) {
+            return Optional.empty();
+        }
+
+        if (cationMatch.getCantidad() == 1 && anionMatch.getCantidad() == 1) {
+            return Optional.of("[" + cation + "]=O");
+        }
+
+        if (cationMatch.getCantidad() == 2 && anionMatch.getCantidad() == 3) {
+            return Optional.of("O[" + cation + "]O[" + cation + "]O");
+        }
+
+        if (cationMatch.getCantidad() == 2 && anionMatch.getCantidad() == 1) {
+            return Optional.of("[" + cation + "]O[" + cation + "]");
+        }
+
+        return Optional.of("[" + cation + "]O");
+    }
+
+    private Optional<String> buildCyanide(IonMatch cationMatch) {
+        String cation = neutralAtom(cationMatch.getIon().getFormula());
+        if (cation == null) {
+            return Optional.of("C#N");
+        }
+        return Optional.of("[" + cation + "]C#N");
+    }
+
+    private boolean isMonoatomic(String formula) {
+        return formula != null && formula.matches("[A-Z][a-z]?") && !"O".equals(formula);
+    }
+
+    private String monoatomicVisualSmiles(IonConfig ion) {
+        if (ion == null || ion.getFormula() == null) {
             return null;
         }
+        String atom = neutralAtom(ion.getFormula());
+        return atom == null ? null : "[" + atom + "+]";
+    }
 
-        String formula = ion.getFormula();
-        int carga = ion.getCarga();
-
-        if (carga == 0) {
+    private String neutralAtom(String formula) {
+        if (formula == null || !formula.matches("[A-Z][a-z]?")) {
             return null;
         }
-
-        if (carga == 1) {
-            return "[" + formula + "+]";
-        }
-        if (carga == -1) {
-            return "[" + formula + "-]";
-        }
-        if (carga > 1) {
-            return "[" + formula + "+" + carga + "]";
-        }
-        return "[" + formula + carga + "]";
+        return formula;
     }
 }
