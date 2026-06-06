@@ -20,6 +20,8 @@ public class MoleculaRepresentacionDTO {
     private String canonicalSmiles;
     private String isomericSmiles;
     private String imagen2d;
+    private String imagenRepresentacionSource;
+    private String imagenRepresentacionReason;
     private String representationInput;
     private String representationInputSource;
     private String representationInputReason;
@@ -42,6 +44,8 @@ public class MoleculaRepresentacionDTO {
         dto.setEnlaces2d(enlaces2d);
         dto.setTexto(texto);
         dto.setPolaridad(polaridad);
+        dto.setImagenRepresentacionSource("STRUCTURE_2D");
+        dto.setImagenRepresentacionReason("Estructura 2D construida por reglas internas de la aplicación.");
 
         return dto;
     }
@@ -56,6 +60,10 @@ public class MoleculaRepresentacionDTO {
         dto.setCanonicalSmiles(canonicalSmiles);
         dto.setIsomericSmiles(isomericSmiles);
         dto.setImagen2d(imagen2d);
+        dto.setImagenRepresentacionSource(imagen2d == null || imagen2d.isBlank() ? "SMILES" : "PUBCHEM_IMAGE_2D");
+        dto.setImagenRepresentacionReason(imagen2d == null || imagen2d.isBlank()
+                ? "No hay imagen 2D externa. La representación visual debe generarse desde SMILES."
+                : "Se usa imagen 2D externa como representación visual principal.");
         return dto;
     }
 
@@ -64,6 +72,8 @@ public class MoleculaRepresentacionDTO {
         dto.setTipoRepresentacion("IONICA");
         dto.setFormulaVisual(formulaVisual);
         dto.setTexto(texto);
+        dto.setImagenRepresentacionSource("CARD_TEXT_ONLY");
+        dto.setImagenRepresentacionReason("La representación iónica se usa como texto de tarjeta, no como imagen molecular.");
         return dto;
     }
 
@@ -71,6 +81,8 @@ public class MoleculaRepresentacionDTO {
         MoleculaRepresentacionDTO dto = new MoleculaRepresentacionDTO();
         dto.setTipoRepresentacion("FORMULA");
         dto.setFormulaVisual(formulaVisual);
+        dto.setImagenRepresentacionSource("FORMULA_ONLY");
+        dto.setImagenRepresentacionReason("No hay imagen molecular disponible. Se muestra solo la fórmula.");
         return dto;
     }
 
@@ -94,6 +106,8 @@ public class MoleculaRepresentacionDTO {
         dto.setVsepr(vsepr);
         dto.setGeometria(geometria);
         dto.setPolaridad(polaridad);
+        dto.setImagenRepresentacionSource("VSEPR");
+        dto.setImagenRepresentacionReason("Representación visual construida a partir de geometría VSEPR.");
         return dto;
     }
 
@@ -199,6 +213,22 @@ public class MoleculaRepresentacionDTO {
 
     public void setImagen2d(String imagen2d) {
         this.imagen2d = imagen2d;
+    }
+
+    public String getImagenRepresentacionSource() {
+        return imagenRepresentacionSource;
+    }
+
+    public void setImagenRepresentacionSource(String imagenRepresentacionSource) {
+        this.imagenRepresentacionSource = imagenRepresentacionSource;
+    }
+
+    public String getImagenRepresentacionReason() {
+        return imagenRepresentacionReason;
+    }
+
+    public void setImagenRepresentacionReason(String imagenRepresentacionReason) {
+        this.imagenRepresentacionReason = imagenRepresentacionReason;
     }
 
     public String getRepresentationInput() {
