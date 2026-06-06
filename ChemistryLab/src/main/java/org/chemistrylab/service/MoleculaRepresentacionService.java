@@ -7,6 +7,8 @@ import org.chemistrylab.chemistry.formula.FormulaParserService;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.repository.MoleculaRepository;
+import org.chemistrylab.representation.RepresentationInputResult;
+import org.chemistrylab.representation.RepresentationInputService;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -24,6 +26,7 @@ public class MoleculaRepresentacionService {
     private final MoleculaRepresentacionVseprService moleculaRepresentacionVseprService;
     private final CompoundFamilyService compoundFamilyService;
     private final CompoundTypeLabelService compoundTypeLabelService;
+    private final RepresentationInputService representationInputService;
 
     public MoleculaRepresentacionService(
             MoleculaRepository moleculaRepository,
@@ -33,7 +36,8 @@ public class MoleculaRepresentacionService {
             MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService,
             MoleculaRepresentacionVseprService moleculaRepresentacionVseprService,
             CompoundFamilyService compoundFamilyService,
-            CompoundTypeLabelService compoundTypeLabelService
+            CompoundTypeLabelService compoundTypeLabelService,
+            RepresentationInputService representationInputService
     ) {
         this.moleculaRepository = moleculaRepository;
         this.formulaParserService = formulaParserService;
@@ -43,6 +47,7 @@ public class MoleculaRepresentacionService {
         this.moleculaRepresentacionVseprService = moleculaRepresentacionVseprService;
         this.compoundFamilyService = compoundFamilyService;
         this.compoundTypeLabelService = compoundTypeLabelService;
+        this.representationInputService = representationInputService;
     }
 
     public MoleculaRepresentacionDTO obtenerRepresentacion(Long id) {
@@ -57,13 +62,23 @@ public class MoleculaRepresentacionService {
         String formulaVisual = limpiarFormula(molecula.getFormula());
         CompoundFamily family = compoundFamilyService.clasificar(molecula);
 
-        if (family == CompoundFamily.ORGANIC && tieneTexto(molecula.getCanonicalSmiles())) {
-            return MoleculaRepresentacionDTO.smiles(
-                    formulaVisual,
+        if (family == CompoundFamily.ORGANIC) {
+            RepresentationInputResult input = representationInputService.resolveInput(
                     molecula.getCanonicalSmiles(),
                     molecula.getIsomericSmiles(),
-                    molecula.getImagen2d()
+                    molecula.getInchi()
             );
+
+            if (input.hasValue()) {
+                MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.smiles(
+                        formulaVisual,
+                        molecula.getCanonicalSmiles(),
+                        molecula.getIsomericSmiles(),
+                        molecula.getImagen2d()
+                );
+                completarEntradaRepresentacion(dto, input);
+                return dto;
+            }
         }
 
         if (family == CompoundFamily.METALLIC_OXIDE) {
@@ -103,12 +118,14 @@ public class MoleculaRepresentacionService {
         return MoleculaRepresentacionDTO.formula(formulaVisual);
     }
 
-    private String limpiarFormula(String formula) {
-        return formulaParserService.limpiarFormula(formula);
+    private void completarEntradaRepresentacion(MoleculaRepresentacionDTO dto, RepresentationInputResult input) {
+        dto.setRepresentationInput(input.getValue());
+        dto.setRepresentationInputSource(input.getSource().name());
+        dto.setRepresentationInputReason(input.getReason());
     }
 
-    private boolean tieneTexto(String valor) {
-        return valor != null && !valor.isBlank();
+    private String limpiarFormula(String formula) {
+        return formulaParserService.limpiarFormula(formula);
     }
 
     private String normalizar(String valor) {
