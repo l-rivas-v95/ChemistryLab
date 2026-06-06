@@ -36,9 +36,6 @@ public class MoleculaEntity {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "tipo_compuesto", columnDefinition = "TEXT")
-    private String tipoCompuesto;
-
     @Column(name = "estado_fisico", columnDefinition = "TEXT")
     private String estadoFisico;
 
