@@ -15,33 +15,46 @@ import java.nio.file.Path;
 import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class CdkDepictionPlayground {
 
     private static final Path OUTPUT_ROOT = Path.of("depiction-test-output");
     private static final Path CDK_DIR = OUTPUT_ROOT.resolve("cdk");
+    private static final Path OPENBABEL_DIR = OUTPUT_ROOT.resolve("openbabel");
 
     public static void main(String[] args) throws IOException {
         Files.createDirectories(CDK_DIR);
+        Files.createDirectories(OPENBABEL_DIR);
 
         List<TestMolecule> molecules = testMolecules();
+        boolean openBabelAvailable = isCommandAvailable("obabel", "-V");
 
         for (TestMolecule molecule : molecules) {
-            Path output = CDK_DIR.resolve(slug(molecule.name()) + ".svg");
+            String filename = slug(molecule.name()) + ".svg";
 
             try {
                 String svg = generateCdkSvg(molecule.smiles());
-                Files.writeString(output, svg, StandardCharsets.UTF_8);
+                Files.writeString(CDK_DIR.resolve(filename), svg, StandardCharsets.UTF_8);
             } catch (Exception exception) {
-                Files.writeString(output, errorSvg("CDK error", exception.getMessage()), StandardCharsets.UTF_8);
+                Files.writeString(CDK_DIR.resolve(filename), errorSvg("CDK error", exception.getMessage()), StandardCharsets.UTF_8);
+            }
+
+            if (openBabelAvailable) {
+                try {
+                    generateOpenBabelSvg(molecule.smiles(), OPENBABEL_DIR.resolve(filename));
+                } catch (Exception exception) {
+                    Files.writeString(OPENBABEL_DIR.resolve(filename), errorSvg("OpenBabel error", exception.getMessage()), StandardCharsets.UTF_8);
+                }
             }
         }
 
-        String comparison = buildComparisonReport(molecules);
+        String comparison = buildComparisonReport(molecules, openBabelAvailable);
         Files.writeString(OUTPUT_ROOT.resolve("comparison.html"), comparison, StandardCharsets.UTF_8);
         Files.writeString(OUTPUT_ROOT.resolve("report.html"), comparison, StandardCharsets.UTF_8);
 
         System.out.println("Generado: depiction-test-output/comparison.html");
+        System.out.println("OpenBabel detectado: " + openBabelAvailable);
     }
 
     private static List<TestMolecule> testMolecules() {
@@ -115,7 +128,46 @@ public class CdkDepictionPlayground {
         return depictionGenerator.depict(withCoordinates).toSvgStr();
     }
 
-    private static String buildComparisonReport(List<TestMolecule> molecules) {
+    private static void generateOpenBabelSvg(String smiles, Path outputFile) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "obabel",
+                "-ismi",
+                "-:",
+                "-O",
+                outputFile.toString(),
+                "--gen2d"
+        );
+        processBuilder.redirectErrorStream(true);
+
+        Process process = processBuilder.start();
+        process.getOutputStream().write(smiles.getBytes(StandardCharsets.UTF_8));
+        process.getOutputStream().close();
+
+        boolean finished = process.waitFor(20, TimeUnit.SECONDS);
+
+        if (!finished) {
+            process.destroyForcibly();
+            throw new IOException("Tiempo agotado ejecutando obabel");
+        }
+
+        if (process.exitValue() != 0 || !Files.exists(outputFile) || Files.size(outputFile) == 0) {
+            throw new IOException("obabel no pudo generar SVG para SMILES: " + smiles);
+        }
+    }
+
+    private static boolean isCommandAvailable(String... command) {
+        try {
+            Process process = new ProcessBuilder(command)
+                    .redirectErrorStream(true)
+                    .start();
+            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
+            return finished && process.exitValue() == 0;
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    private static String buildComparisonReport(List<TestMolecule> molecules, boolean openBabelAvailable) {
         StringBuilder report = new StringBuilder();
         report.append("<!doctype html><html><head><meta charset='UTF-8'><title>Unified depiction comparison</title>")
                 .append("<script src='https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js'></script>")
@@ -135,7 +187,7 @@ public class CdkDepictionPlayground {
                 .append("code{font-size:12px;word-break:break-all;display:block;background:#f3f4f6;border-radius:8px;padding:8px;margin-top:10px;}")
                 .append(".note{font-size:13px;line-height:1.35;color:#374151;margin-top:10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px;}")
                 .append("</style></head><body><h1>Unified depiction comparison</h1>")
-                .append("<p class='intro'>Una tarjeta por molécula y una columna por motor. CDK genera SVG desde Java. SmilesDrawer se dibuja en el navegador usando el mismo SMILES. OpenBabel, RDKit e Indigo quedan preparados para añadir sus salidas al mismo informe.</p>");
+                .append("<p class='intro'>Una tarjeta por molécula y una columna por motor. CDK genera SVG desde Java. SmilesDrawer se dibuja en el navegador usando el mismo SMILES. OpenBabel se genera si existe el comando obabel en PATH. RDKit e Indigo quedan preparados para añadir sus salidas al mismo informe.</p>");
 
         for (int i = 0; i < molecules.size(); i++) {
             TestMolecule molecule = molecules.get(i);
@@ -152,7 +204,13 @@ public class CdkDepictionPlayground {
 
             appendEngineWithImage(report, "CDK", "cdk/" + filename, molecule.smiles(), molecule.note());
             appendSmilesDrawerEngine(report, canvasId, molecule.smiles());
-            appendPlaceholder(report, "OpenBabel", "Pendiente: requiere binario externo obabel.");
+
+            if (openBabelAvailable) {
+                appendEngineWithImage(report, "OpenBabel", "openbabel/" + filename, molecule.smiles(), "SVG generado con obabel --gen2d desde el mismo SMILES.");
+            } else {
+                appendPlaceholder(report, "OpenBabel", "No detectado. Instala OpenBabel y asegúrate de que obabel esté en PATH.");
+            }
+
             appendPlaceholder(report, "RDKit", "Pendiente: requiere Python/RDKit o integración aparte.");
             appendPlaceholder(report, "Indigo", "Pendiente: requiere dependencia Java/Python.");
 
