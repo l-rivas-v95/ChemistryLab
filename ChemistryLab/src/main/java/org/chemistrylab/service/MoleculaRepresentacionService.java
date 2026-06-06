@@ -22,7 +22,6 @@ public class MoleculaRepresentacionService {
     private final MoleculaRepository moleculaRepository;
     private final FormulaParserService formulaParserService;
     private final Estructura2DService estructura2DService;
-    private final OxidoIonico2DService oxidoIonico2DService;
     private final MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService;
     private final MoleculaRepresentacionVseprService moleculaRepresentacionVseprService;
     private final CompoundFamilyService compoundFamilyService;
@@ -33,7 +32,6 @@ public class MoleculaRepresentacionService {
             MoleculaRepository moleculaRepository,
             FormulaParserService formulaParserService,
             Estructura2DService estructura2DService,
-            OxidoIonico2DService oxidoIonico2DService,
             MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService,
             MoleculaRepresentacionVseprService moleculaRepresentacionVseprService,
             CompoundFamilyService compoundFamilyService,
@@ -43,7 +41,6 @@ public class MoleculaRepresentacionService {
         this.moleculaRepository = moleculaRepository;
         this.formulaParserService = formulaParserService;
         this.estructura2DService = estructura2DService;
-        this.oxidoIonico2DService = oxidoIonico2DService;
         this.moleculaRepresentacionIonicaService = moleculaRepresentacionIonicaService;
         this.moleculaRepresentacionVseprService = moleculaRepresentacionVseprService;
         this.compoundFamilyService = compoundFamilyService;
@@ -79,13 +76,6 @@ public class MoleculaRepresentacionService {
                 );
                 completarEntradaRepresentacion(dto, input);
                 return dto;
-            }
-        }
-
-        if (family == CompoundFamily.METALLIC_OXIDE) {
-            Optional<MoleculaRepresentacionDTO> oxidoIonico2D = oxidoIonico2DService.intentarConstruir(formulaVisual);
-            if (oxidoIonico2D.isPresent()) {
-                return oxidoIonico2D.get();
             }
         }
 
