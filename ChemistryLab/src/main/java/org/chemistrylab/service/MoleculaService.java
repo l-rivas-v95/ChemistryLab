@@ -71,16 +71,6 @@ public class MoleculaService {
         return moleculaMapper.toDTO(entity);
     }
 
-    public List<MoleculaDTO> findByTipoCompuesto(String tipoCompuesto) {
-        String tipoNormalizado = normalizar(tipoCompuesto);
-
-        return moleculaRepository.findAll()
-                .stream()
-                .map(moleculaMapper::toDTO)
-                .filter(dto -> normalizar(dto.getTipoCompuesto()).contains(tipoNormalizado))
-                .toList();
-    }
-
     private boolean coincideBusquedaCalculada(MoleculaDTO dto, String search) {
         if (search == null || search.isBlank()) {
             return true;
@@ -125,13 +115,14 @@ public class MoleculaService {
         return switch (familia) {
             case "acid" -> tipo.contains("acido");
             case "base" -> tipo.contains("base") || tipo.contains("hidroxido");
-            case "oxide" -> tipo.contains("oxido");
+            case "oxide" -> tipo.contains("oxido") || tipo.contains("peroxido");
             case "salt" -> tipo.contains("sal");
             case "other-inorganic" -> !tipo.equals("organica")
                     && !tipo.contains("acido")
                     && !tipo.contains("base")
                     && !tipo.contains("hidroxido")
                     && !tipo.contains("oxido")
+                    && !tipo.contains("peroxido")
                     && !tipo.contains("sal");
             case "all-organic" -> tipo.equals("organica");
             default -> true;
