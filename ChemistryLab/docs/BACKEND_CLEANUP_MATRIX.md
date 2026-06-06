@@ -3,6 +3,8 @@
 > Rama: `cleanup/minimal-chemistrylab`
 >
 > Objetivo: decidir qué clases se mantienen, cuáles se revisan y cuáles son candidatas a borrar antes de seguir añadiendo representación química.
+>
+> Este documento se usa como índice vivo del backend. Cada vez que se revise una clase o se tome una decisión de limpieza, debe actualizarse aquí.
 
 ## Leyenda
 
@@ -14,11 +16,37 @@
 | REVISAR | No borrar aún; hay que comprobar usos reales. |
 | CANDIDATA A BORRAR | Parece parte de motores viejos o duplicados. Borrar solo tras comprobar referencias. |
 
+---
+
+# Índice de representación actual
+
+## Objetivo visual actual
+
+La tarjeta de molécula debe estar pintada siempre que sea posible. El orden deseado es:
+
+```text
+MoleculeCardRepresentationService
+    -> RepresentationSmilesOverrideService      // capa educational
+    -> IonicSmilesBuilderService                // solo si genera SMILES visual compacto
+    -> canonicalSmiles / isomericSmiles de BD
+    -> imagen PubChem
+    -> fórmula
+```
+
+Frontend:
+
+```text
+MoleculeStructure.jsx
+    SVG       -> inline SVG
+    IMAGEN_2D -> img externa
+    FORMULA   -> ChemicalFormulaText
+```
+
 ## Punto más importante: capa `educational`
 
 La parte que hay que recuperar no es un simple formateo bonito de fórmulas. Es una capa de **SMILES educativos/curados**.
 
-Esa capa debe vivir principalmente en:
+Debe vivir principalmente en:
 
 ```text
 org.chemistrylab.representation.RepresentationSmilesOverrideService
@@ -30,22 +58,60 @@ Función esperada:
 formula química -> SMILES educativo -> CDK -> SVG
 ```
 
-Ejemplos:
+### Diferencia clave
+
+No queremos esto para sales simples:
+
+```text
+NaCl -> [Na+].[Cl-]
+```
+
+porque CDK separa los fragmentos y pinta los iones lejos.
+
+Para tarjeta se prefiere algo visual/compacto:
+
+```text
+NaCl -> [Na]Cl
+NaOH -> [Na]O[H]
+Ca(OH)2 -> [H]O[Ca]O[H]
+```
+
+No es una representación de enlace real perfecta, pero es mejor para una tarjeta educativa sencilla.
+
+### Educational overrides prioritarios
 
 | Fórmula | SMILES educativo esperado | Motivo |
 |---|---|---|
 | H2O | `[H]O[H]` | Mostrar hidrógenos explícitos. |
-| NH3 | `[H]N([H])[H]` | Mostrar pirámide/estructura simple reconocible. |
+| OH2 | `[H]O[H]` | Alias de H2O. |
+| NH3 | `[H]N([H])[H]` | Mostrar hidrógenos explícitos. |
+| H3N | `[H]N([H])[H]` | Alias de NH3. |
 | H2O2 | `[H]OO[H]` | Mostrar enlace O-O. |
+| O2H2 | `[H]OO[H]` | Alias de H2O2. |
 | CO2 | `O=C=O` | Lineal y reconocible. |
-| SO3 | `O=S(=O)=O` | Oxoácido/óxido covalente más claro. |
-| HCl | `[H]Cl` | Evitar representación iónica separada. |
-| HF | `[H]F` | Evitar representación iónica separada. |
-| NaCl | `[Na]Cl` o forma compacta equivalente | Forzar cercanía visual. |
-| NaOH | `[Na]O[H]` | Evitar Na+ y OH- flotando. |
+| O2C | `O=C=O` | Alias de CO2. |
+| CO | `[C-]#[O+]` o `C#O` | Compacto; revisar cuál pinta mejor CDK. |
+| SO2 | `O=S=O` | Óxido covalente claro. |
+| O2S | `O=S=O` | Alias de SO2. |
+| SO3 | `O=S(=O)=O` | Oxoácido/óxido covalente claro. |
+| O3S | `O=S(=O)=O` | Alias de SO3. |
+| NO | `N=O` | Compacto. |
+| ON | `N=O` | Alias de NO. |
+| NO2 | `O=[N+][O-]` | Mejor que fórmula. |
+| O2N | `O=[N+][O-]` | Alias de NO2. |
+| N2O | `N#[N+]O` | Representación compacta. |
+| HCl | `[H]Cl` | Evitar disociación. |
+| HF | `[H]F` | Evitar disociación. |
+| HBr | `[H]Br` | Evitar disociación. |
+| HI | `[H]I` | Evitar disociación. |
+| NaCl | `[Na]Cl` | Sal simple compacta. |
+| KCl | `[K]Cl` | Sal simple compacta. |
+| NaOH | `[Na]O[H]` | Hidróxido compacto. |
+| KOH | `[K]O[H]` | Hidróxido compacto. |
 | Ca(OH)2 | `[H]O[Ca]O[H]` | Hidróxido compacto. |
+| Mg(OH)2 | `[H]O[Mg]O[H]` | Hidróxido compacto. |
 
-La capa `IonicSmilesBuilderService` puede ayudar, pero solo si genera SMILES visuales compactos. Si produce fragmentos tipo `[Na+].[Cl-]`, CDK separa los iones y vuelve a quedar mal.
+**Estado actual detectado:** `RepresentationSmilesOverrideService` existe, pero aún contiene valores que no son del todo educational para algunos casos, por ejemplo `H2O -> O`, `NH3 -> N`, `H2O2 -> OO`, y varios óxidos metálicos como fragmentos iónicos (`[Ca+2].[O-2]`). Eso debe corregirse.
 
 ---
 
@@ -220,3 +286,43 @@ Debe contener overrides por fórmula para moléculas y compuestos pequeños. Est
 4. Borrar representación manual antigua si ya no se usa.
 5. Simplificar DTOs.
 6. Simplificar frontend si quedan componentes viejos sin uso.
+
+---
+
+# Registro de barrida
+
+## Barrida 1 - RepresentationSmilesOverrideService
+
+Estado: revisado parcialmente.
+
+Hallazgo:
+
+- La clase existe y se usa como capa de overrides.
+- Actualmente contiene algunos valores contrarios al objetivo educational:
+  - `H2O -> O`, cuando debería ser `[H]O[H]`.
+  - `NH3 -> N`, cuando debería ser `[H]N([H])[H]`.
+  - `H2O2 -> OO`, cuando debería ser `[H]OO[H]`.
+  - Óxidos metálicos como `CaO -> [Ca+2].[O-2]`, lo que puede volver a separar fragmentos.
+
+Decisión:
+
+- Mantener la clase.
+- Convertirla en la capa educational principal.
+- Corregir primero overrides explícitos de moléculas pequeñas.
+- Después añadir sales/hidróxidos compactos caso a caso.
+
+## Barrida 2 - Búsquedas de paquetes classification
+
+Estado: pendiente de confirmar estructura real.
+
+Se intentó localizar `CompoundFamily`, `classification` y `CompoundTypeLabelService` mediante búsqueda en GitHub, pero no aparecieron resultados en la rama actual. Esto puede indicar:
+
+- fueron eliminadas en algún refactor;
+- están en otra rama/commit;
+- la clasificación actual está implementada con otros nombres;
+- el índice de búsqueda no las está devolviendo.
+
+Decisión:
+
+- No asumir que `chemistry.classification.*` existe en esta rama hasta revisar el árbol real del proyecto local.
+- Actualizar esta sección cuando se confirme el paquete real.
