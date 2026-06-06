@@ -2,6 +2,7 @@ package org.chemistrylab.service;
 
 import org.chemistrylab.chemistry.classification.CompoundFamily;
 import org.chemistrylab.chemistry.classification.CompoundFamilyService;
+import org.chemistrylab.chemistry.classification.CompoundTypeLabelService;
 import org.chemistrylab.chemistry.formula.FormulaParserService;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.entity.MoleculaEntity;
@@ -22,6 +23,7 @@ public class MoleculaRepresentacionService {
     private final MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService;
     private final MoleculaRepresentacionVseprService moleculaRepresentacionVseprService;
     private final CompoundFamilyService compoundFamilyService;
+    private final CompoundTypeLabelService compoundTypeLabelService;
 
     public MoleculaRepresentacionService(
             MoleculaRepository moleculaRepository,
@@ -30,7 +32,8 @@ public class MoleculaRepresentacionService {
             OxidoIonico2DService oxidoIonico2DService,
             MoleculaRepresentacionIonicaService moleculaRepresentacionIonicaService,
             MoleculaRepresentacionVseprService moleculaRepresentacionVseprService,
-            CompoundFamilyService compoundFamilyService
+            CompoundFamilyService compoundFamilyService,
+            CompoundTypeLabelService compoundTypeLabelService
     ) {
         this.moleculaRepository = moleculaRepository;
         this.formulaParserService = formulaParserService;
@@ -39,6 +42,7 @@ public class MoleculaRepresentacionService {
         this.moleculaRepresentacionIonicaService = moleculaRepresentacionIonicaService;
         this.moleculaRepresentacionVseprService = moleculaRepresentacionVseprService;
         this.compoundFamilyService = compoundFamilyService;
+        this.compoundTypeLabelService = compoundTypeLabelService;
     }
 
     public MoleculaRepresentacionDTO obtenerRepresentacion(Long id) {
@@ -49,7 +53,7 @@ public class MoleculaRepresentacionService {
     }
 
     private MoleculaRepresentacionDTO construirRepresentacion(MoleculaEntity molecula) {
-        String tipo = normalizar(molecula.getTipoCompuesto());
+        String tipo = normalizar(compoundTypeLabelService.getLabel(molecula));
         String formulaVisual = limpiarFormula(molecula.getFormula());
         CompoundFamily family = compoundFamilyService.clasificar(molecula);
 
