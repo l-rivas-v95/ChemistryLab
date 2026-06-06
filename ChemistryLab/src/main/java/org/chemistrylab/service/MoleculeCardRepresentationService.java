@@ -4,6 +4,7 @@ import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.repository.MoleculaRepository;
 import org.chemistrylab.representation.RepresentationSmilesOverrideService;
+import org.chemistrylab.representation.SmilesToSvgService;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -13,13 +14,16 @@ public class MoleculeCardRepresentationService {
 
     private final MoleculaRepository moleculaRepository;
     private final RepresentationSmilesOverrideService representationSmilesOverrideService;
+    private final SmilesToSvgService smilesToSvgService;
 
     public MoleculeCardRepresentationService(
             MoleculaRepository moleculaRepository,
-            RepresentationSmilesOverrideService representationSmilesOverrideService
+            RepresentationSmilesOverrideService representationSmilesOverrideService,
+            SmilesToSvgService smilesToSvgService
     ) {
         this.moleculaRepository = moleculaRepository;
         this.representationSmilesOverrideService = representationSmilesOverrideService;
+        this.smilesToSvgService = smilesToSvgService;
     }
 
     public MoleculaRepresentacionDTO obtenerRepresentacion(Long id) {
@@ -30,42 +34,30 @@ public class MoleculeCardRepresentationService {
 
         Optional<String> override = representationSmilesOverrideService.findOverride(formula);
         if (override.isPresent()) {
-            MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.smiles(
+            return crearDesdeSmiles(
                     formula,
                     override.get(),
-                    override.get(),
-                    null
+                    "CARD_CURATED_SMILES_OVERRIDE",
+                    "Representación aislada de tarjeta: SVG CDK generado desde SMILES curado por fórmula."
             );
-            dto.setRepresentationInput(override.get());
-            dto.setRepresentationInputSource("CARD_CURATED_SMILES_OVERRIDE");
-            dto.setRepresentationInputReason("Representación aislada de tarjeta: SMILES curado por fórmula.");
-            return dto;
         }
 
         if (tieneTexto(molecula.getCanonicalSmiles())) {
-            MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.smiles(
+            return crearDesdeSmiles(
                     formula,
                     molecula.getCanonicalSmiles(),
-                    molecula.getIsomericSmiles(),
-                    null
+                    "CARD_CANONICAL_SMILES",
+                    "Representación aislada de tarjeta: SVG CDK generado desde canonicalSmiles de la base de datos."
             );
-            dto.setRepresentationInput(molecula.getCanonicalSmiles());
-            dto.setRepresentationInputSource("CARD_CANONICAL_SMILES");
-            dto.setRepresentationInputReason("Representación aislada de tarjeta: canonicalSmiles de la base de datos.");
-            return dto;
         }
 
         if (tieneTexto(molecula.getIsomericSmiles())) {
-            MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.smiles(
+            return crearDesdeSmiles(
                     formula,
                     molecula.getIsomericSmiles(),
-                    molecula.getIsomericSmiles(),
-                    null
+                    "CARD_ISOMERIC_SMILES",
+                    "Representación aislada de tarjeta: SVG CDK generado desde isomericSmiles de la base de datos."
             );
-            dto.setRepresentationInput(molecula.getIsomericSmiles());
-            dto.setRepresentationInputSource("CARD_ISOMERIC_SMILES");
-            dto.setRepresentationInputReason("Representación aislada de tarjeta: isomericSmiles de la base de datos.");
-            return dto;
         }
 
         if (tieneTexto(molecula.getImagen2d())) {
@@ -77,6 +69,38 @@ public class MoleculeCardRepresentationService {
         }
 
         return MoleculaRepresentacionDTO.formula(formula);
+    }
+
+    private MoleculaRepresentacionDTO crearDesdeSmiles(
+            String formula,
+            String smiles,
+            String source,
+            String reason
+    ) {
+        Optional<String> svg = smilesToSvgService.renderSvg(smiles);
+        if (svg.isPresent()) {
+            MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.svg(
+                    formula,
+                    svg.get(),
+                    "CDK_SVG",
+                    reason
+            );
+            dto.setRepresentationInput(smiles);
+            dto.setRepresentationInputSource(source);
+            dto.setRepresentationInputReason(reason);
+            return dto;
+        }
+
+        MoleculaRepresentacionDTO fallback = MoleculaRepresentacionDTO.smiles(
+                formula,
+                smiles,
+                smiles,
+                null
+        );
+        fallback.setRepresentationInput(smiles);
+        fallback.setRepresentationInputSource(source + "_FALLBACK_SMILES");
+        fallback.setRepresentationInputReason("CDK no pudo generar SVG. Se conserva SMILES como fallback temporal.");
+        return fallback;
     }
 
     private String limpiar(String value) {
