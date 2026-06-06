@@ -40,6 +40,12 @@ src/main/java/org/chemistrylab
 │   │   └── IonConfig
 │   ├── connectivity
 │   │   ├── rules
+│   │   │   ├── CovalentX2OConnectivityRule
+│   │   │   ├── DiatomicConnectivityRule
+│   │   │   ├── HydrogenPeroxideConnectivityRule
+│   │   │   ├── MolecularConnectivityContext
+│   │   │   ├── MolecularConnectivityRule
+│   │   │   └── NitrogenDioxideConnectivityRule
 │   │   ├── MolecularBond
 │   │   ├── MolecularConnectivity
 │   │   └── MolecularConnectivityService
@@ -200,10 +206,6 @@ RepresentationFamily
 RepresentationStrategy
 ImageRepresentationSource
 EstadoOxidacionEntity
-MolecularConnectivityService
-MolecularConnectivity
-MolecularBond
-chemistry.connectivity.rules.*
 ```
 
 ## Candidatos fuertes a borrar
@@ -219,6 +221,10 @@ EnlaceRepresentacionDTO
 chemistry.smiles.SmilesGenerationService
 chemistry.smiles.SmilesGenerationResult
 chemistry.formula.IonicFormulaResolution
+MolecularConnectivityService
+MolecularConnectivity
+MolecularBond
+chemistry.connectivity.rules.*
 ```
 
 ---
@@ -273,20 +279,8 @@ Estado: revisado.
 Hallazgo:
 
 - Es el motor viejo de representación.
-- Mezcla demasiadas decisiones:
-  - family classification;
-  - orgánicas por entrada química;
-  - sales/ácidos/hidróxidos/óxidos metálicos por representación iónica;
-  - estructura 2D interna;
-  - VSEPR;
-  - fórmula fallback.
-- Depende de muchos servicios antiguos:
-  - `Estructura2DService`;
-  - `MoleculaRepresentacionIonicaService`;
-  - `MoleculaRepresentacionVseprService`;
-  - `RepresentationInputService`;
-  - `RepresentationSmilesOverrideService`;
-  - classification services.
+- Mezcla demasiadas decisiones: classification, orgánicas por entrada química, sales/ácidos/hidróxidos/óxidos metálicos por representación iónica, estructura 2D interna, VSEPR y fórmula fallback.
+- Depende de `Estructura2DService`, `MoleculaRepresentacionIonicaService`, `MoleculaRepresentacionVseprService`, `RepresentationInputService`, `RepresentationSmilesOverrideService` y classification services.
 
 Decisión:
 
@@ -327,9 +321,7 @@ Estado: árbol identificado.
 
 Hallazgo:
 
-- Hay dos posibles capas de decisión:
-  - `MoleculeCardRepresentationService`, más simple y actual.
-  - `RepresentationDecisionService` + enums/modelos, posiblemente refactor intermedio.
+- Hay dos posibles capas de decisión: `MoleculeCardRepresentationService`, más simple y actual, y `RepresentationDecisionService` + enums/modelos, posiblemente refactor intermedio.
 
 Decisión:
 
@@ -343,11 +335,7 @@ Hallazgo:
 
 - Clase muy pequeña.
 - No tiene `@Service`.
-- Decide por `RepresentationFamily`:
-  - sales binarias, hidróxidos, oxisales y oxisales ácidas -> `EDUCATIONAL_CANDIDATE`;
-  - complejos y organofosfatos -> `SPECIAL_CASE`;
-  - desconocida -> `FALLBACK`;
-  - resto -> `DIRECT_SMILES`.
+- Decide por `RepresentationFamily`: sales binarias, hidróxidos, oxisales y oxisales ácidas -> `EDUCATIONAL_CANDIDATE`; complejos y organofosfatos -> `SPECIAL_CASE`; desconocida -> `FALLBACK`; resto -> `DIRECT_SMILES`.
 
 Decisión:
 
@@ -376,12 +364,7 @@ Estado: revisado.
 Hallazgo:
 
 - Es el flujo actual de tarjeta.
-- Orden:
-  1. `RepresentationSmilesOverrideService.findOverride(formula)`;
-  2. `IonicSmilesBuilderService.build(formula)`;
-  3. `canonicalSmiles` o `isomericSmiles`;
-  4. `imagen2d` PubChem;
-  5. fórmula.
+- Orden: `RepresentationSmilesOverrideService`, `IonicSmilesBuilderService`, canonical/isomeric SMILES, imagen PubChem, fórmula.
 - Genera SVG mediante `SmilesToSvgService.renderSvg(smiles)`.
 - No usa `RepresentationInputService`, aunque duplica parte de su lógica.
 
@@ -428,10 +411,7 @@ Hallazgo:
 
 - Construye conectividad molecular desde fórmula visual.
 - Usa `FormulaParserService`, `ElementoRepository` y una lista de `MolecularConnectivityRule`.
-- Solo acepta moléculas covalentes pequeñas:
-  - 2 o 3 tipos de átomos;
-  - máximo 6 átomos totales;
-  - todos no metales/metaloides.
+- Solo acepta moléculas covalentes pequeñas: 2 o 3 tipos de átomos, máximo 6 átomos totales y todos no metales/metaloides.
 - Intenta aplicar reglas específicas primero.
 - Si ninguna regla aplica, elige átomo central, terminales, órdenes de enlace y pares libres.
 - Su salida es `MolecularConnectivity`, con átomo central, lista de `MolecularBond` y lonePairs.
@@ -448,11 +428,42 @@ Estado: revisado.
 
 Hallazgo:
 
-- Son modelos simples:
-  - `MolecularConnectivity`: central, bonds, lonePairs.
-  - `MolecularBond`: from, to, order.
+- Son modelos simples: `MolecularConnectivity` tiene central, bonds y lonePairs; `MolecularBond` tiene from, to y order.
 - No contienen lógica.
 
 Decisión:
 
 - Borrables si se borra `MolecularConnectivityService` y `Estructura2DService`.
+
+## Barrida 14 - chemistry.connectivity.rules
+
+Estado: revisado.
+
+Clases revisadas:
+
+- `MolecularConnectivityRule`
+- `MolecularConnectivityContext`
+- `DiatomicConnectivityRule`
+- `HydrogenPeroxideConnectivityRule`
+- `NitrogenDioxideConnectivityRule`
+- `CovalentX2OConnectivityRule`
+
+Hallazgo:
+
+- Todas pertenecen al motor manual de conectividad.
+- `MolecularConnectivityRule` solo define `tryBuild(context)`.
+- `MolecularConnectivityContext` solo transporta `formulaVisual`, `atomosFormula` y `elementos`.
+- `DiatomicConnectivityRule` construye enlaces para moléculas de 2 átomos y trata CO como triple enlace.
+- `HydrogenPeroxideConnectivityRule` fuerza H-O-O-H.
+- `NitrogenDioxideConnectivityRule` fuerza NO2 con N central y dos oxígenos.
+- `CovalentX2OConnectivityRule` intenta representar fórmulas X2O con enlace X-X y X-O.
+- Lo interesante de estas reglas no es la conectividad manual, sino que confirman qué casos deberían estar en educational overrides:
+  - CO
+  - H2O2
+  - NO2
+  - posibles X2O/N2O
+
+Decisión:
+
+- Marcar `chemistry.connectivity.rules.*` como candidato fuerte a borrar junto con `MolecularConnectivityService` y `Estructura2DService`.
+- Rescatar antes sus casos como entradas de `RepresentationSmilesOverrideService`.
