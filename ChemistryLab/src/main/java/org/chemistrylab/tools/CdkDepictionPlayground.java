@@ -23,16 +23,20 @@ public class CdkDepictionPlayground {
     private static final Path CDK_DIR = OUTPUT_ROOT.resolve("cdk");
     private static final Path OPENBABEL_DIR = OUTPUT_ROOT.resolve("openbabel");
     private static final Path RDKIT_DIR = OUTPUT_ROOT.resolve("rdkit");
+    private static final Path INDIGO_DIR = OUTPUT_ROOT.resolve("indigo");
     private static final Path RDKIT_SCRIPT = Path.of("tools", "rdkit_depiction_generator.py");
+    private static final Path INDIGO_SCRIPT = Path.of("tools", "indigo_depiction_generator.py");
 
     public static void main(String[] args) throws IOException {
         Files.createDirectories(CDK_DIR);
         Files.createDirectories(OPENBABEL_DIR);
         Files.createDirectories(RDKIT_DIR);
+        Files.createDirectories(INDIGO_DIR);
 
         List<TestMolecule> molecules = testMolecules();
         boolean openBabelAvailable = isCommandAvailable("obabel", "-V");
-        boolean rdkitAvailable = runRdkitGenerator();
+        boolean rdkitAvailable = runPythonGenerator(RDKIT_SCRIPT, RDKIT_DIR, 60);
+        boolean indigoAvailable = runPythonGenerator(INDIGO_SCRIPT, INDIGO_DIR, 60);
 
         for (TestMolecule molecule : molecules) {
             String filename = slug(molecule.name()) + ".svg";
@@ -53,13 +57,14 @@ public class CdkDepictionPlayground {
             }
         }
 
-        String comparison = buildComparisonReport(molecules, openBabelAvailable, rdkitAvailable);
+        String comparison = buildComparisonReport(molecules, openBabelAvailable, rdkitAvailable, indigoAvailable);
         Files.writeString(OUTPUT_ROOT.resolve("comparison.html"), comparison, StandardCharsets.UTF_8);
         Files.writeString(OUTPUT_ROOT.resolve("report.html"), comparison, StandardCharsets.UTF_8);
 
         System.out.println("Generado: depiction-test-output/comparison.html");
         System.out.println("OpenBabel detectado: " + openBabelAvailable);
         System.out.println("RDKit detectado: " + rdkitAvailable);
+        System.out.println("Indigo detectado: " + indigoAvailable);
     }
 
     private static List<TestMolecule> testMolecules() {
@@ -136,8 +141,7 @@ public class CdkDepictionPlayground {
     private static void generateOpenBabelSvg(String smiles, Path outputFile) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder(
                 "obabel",
-                "-ismi",
-                "-:",
+                "-:" + smiles,
                 "-O",
                 outputFile.toString(),
                 "--gen2d"
@@ -145,9 +149,6 @@ public class CdkDepictionPlayground {
         processBuilder.redirectErrorStream(true);
 
         Process process = processBuilder.start();
-        process.getOutputStream().write(smiles.getBytes(StandardCharsets.UTF_8));
-        process.getOutputStream().close();
-
         boolean finished = process.waitFor(20, TimeUnit.SECONDS);
 
         if (!finished) {
@@ -160,25 +161,27 @@ public class CdkDepictionPlayground {
         }
     }
 
-    private static boolean runRdkitGenerator() {
-        if (!Files.exists(RDKIT_SCRIPT)) {
+    private static boolean runPythonGenerator(Path script, Path outputDir, int timeoutSeconds) {
+        if (!Files.exists(script)) {
             return false;
         }
 
-        return runPythonRdkit("python") || runPythonRdkit("python3") || runPythonRdkit("py");
+        return runPythonGenerator("python", script, outputDir, timeoutSeconds)
+                || runPythonGenerator("python3", script, outputDir, timeoutSeconds)
+                || runPythonGenerator("py", script, outputDir, timeoutSeconds);
     }
 
-    private static boolean runPythonRdkit(String pythonCommand) {
+    private static boolean runPythonGenerator(String pythonCommand, Path script, Path outputDir, int timeoutSeconds) {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(
                     pythonCommand,
-                    RDKIT_SCRIPT.toString(),
+                    script.toString(),
                     "--out",
-                    RDKIT_DIR.toString()
+                    outputDir.toString()
             );
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
-            boolean finished = process.waitFor(60, TimeUnit.SECONDS);
+            boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
 
             if (!finished) {
                 process.destroyForcibly();
@@ -203,7 +206,7 @@ public class CdkDepictionPlayground {
         }
     }
 
-    private static String buildComparisonReport(List<TestMolecule> molecules, boolean openBabelAvailable, boolean rdkitAvailable) {
+    private static String buildComparisonReport(List<TestMolecule> molecules, boolean openBabelAvailable, boolean rdkitAvailable, boolean indigoAvailable) {
         StringBuilder report = new StringBuilder();
         report.append("<!doctype html><html><head><meta charset='UTF-8'><title>Unified depiction comparison</title>")
                 .append("<script src='https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js'></script>")
@@ -223,7 +226,7 @@ public class CdkDepictionPlayground {
                 .append("code{font-size:12px;word-break:break-all;display:block;background:#f3f4f6;border-radius:8px;padding:8px;margin-top:10px;}")
                 .append(".note{font-size:13px;line-height:1.35;color:#374151;margin-top:10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px;}")
                 .append("</style></head><body><h1>Unified depiction comparison</h1>")
-                .append("<p class='intro'>Una tarjeta por molécula y una columna por motor. CDK genera SVG desde Java. SmilesDrawer se dibuja en el navegador usando el mismo SMILES. OpenBabel se genera si existe el comando obabel en PATH. RDKit se genera si existe Python con rdkit instalado. Indigo queda preparado para añadir su salida al mismo informe.</p>");
+                .append("<p class='intro'>Una tarjeta por molécula y una columna por motor. CDK genera SVG desde Java. SmilesDrawer se dibuja en el navegador usando el mismo SMILES. OpenBabel se genera si existe el comando obabel en PATH. RDKit e Indigo se generan si existe Python con sus librerías instaladas.</p>");
 
         for (int i = 0; i < molecules.size(); i++) {
             TestMolecule molecule = molecules.get(i);
@@ -253,7 +256,11 @@ public class CdkDepictionPlayground {
                 appendPlaceholder(report, "RDKit", "No detectado. Instala Python con rdkit o ejecuta tools/rdkit_depiction_generator.py manualmente.");
             }
 
-            appendPlaceholder(report, "Indigo", "Pendiente: requiere dependencia Java/Python.");
+            if (indigoAvailable) {
+                appendEngineWithImage(report, "Indigo", "indigo/" + filename, molecule.smiles(), "SVG generado por Python/Indigo desde el mismo SMILES.");
+            } else {
+                appendPlaceholder(report, "Indigo", "No detectado. Instala epam.indigo o ejecuta tools/indigo_depiction_generator.py manualmente.");
+            }
 
             report.append("</div></section>");
         }
