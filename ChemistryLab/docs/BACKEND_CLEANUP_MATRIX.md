@@ -279,11 +279,11 @@ No es una representación de enlace real perfecta, pero es mejor para una tarjet
 
 | Clase | Paquete | Estado | Qué hace | Decisión |
 |---|---|---|---|---|
-| MoleculeCardRepresentationService | service | MANTENER | Entrada limpia para representación de tarjeta. | Debe ser la única vía principal. |
+| MoleculeCardRepresentationService | service | MANTENER / REVISAR | Entrada limpia actual para representación de tarjeta. Actualmente hace override educational -> ionic builder -> SMILES BD -> PubChem -> fórmula. | Mantener como entrada única, pero revisar si debe usar `RepresentationInputService` para registrar origen de SMILES. |
 | SmilesToSvgService | representation | MANTENER | Convierte SMILES a SVG con CDK. | Mantener. |
 | RepresentationSmilesOverrideService | representation | MANTENER / PRIORIDAD | Capa `educational`: overrides de fórmula a SMILES curado. | Ampliar y convertir en pieza central. |
-| IonicSmilesBuilderService | representation | TEMPORAL / REVISAR | Construye SMILES desde fórmula iónica. | Mantener solo si genera SMILES visuales compactos; no usar disociación fea. |
-| RepresentationInputService | representation | REVISAR | Decide qué input químico usar: canonical SMILES, isomeric SMILES o InChI. | Probablemente útil, pero la vía nueva puede hacerlo más simple. Revisar si se reutiliza. |
+| IonicSmilesBuilderService | representation | TEMPORAL / REVISAR | Construye SMILES desde fórmula iónica. Tiene parte compacta para sales/hidróxidos/óxidos simples y oxoaniones, pero aún puede generar fragmentos separados. | Mantener temporalmente; limitar o reescribir según pruebas visuales. |
+| RepresentationInputService | representation | REVISAR | Decide qué input químico usar: canonical SMILES, isomeric SMILES o InChI. | Útil conceptualmente, pero ahora mismo `MoleculeCardRepresentationService` replica parte de su trabajo. Fusionar o usar, no duplicar. |
 | RepresentationInputResult | representation | REVISAR | Resultado de decidir el input de representación. | Mantener solo si `RepresentationInputService` queda. |
 | RepresentationInputSource | representation | REVISAR | Enum de origen del input: canonical, isomeric, InChI, etc. | Mantener solo si `RepresentationInputService` queda. |
 | RepresentationDecisionService | representation | REVISAR / POSIBLE BORRAR | Decide estrategia por familia: educational candidate, special case, fallback o direct smiles. Actualmente es muy pequeño y no está anotado como `@Service`. | Puede borrarse si no se usa; su lógica puede integrarse en `MoleculeCardRepresentationService`. |
@@ -574,3 +574,72 @@ Decisión:
 - Candidato a borrar si nadie lo usa.
 - Alternativa: implementarlo de verdad más adelante si se quiere convertir InChI a SMILES.
 - No depende de la representación visual actual.
+
+## Barrida 9 - MoleculeCardRepresentationService
+
+Estado: revisado.
+
+Hallazgo:
+
+- Es el flujo actual de tarjeta.
+- Obtiene molécula por id.
+- Usa este orden:
+  1. `RepresentationSmilesOverrideService.findOverride(formula)`;
+  2. `IonicSmilesBuilderService.build(formula)`;
+  3. `canonicalSmiles` o `isomericSmiles`;
+  4. `imagen2d` PubChem;
+  5. fórmula.
+- Genera SVG mediante `SmilesToSvgService.renderSvg(smiles)`.
+- Rellena metadatos `representationInput`, `representationInputSource` y `representationInputReason`.
+- No usa `RepresentationInputService`, aunque duplica parte de su lógica.
+
+Decisión:
+
+- Mantener como entrada principal.
+- Simplificar después para evitar duplicar `RepresentationInputService`, o borrar `RepresentationInputService` si no aporta nada.
+- El problema visual actual no está aquí, sino en qué SMILES devuelven `RepresentationSmilesOverrideService` e `IonicSmilesBuilderService`.
+
+## Barrida 10 - RepresentationInputService
+
+Estado: revisado.
+
+Hallazgo:
+
+- Servicio simple y correcto.
+- Decide input por orden:
+  1. canonicalSmiles;
+  2. isomericSmiles;
+  3. inchi;
+  4. unknown.
+- Devuelve también origen y motivo.
+- No convierte InChI a SMILES; solo lo deja como input.
+
+Decisión:
+
+- Conceptualmente útil para trazabilidad.
+- Ahora mismo `MoleculeCardRepresentationService` no lo usa.
+- Decidir entre:
+  - incorporarlo al flujo actual para evitar duplicación;
+  - borrarlo junto con `RepresentationInputResult` y `RepresentationInputSource`.
+
+## Barrida 11 - IonicSmilesBuilderService
+
+Estado: revisado.
+
+Hallazgo:
+
+- Usa `IonicFormulaResolver` para obtener catión/anión.
+- Tiene una tabla de oxoaniones:
+  - `NO3`, `SO4`, `CO3`, `PO4`, `ClO4`, `Cr2O7`, etc.
+- Tiene generación compacta para:
+  - sales monoatómicas;
+  - hidróxidos;
+  - óxidos;
+  - cianuros.
+- Para oxoaniones, genera el anión y después añade cationes como fragmentos separados con punto (`.`), lo que todavía puede provocar que CDK coloque iones alejados.
+
+Decisión:
+
+- Mantener temporalmente.
+- Evitar usarlo como solución genérica para todas las sales hasta que los resultados visuales sean mejores.
+- Las sales/hidróxidos más importantes deberían pasar primero por `RepresentationSmilesOverrideService` con overrides educational específicos.
