@@ -325,6 +325,81 @@
     display: block;
 }
 
+.molecule-image-box canvas {
+    transform: scale(1.08) translateY(-4px);
+    transform-origin: center center;
+}
+
+.formula-structure-html {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.formula-bg-html {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.external-image-structure-html {
+    padding: 12px;
+}
+
+.external-molecule-image,
+.pubchem-structure-img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 88%;
+    height: 88%;
+    max-width: 88%;
+    max-height: 88%;
+    object-fit: contain;
+    object-position: center center;
+    mix-blend-mode: multiply;
+}
+
+.formula-big-html,
+.formula-ion-view-html {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 92px;
+    padding: 16px;
+    color: #142033;
+    text-align: center;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.formula-big-html {
+    font-size: 22px;
+}
+
+.formula-ion-view-html {
+    font-size: 20px;
+}
+
+.formula-caption-html {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 18px;
+    z-index: 1;
+    color: #334155;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+}
+
 .molecule-main-info {
     text-align: center;
 }
@@ -674,6 +749,7 @@
     box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.85),
             0 8px 18px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
 }
 
 .molecule-detail-text-card-header {
@@ -1200,13 +1276,6 @@
             radial-gradient(circle at center, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.82));
 }
 
-.pubchem-structure-img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    mix-blend-mode: multiply;
-}
 /* VSEPR / generated 2D structure */
 
 .vsepr-bond {
