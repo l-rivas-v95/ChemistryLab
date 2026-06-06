@@ -195,7 +195,6 @@ MoleculeCardRepresentationService
 ## Revisar antes de decidir
 
 ```text
-MoleculaFormulaService
 IonicSmilesBuilderService
 RepresentationInputService
 RepresentationInputResult
@@ -211,6 +210,7 @@ EstadoOxidacionEntity
 ## Candidatos fuertes a borrar
 
 ```text
+MoleculaFormulaService
 MoleculaRepresentacionService
 MoleculaRepresentacionIonicaService
 MoleculaRepresentacionVseprService
@@ -285,7 +285,7 @@ Hallazgo:
 Decisión:
 
 - No debe alimentar la tarjeta actual.
-- Si `MoleculaController` ya usa `MoleculeCardRepresentationService`, esta clase queda como candidata clara a borrar.
+- `MoleculaController` ya usa `MoleculeCardRepresentationService` para `/api/moleculas/{id}/representacion`, así que esta clase queda como candidata clara a borrar si no hay otros usos.
 
 ## Barrida 4 - Árbol real del backend
 
@@ -420,7 +420,6 @@ Hallazgo:
 Decisión:
 
 - Candidato a borrar si se elimina `Estructura2DService`.
-- Antes de borrar, revisar reglas en `chemistry.connectivity.rules.*`, porque podrían contener casos explícitos útiles, aunque probablemente estén orientadas al motor manual.
 
 ## Barrida 13 - MolecularConnectivity y MolecularBond
 
@@ -451,12 +450,6 @@ Clases revisadas:
 Hallazgo:
 
 - Todas pertenecen al motor manual de conectividad.
-- `MolecularConnectivityRule` solo define `tryBuild(context)`.
-- `MolecularConnectivityContext` solo transporta `formulaVisual`, `atomosFormula` y `elementos`.
-- `DiatomicConnectivityRule` construye enlaces para moléculas de 2 átomos y trata CO como triple enlace.
-- `HydrogenPeroxideConnectivityRule` fuerza H-O-O-H.
-- `NitrogenDioxideConnectivityRule` fuerza NO2 con N central y dos oxígenos.
-- `CovalentX2OConnectivityRule` intenta representar fórmulas X2O con enlace X-X y X-O.
 - Lo interesante de estas reglas no es la conectividad manual, sino que confirman qué casos deberían estar en educational overrides: CO, H2O2, NO2 y posibles X2O/N2O.
 
 Decisión:
@@ -472,19 +465,12 @@ Hallazgo:
 
 - No genera estructuras ni SVG. Genera texto iónico tipo `Na⁺ + Cl⁻`, `Ca²⁺ + 2OH⁻`, `2H⁺ + CO3²⁻`.
 - Usa `IonicFormulaResolver`, `IonCatalogService`, `FormulaParserService` y `ElementoRepository`.
-- Contiene varios casos manuales:
-  - ácido carbónico -> `2H⁺ + CO3²⁻`;
-  - ácido bórico -> `B(OH)3`;
-  - hidróxido de aluminio -> `Al³⁺ + 3OH⁻`;
-  - hidróxido amónico -> `NH4⁺ + OH⁻`;
-  - dióxido de titanio -> `Ti⁴⁺ + 2O²⁻`;
-  - fosfatos y fosfatos ácidos.
+- Contiene varios casos manuales: ácido carbónico, ácido bórico, hidróxido de aluminio, hidróxido amónico, dióxido de titanio, fosfatos y fosfatos ácidos.
 
 Decisión:
 
 - Candidata a borrar del flujo de representación visual.
 - Puede tener valor si se quiere mostrar una explicación textual de disociación iónica en una ficha educativa, pero no debe alimentar tarjetas.
-- Si se borra, revisar antes si algún texto útil se quiere conservar en otro servicio educativo.
 
 ## Barrida 16 - MoleculaRepresentacionVseprService
 
@@ -493,14 +479,7 @@ Estado: revisado.
 Hallazgo:
 
 - Depende directamente de `MolecularConnectivityService`.
-- Construye un DTO VSEPR con:
-  - átomo central;
-  - terminales;
-  - enlaces;
-  - pares libres;
-  - código AXE;
-  - geometría;
-  - polaridad.
+- Construye un DTO VSEPR con átomo central, terminales, enlaces, pares libres, código AXE, geometría y polaridad.
 - Geometrías soportadas: lineal, angular, trigonal plana, piramidal trigonal y tetraédrica.
 - No genera SMILES ni SVG CDK.
 
@@ -526,3 +505,34 @@ Decisión:
 
 - Candidata muy fuerte a borrar.
 - No rescatar para tarjetas. Los óxidos deben pasar por `RepresentationSmilesOverrideService`, `IonicSmilesBuilderService` limitado, SMILES de BD o imagen PubChem.
+
+## Barrida 18 - MoleculaFormulaService
+
+Estado: revisado.
+
+Hallazgo:
+
+- Clase mínima.
+- Solo inyecta `FormulaParserService` y expone `obtenerFormulaVisible(nombre, formula)`, que devuelve `formulaParserService.normalizarFormulaVisual(formula)`.
+- El parámetro `nombre` ni siquiera se usa.
+- La búsqueda no muestra usos relevantes.
+
+Decisión:
+
+- Candidata fuerte a borrar.
+- Sustituir llamadas, si existen, por `FormulaParserService.normalizarFormulaVisual(formula)` directamente.
+
+## Barrida 19 - MoleculaController
+
+Estado: revisado.
+
+Hallazgo:
+
+- El endpoint `/api/moleculas/{id}/representacion` ya usa `MoleculeCardRepresentationService`.
+- No inyecta `MoleculaRepresentacionService`.
+- Esto confirma que el motor viejo de representación ya no alimenta el endpoint principal.
+
+Decisión:
+
+- Mantener controller.
+- Usarlo como prueba de que `MoleculaRepresentacionService` y dependencias antiguas se pueden empezar a aislar/borrar si no hay otros usos.
