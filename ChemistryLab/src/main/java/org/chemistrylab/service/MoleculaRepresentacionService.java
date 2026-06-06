@@ -10,6 +10,7 @@ import org.chemistrylab.repository.MoleculaRepository;
 import org.chemistrylab.representation.RepresentationInputResult;
 import org.chemistrylab.representation.RepresentationInputService;
 import org.chemistrylab.representation.RepresentationInputSource;
+import org.chemistrylab.representation.RepresentationSmilesOverrideService;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -27,6 +28,7 @@ public class MoleculaRepresentacionService {
     private final CompoundFamilyService compoundFamilyService;
     private final CompoundTypeLabelService compoundTypeLabelService;
     private final RepresentationInputService representationInputService;
+    private final RepresentationSmilesOverrideService representationSmilesOverrideService;
 
     public MoleculaRepresentacionService(
             MoleculaRepository moleculaRepository,
@@ -36,7 +38,8 @@ public class MoleculaRepresentacionService {
             MoleculaRepresentacionVseprService moleculaRepresentacionVseprService,
             CompoundFamilyService compoundFamilyService,
             CompoundTypeLabelService compoundTypeLabelService,
-            RepresentationInputService representationInputService
+            RepresentationInputService representationInputService,
+            RepresentationSmilesOverrideService representationSmilesOverrideService
     ) {
         this.moleculaRepository = moleculaRepository;
         this.formulaParserService = formulaParserService;
@@ -46,6 +49,7 @@ public class MoleculaRepresentacionService {
         this.compoundFamilyService = compoundFamilyService;
         this.compoundTypeLabelService = compoundTypeLabelService;
         this.representationInputService = representationInputService;
+        this.representationSmilesOverrideService = representationSmilesOverrideService;
     }
 
     public MoleculaRepresentacionDTO obtenerRepresentacion(Long id) {
@@ -107,6 +111,20 @@ public class MoleculaRepresentacionService {
     }
 
     private MoleculaRepresentacionDTO intentarConstruirDesdeEntradaQuimica(MoleculaEntity molecula, String formulaVisual) {
+        Optional<String> override = representationSmilesOverrideService.findOverride(formulaVisual);
+        if (override.isPresent()) {
+            MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.smiles(
+                    formulaVisual,
+                    override.get(),
+                    molecula.getIsomericSmiles(),
+                    molecula.getImagen2d()
+            );
+            dto.setRepresentationInput(override.get());
+            dto.setRepresentationInputSource("CURATED_SMILES_OVERRIDE");
+            dto.setRepresentationInputReason("SMILES curado para representación visual educativa a partir de la fórmula.");
+            return dto;
+        }
+
         RepresentationInputResult input = representationInputService.resolveInput(
                 molecula.getCanonicalSmiles(),
                 molecula.getIsomericSmiles(),
@@ -114,6 +132,19 @@ public class MoleculaRepresentacionService {
         );
 
         if (!input.hasValue()) {
+            return null;
+        }
+
+        if (input.getSource() == RepresentationInputSource.INCHI) {
+            if (molecula.getImagen2d() != null && !molecula.getImagen2d().isBlank()) {
+                MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.imagenExterna(
+                        formulaVisual,
+                        molecula.getImagen2d(),
+                        "No hay SMILES dibujable. Se usa imagen 2D externa antes de caer a fórmula."
+                );
+                completarEntradaRepresentacion(dto, input);
+                return dto;
+            }
             return null;
         }
 
