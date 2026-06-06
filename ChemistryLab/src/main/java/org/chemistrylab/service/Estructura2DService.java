@@ -1,89 +1,190 @@
 package org.chemistrylab.service;
 
+import lombok.RequiredArgsConstructor;
+import org.chemistrylab.chemistry.connectivity.MolecularBond;
+import org.chemistrylab.chemistry.connectivity.MolecularConnectivity;
+import org.chemistrylab.chemistry.connectivity.MolecularConnectivityService;
 import org.chemistrylab.dto.AtomoRepresentacionDTO;
 import org.chemistrylab.dto.EnlaceRepresentacionDTO;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class Estructura2DService {
 
+    private final MolecularConnectivityService molecularConnectivityService;
+
     public Optional<MoleculaRepresentacionDTO> intentarConstruir(String formulaVisual) {
-        Map<String, Integer> composicion = new java.util.HashMap<>();
-        composicion.putAll(parsearFormulaSimple(formulaVisual));
-
-        if (esComposicion(composicion, "H", 2, "O", 2)) {
-            return Optional.of(peroxidoHidrogeno(formulaVisual));
-        }
-
-        return Optional.empty();
+        return molecularConnectivityService.construir(formulaVisual)
+                .filter(this::esCadenaRepresentable)
+                .map(connectivity -> construirEstructura(formulaVisual, connectivity));
     }
 
-    private MoleculaRepresentacionDTO peroxidoHidrogeno(String formulaVisual) {
+    private boolean esCadenaRepresentable(MolecularConnectivity connectivity) {
+        return connectivity.getBonds() != null
+                && connectivity.getBonds().size() >= 2;
+    }
+
+    private MoleculaRepresentacionDTO construirEstructura(
+            String formulaVisual,
+            MolecularConnectivity connectivity
+    ) {
+        if (esPeroxidoDeHidrogeno(formulaVisual, connectivity)) {
+            return construirPeroxidoDeHidrogeno(formulaVisual);
+        }
+
+        return construirCadenaSimple(formulaVisual, connectivity);
+    }
+
+    private MoleculaRepresentacionDTO construirPeroxidoDeHidrogeno(String formulaVisual) {
         List<AtomoRepresentacionDTO> atomos = List.of(
-                new AtomoRepresentacionDTO("H1", "H", 45, 95, null, 0),
-                new AtomoRepresentacionDTO("O1", "O", 95, 70, null, 2),
-                new AtomoRepresentacionDTO("O2", "O", 165, 70, null, 2),
-                new AtomoRepresentacionDTO("H2", "H", 215, 95, null, 0)
+                new AtomoRepresentacionDTO("H0", "H", 72, 58, null, 0),
+                new AtomoRepresentacionDTO("O1", "O", 112, 78, null, 2),
+                new AtomoRepresentacionDTO("O2", "O", 148, 102, null, 2),
+                new AtomoRepresentacionDTO("H3", "H", 188, 82, null, 0)
         );
 
         List<EnlaceRepresentacionDTO> enlaces = List.of(
-                new EnlaceRepresentacionDTO("H1", "O1", 1),
+                new EnlaceRepresentacionDTO("H0", "O1", 1),
                 new EnlaceRepresentacionDTO("O1", "O2", 1),
-                new EnlaceRepresentacionDTO("O2", "H2", 1)
+                new EnlaceRepresentacionDTO("O2", "H3", 1)
         );
 
         return MoleculaRepresentacionDTO.estructura2d(
                 formulaVisual,
                 atomos,
                 enlaces,
-                "H—O—O—H",
+                null,
                 "Polar"
         );
     }
 
-    private Map<String, Integer> parsearFormulaSimple(String formula) {
-        Map<String, Integer> resultado = new java.util.LinkedHashMap<>();
-
-        if (formula == null || formula.isBlank()) {
-            return resultado;
+    private boolean esPeroxidoDeHidrogeno(String formulaVisual, MolecularConnectivity connectivity) {
+        if ("H2O2".equals(normalizarFormula(formulaVisual))) {
+            return true;
         }
 
-        java.util.regex.Matcher matcher = java.util.regex.Pattern
-                .compile("([A-Z][a-z]?)(\\d*)")
-                .matcher(formula);
+        long enlacesOxigenoOxigeno = connectivity.getBonds().stream()
+                .filter(bond -> "O".equals(bond.getFrom()) && "O".equals(bond.getTo()))
+                .count();
 
-        while (matcher.find()) {
-            String simbolo = matcher.group(1);
-            String cantidadTexto = matcher.group(2);
+        long enlacesHidrogenoOxigeno = connectivity.getBonds().stream()
+                .filter(bond -> ("H".equals(bond.getFrom()) && "O".equals(bond.getTo()))
+                        || ("O".equals(bond.getFrom()) && "H".equals(bond.getTo())))
+                .count();
 
-            int cantidad = cantidadTexto == null || cantidadTexto.isBlank()
-                    ? 1
-                    : Integer.parseInt(cantidadTexto);
-
-            resultado.put(simbolo, resultado.getOrDefault(simbolo, 0) + cantidad);
-        }
-
-        return resultado;
+        return enlacesOxigenoOxigeno == 1 && enlacesHidrogenoOxigeno == 2;
     }
 
-    private boolean esComposicion(Map<String, Integer> atomos, Object... pares) {
-        if (atomos == null || pares == null || pares.length % 2 != 0) {
-            return false;
+    private MoleculaRepresentacionDTO construirCadenaSimple(
+            String formulaVisual,
+            MolecularConnectivity connectivity
+    ) {
+        List<MolecularBond> bonds = connectivity.getBonds();
+        List<String> simbolosOrdenados = construirSimbolosOrdenados(bonds);
+        List<AtomoRepresentacionDTO> atomos = new ArrayList<>();
+        List<EnlaceRepresentacionDTO> enlaces = new ArrayList<>();
+        Map<Integer, String> idsPorIndice = new LinkedHashMap<>();
+
+        int stepX = 48;
+        int startX = 130 - ((simbolosOrdenados.size() - 1) * stepX) / 2;
+        int y = 78;
+
+        for (int i = 0; i < simbolosOrdenados.size(); i++) {
+            String simbolo = simbolosOrdenados.get(i);
+            String id = crearId(simbolo, i);
+            idsPorIndice.put(i, id);
+
+            atomos.add(new AtomoRepresentacionDTO(
+                    id,
+                    simbolo,
+                    startX + i * stepX,
+                    y,
+                    null,
+                    obtenerParesLibres(simbolo, connectivity)
+            ));
         }
 
-        Map<String, Integer> esperada = new java.util.HashMap<>();
+        for (int i = 0; i < bonds.size(); i++) {
+            MolecularBond bond = bonds.get(i);
 
-        for (int i = 0; i < pares.length; i += 2) {
-            String simbolo = (String) pares[i];
-            Integer cantidad = (Integer) pares[i + 1];
-            esperada.put(simbolo, cantidad);
+            enlaces.add(new EnlaceRepresentacionDTO(
+                    idsPorIndice.get(i),
+                    idsPorIndice.get(i + 1),
+                    bond.getOrder()
+            ));
         }
 
-        return atomos.equals(esperada);
+        return MoleculaRepresentacionDTO.estructura2d(
+                formulaVisual,
+                atomos,
+                enlaces,
+                null,
+                "Polar"
+        );
+    }
+
+    private List<String> construirSimbolosOrdenados(List<MolecularBond> bonds) {
+        List<String> simbolos = new ArrayList<>();
+
+        if (bonds.isEmpty()) {
+            return simbolos;
+        }
+
+        simbolos.add(bonds.get(0).getFrom());
+
+        for (MolecularBond bond : bonds) {
+            simbolos.add(bond.getTo());
+        }
+
+        return simbolos;
+    }
+
+    private int obtenerParesLibres(String simbolo, MolecularConnectivity connectivity) {
+        if (simbolo.equals(connectivity.getCentral())) {
+            return connectivity.getLonePairs();
+        }
+
+        if ("O".equals(simbolo)) {
+            return 2;
+        }
+
+        if ("N".equals(simbolo)) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private String normalizarFormula(String formula) {
+        if (formula == null) {
+            return "";
+        }
+
+        return formula
+                .replace("₀", "0")
+                .replace("₁", "1")
+                .replace("₂", "2")
+                .replace("₃", "3")
+                .replace("₄", "4")
+                .replace("₅", "5")
+                .replace("₆", "6")
+                .replace("₇", "7")
+                .replace("₈", "8")
+                .replace("₉", "9")
+                .replace(" ", "")
+                .trim()
+                .toUpperCase();
+    }
+
+    private String crearId(String simbolo, int index) {
+        return simbolo + index;
     }
 }

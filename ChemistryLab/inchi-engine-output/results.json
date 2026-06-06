@@ -1,0 +1,189 @@
+{
+  "propene": {
+    "OpenBabel": {
+      "smiles": "C=CC",
+      "svg": "openbabel/propene.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "C=CC",
+      "svg": "rdkit/propene.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "CC=C",
+      "svg": "indigo/propene.svg",
+      "status": "OK"
+    }
+  },
+  "water": {
+    "OpenBabel": {
+      "smiles": "O",
+      "svg": "openbabel/water.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "O",
+      "svg": "rdkit/water.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "O",
+      "svg": "indigo/water.svg",
+      "status": "OK"
+    }
+  },
+  "ammonia": {
+    "OpenBabel": {
+      "smiles": "N",
+      "svg": "openbabel/ammonia.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "N",
+      "svg": "rdkit/ammonia.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "N",
+      "svg": "indigo/ammonia.svg",
+      "status": "OK"
+    }
+  },
+  "carbon_dioxide": {
+    "OpenBabel": {
+      "smiles": "C(=O)=O",
+      "svg": "openbabel/carbon_dioxide.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "O=C=O",
+      "svg": "rdkit/carbon_dioxide.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "O=C=O",
+      "svg": "indigo/carbon_dioxide.svg",
+      "status": "OK"
+    }
+  },
+  "sulfuric_acid": {
+    "OpenBabel": {
+      "smiles": "OS(=O)(=O)O",
+      "svg": "openbabel/sulfuric_acid.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "O=S(=O)(O)O",
+      "svg": "rdkit/sulfuric_acid.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "OS(O)(=O)=O",
+      "svg": "indigo/sulfuric_acid.svg",
+      "status": "OK"
+    }
+  },
+  "phosphoric_acid": {
+    "OpenBabel": {
+      "smiles": "OP(=O)(O)O",
+      "svg": "openbabel/phosphoric_acid.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "O=P(O)(O)O",
+      "svg": "rdkit/phosphoric_acid.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "OP(O)(O)=O",
+      "svg": "indigo/phosphoric_acid.svg",
+      "status": "OK"
+    }
+  },
+  "sodium_chloride": {
+    "OpenBabel": {
+      "smiles": "[Cl-].[Na+]",
+      "svg": "openbabel/sodium_chloride.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "[Cl-].[Na+]",
+      "svg": "rdkit/sodium_chloride.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "[Na+].[Cl-]",
+      "svg": "indigo/sodium_chloride.svg",
+      "status": "OK"
+    }
+  },
+  "sodium_carbonate": {
+    "OpenBabel": {
+      "smiles": "C(=O)([O-])[O-].[Na+].[Na+]",
+      "svg": "openbabel/sodium_carbonate.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "O=C([O-])[O-].[Na+].[Na+]",
+      "svg": "rdkit/sodium_carbonate.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "[Na+].[Na+].[O-]C([O-])=O",
+      "svg": "indigo/sodium_carbonate.svg",
+      "status": "OK"
+    }
+  },
+  "calcium_carbonate": {
+    "OpenBabel": {
+      "smiles": "C(=O)([O-])[O-].[Ca+2]",
+      "svg": "openbabel/calcium_carbonate.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "O=C([O-])[O-].[Ca+2]",
+      "svg": "rdkit/calcium_carbonate.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "[Ca+2].[O-]C([O-])=O",
+      "svg": "indigo/calcium_carbonate.svg",
+      "status": "OK"
+    }
+  },
+  "potassium_ferricyanide": {
+    "OpenBabel": {
+      "smiles": "[C-]#N.[C-]#N.[C-]#N.[C-]#N.[C-]#N.[C-]#N.[Fe+3].[K+].[K+].[K+]",
+      "svg": "openbabel/potassium_ferricyanide.svg",
+      "status": "OK"
+    },
+    "RDKit": {
+      "smiles": "[C-]#N.[C-]#N.[C-]#N.[C-]#N.[C-]#N.[C-]#N.[Fe+3].[K+].[K+].[K+]",
+      "svg": "rdkit/potassium_ferricyanide.svg",
+      "status": "OK"
+    },
+    "Indigo": {
+      "smiles": "[K+].[K+].[K+].[Fe+3].[C-]#N.[C-]#N.[C-]#N.[C-]#N.[C-]#N.[C-]#N",
+      "svg": "indigo/potassium_ferricyanide.svg",
+      "status": "OK"
+    }
+  },
+  "atp": {
+    "OpenBabel": {
+      "smiles": "",
+      "svg": "openbabel/atp.svg",
+      "status": "ERROR: list index out of range"
+    },
+    "RDKit": {
+      "smiles": "",
+      "svg": "rdkit/atp.svg",
+      "status": "ERROR: RDKit MolFromInchi devolvió None"
+    },
+    "Indigo": {
+      "smiles": "",
+      "svg": "indigo/atp.svg",
+      "status": "ERROR: inchi-wrapper: Internal error parsing InChI string"
+    }
+  }
+}

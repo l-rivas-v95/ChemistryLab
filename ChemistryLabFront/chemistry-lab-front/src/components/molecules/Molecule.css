@@ -325,6 +325,81 @@
     display: block;
 }
 
+.molecule-image-box canvas {
+    transform: scale(1.08) translateY(-4px);
+    transform-origin: center center;
+}
+
+.formula-structure-html {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.formula-bg-html {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.external-image-structure-html {
+    padding: 12px;
+}
+
+.external-molecule-image,
+.pubchem-structure-img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 88%;
+    height: 88%;
+    max-width: 88%;
+    max-height: 88%;
+    object-fit: contain;
+    object-position: center center;
+    mix-blend-mode: multiply;
+}
+
+.formula-big-html,
+.formula-ion-view-html {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 92px;
+    padding: 16px;
+    color: #142033;
+    text-align: center;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.formula-big-html {
+    font-size: 22px;
+}
+
+.formula-ion-view-html {
+    font-size: 20px;
+}
+
+.formula-caption-html {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 18px;
+    z-index: 1;
+    color: #334155;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+}
+
 .molecule-main-info {
     text-align: center;
 }
@@ -674,6 +749,7 @@
     box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.85),
             0 8px 18px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
 }
 
 .molecule-detail-text-card-header {
@@ -1200,48 +1276,43 @@
             radial-gradient(circle at center, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.82));
 }
 
-.pubchem-structure-img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    mix-blend-mode: multiply;
-}
-/* VSEPR */
+/* VSEPR / generated 2D structure */
 
-.vsepr-structure .vsepr-bond {
+.vsepr-bond {
     stroke: #334155;
     stroke-width: 4;
     stroke-linecap: round;
+    fill: none;
 }
 
-.vsepr-structure .vsepr-atom {
+.vsepr-atom {
     font-size: 38px;
     font-weight: 900;
+    fill: #142033;
 }
 
-.vsepr-structure .vsepr-atom-H {
+.vsepr-atom-H {
     fill: #666666;
 }
 
-.vsepr-structure .vsepr-atom-O {
+.vsepr-atom-O {
     fill: #e74c3c;
 }
 
-.vsepr-structure .vsepr-atom-N {
+.vsepr-atom-N {
     fill: #3498db;
 }
 
-.vsepr-structure .vsepr-atom-S {
+.vsepr-atom-S {
     fill: #f2a900;
 }
 
-.vsepr-structure .vsepr-atom-C {
+.vsepr-atom-C {
     fill: #222222;
 }
 
-.vsepr-structure .vsepr-atom-P,
-.vsepr-structure .vsepr-atom-B {
+.vsepr-atom-P,
+.vsepr-atom-B {
     fill: #e67e22;
 }
 
@@ -1352,6 +1423,113 @@
     font-weight: 900;
     fill: #2563eb;
 }
+.moleculas-import-panel {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.9fr) minmax(280px, 1.3fr);
+    gap: 16px;
+    align-items: center;
+    margin: 0 0 22px;
+    padding: 18px 22px;
+    border: 1px solid rgba(245, 158, 11, 0.38);
+    border-radius: 20px;
+    background:
+            linear-gradient(180deg, rgba(255, 251, 235, 0.86), rgba(255, 255, 255, 0.64)),
+            radial-gradient(circle at 14% 15%, rgba(255, 212, 90, 0.25), transparent 38%);
+    box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.85),
+            0 12px 26px rgba(0, 0, 0, 0.1);
+}
+
+.moleculas-import-panel h3 {
+    margin: 0 0 6px;
+    color: #142033;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.moleculas-import-panel p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.moleculas-import-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.moleculas-import-row input {
+    flex: 1;
+    min-width: 0;
+    padding: 13px 16px;
+    border: 1px solid rgba(90, 65, 25, 0.24);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #142033;
+    font: inherit;
+    font-weight: 800;
+    outline: none;
+}
+
+.moleculas-import-row input:focus {
+    border-color: rgba(245, 158, 11, 0.95);
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.16);
+}
+
+.moleculas-import-row button {
+    padding: 10px 18px;
+    border: 1px solid rgba(90, 65, 25, 0.35);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffd45a, #f3b33d);
+    color: #1f1a12;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+}
+
+.moleculas-import-row button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.moleculas-import-message,
+.moleculas-import-error {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.moleculas-import-message {
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    background: rgba(220, 252, 231, 0.85);
+    color: #14532d;
+}
+
+.moleculas-import-error {
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    background: rgba(254, 226, 226, 0.85);
+    color: #7f1d1d;
+}
+
+@media (max-width: 760px) {
+    .moleculas-import-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .moleculas-import-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
 @media (max-width: 1250px) {
     .molecule-detail-card-three {
         grid-template-columns: 1fr;
@@ -1390,4 +1568,3 @@
         max-width: 100%;
     }
 }
-

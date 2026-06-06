@@ -1,15 +1,17 @@
 package org.chemistrylab.controller;
 
+import jakarta.validation.Valid;
 import org.chemistrylab.dto.MoleculaDTO;
+import org.chemistrylab.dto.MoleculaImportRequest;
+import org.chemistrylab.dto.MoleculaImportResponse;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
-import org.chemistrylab.service.MoleculaRepresentacionService;
+import org.chemistrylab.service.MoleculaImportService;
 import org.chemistrylab.service.MoleculaService;
+import org.chemistrylab.service.MoleculeCardRepresentationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/moleculas")
@@ -17,19 +19,27 @@ import java.util.List;
 public class MoleculaController {
 
     private final MoleculaService moleculaService;
-    private final MoleculaRepresentacionService moleculaRepresentacionService;
+    private final MoleculeCardRepresentationService moleculeCardRepresentationService;
+    private final MoleculaImportService moleculaImportService;
 
     public MoleculaController(
             MoleculaService moleculaService,
-            MoleculaRepresentacionService moleculaRepresentacionService
+            MoleculeCardRepresentationService moleculeCardRepresentationService,
+            MoleculaImportService moleculaImportService
     ) {
         this.moleculaService = moleculaService;
-        this.moleculaRepresentacionService = moleculaRepresentacionService;
+        this.moleculeCardRepresentationService = moleculeCardRepresentationService;
+        this.moleculaImportService = moleculaImportService;
+    }
+
+    @PostMapping("/importar")
+    public ResponseEntity<MoleculaImportResponse> importar(@Valid @RequestBody MoleculaImportRequest request) {
+        return ResponseEntity.ok(moleculaImportService.importar(request.getQuery()));
     }
 
     @GetMapping("/{id}/representacion")
     public ResponseEntity<MoleculaRepresentacionDTO> obtenerRepresentacion(@PathVariable Long id) {
-        return ResponseEntity.ok(moleculaRepresentacionService.obtenerRepresentacion(id));
+        return ResponseEntity.ok(moleculeCardRepresentationService.obtenerRepresentacion(id));
     }
 
     @GetMapping
@@ -55,10 +65,5 @@ public class MoleculaController {
     @GetMapping("/nombre/{nombre}")
     public MoleculaDTO findByNombre(@PathVariable String nombre) {
         return moleculaService.findByNombre(nombre);
-    }
-
-    @GetMapping("/tipo/{tipoCompuesto}")
-    public List<MoleculaDTO> findByTipoCompuesto(@PathVariable String tipoCompuesto) {
-        return moleculaService.findByTipoCompuesto(tipoCompuesto);
     }
 }

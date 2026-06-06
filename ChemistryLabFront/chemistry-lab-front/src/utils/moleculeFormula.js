@@ -89,7 +89,12 @@ const KNOWN_BY_NAME = {
     "sodium dichromate": "Na2Cr2O7",
     "potassium dichromate": "K2Cr2O7",
     "sodium cyanide": "NaCN",
-    "potassium cyanide": "KCN"
+    "potassium cyanide": "KCN",
+    "phosphorus trichloride": "PCl3",
+    "phosphorus pentachloride": "PCl5",
+    "sulfur hexafluoride": "SF6",
+    "chlorine dioxide": "ClO2",
+    ozone: "O3"
 };
 
 const KNOWN_BY_FORMULA = {
@@ -161,7 +166,11 @@ const KNOWN_BY_FORMULA = {
     Cr2Na2O7: "Na2Cr2O7",
     Cr2K2O7: "K2Cr2O7",
     CNNa: "NaCN",
-    CKN: "KCN"
+    CKN: "KCN",
+    Cl3P: "PCl3",
+    Cl5P: "PCl5",
+    F6S: "SF6",
+    O2Cl: "ClO2"
 };
 
 export function getFormulaVisible(molecula) {
