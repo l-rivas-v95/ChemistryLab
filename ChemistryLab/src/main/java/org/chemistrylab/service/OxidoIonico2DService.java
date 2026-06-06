@@ -53,7 +53,7 @@ public class OxidoIonico2DService {
             return Optional.empty();
         }
 
-        return Optional.of(construirRepresentacion(formulaVisual, metal, cantidadMetal, cantidadOxigeno));
+        return Optional.of(construirRepresentacion(formulaVisual, metal, cantidadMetal, cantidadOxigeno, cargaMetal));
     }
 
     private boolean esOxidoIonicoBinario(Map<String, Integer> atomos) {
@@ -77,33 +77,32 @@ public class OxidoIonico2DService {
             String formulaVisual,
             String metal,
             int cantidadMetal,
-            int cantidadOxigeno
+            int cantidadOxigeno,
+            int cargaMetal
     ) {
         List<AtomoRepresentacionDTO> atomos = new ArrayList<>();
         List<EnlaceRepresentacionDTO> enlaces = new ArrayList<>();
 
         if (cantidadMetal == 1 && cantidadOxigeno == 1) {
-            agregarIon(atomos, metal + "0", metal, 94, 78, 0);
-            agregarIon(atomos, "O0", "O", 166, 78, 0);
-            agregarEnlace(enlaces, metal + "0", "O0");
+            construirRedBinariaUnoAUno(atomos, enlaces, metal, cargaMetal);
         } else if (cantidadMetal == 2 && cantidadOxigeno == 1) {
-            agregarIon(atomos, metal + "0", metal, 58, 78, 0);
-            agregarIon(atomos, "O0", "O", 130, 78, 0);
-            agregarIon(atomos, metal + "1", metal, 202, 78, 0);
+            agregarIon(atomos, metal + "0", metal, 58, 78, cargaMetal);
+            agregarIon(atomos, "O0", "O", 130, 78, -2);
+            agregarIon(atomos, metal + "1", metal, 202, 78, cargaMetal);
             agregarEnlace(enlaces, metal + "0", "O0");
             agregarEnlace(enlaces, "O0", metal + "1");
         } else if (cantidadMetal == 1 && cantidadOxigeno == 2) {
-            agregarIon(atomos, "O0", "O", 58, 78, 0);
-            agregarIon(atomos, metal + "0", metal, 130, 78, 0);
-            agregarIon(atomos, "O1", "O", 202, 78, 0);
+            agregarIon(atomos, "O0", "O", 58, 78, -2);
+            agregarIon(atomos, metal + "0", metal, 130, 78, cargaMetal);
+            agregarIon(atomos, "O1", "O", 202, 78, -2);
             agregarEnlace(enlaces, "O0", metal + "0");
             agregarEnlace(enlaces, metal + "0", "O1");
         } else if (cantidadMetal == 2 && cantidadOxigeno == 3) {
-            agregarIon(atomos, "O0", "O", 130, 30, 0);
-            agregarIon(atomos, metal + "0", metal, 66, 88, 0);
-            agregarIon(atomos, "O1", "O", 130, 88, 0);
-            agregarIon(atomos, metal + "1", metal, 194, 88, 0);
-            agregarIon(atomos, "O2", "O", 130, 140, 0);
+            agregarIon(atomos, "O0", "O", 130, 30, -2);
+            agregarIon(atomos, metal + "0", metal, 66, 88, cargaMetal);
+            agregarIon(atomos, "O1", "O", 130, 88, -2);
+            agregarIon(atomos, metal + "1", metal, 194, 88, cargaMetal);
+            agregarIon(atomos, "O2", "O", 130, 140, -2);
             agregarEnlace(enlaces, "O0", metal + "0");
             agregarEnlace(enlaces, "O0", metal + "1");
             agregarEnlace(enlaces, metal + "0", "O1");
@@ -111,7 +110,7 @@ public class OxidoIonico2DService {
             agregarEnlace(enlaces, "O2", metal + "0");
             agregarEnlace(enlaces, "O2", metal + "1");
         } else {
-            construirLayoutLineal(atomos, enlaces, metal, cantidadMetal, cantidadOxigeno);
+            construirLayoutLineal(atomos, enlaces, metal, cantidadMetal, cantidadOxigeno, cargaMetal);
         }
 
         return MoleculaRepresentacionDTO.estructura2d(
@@ -123,12 +122,46 @@ public class OxidoIonico2DService {
         );
     }
 
+    private void construirRedBinariaUnoAUno(
+            List<AtomoRepresentacionDTO> atomos,
+            List<EnlaceRepresentacionDTO> enlaces,
+            String metal,
+            int cargaMetal
+    ) {
+        int[][] posiciones = {
+                {70, 42}, {130, 42}, {190, 42},
+                {70, 88}, {130, 88}, {190, 88},
+                {70, 134}, {130, 134}, {190, 134}
+        };
+
+        for (int i = 0; i < posiciones.length; i++) {
+            boolean esMetal = i % 2 == 0;
+            String simbolo = esMetal ? metal : "O";
+            int carga = esMetal ? cargaMetal : -2;
+            String id = simbolo + i;
+
+            agregarIon(atomos, id, simbolo, posiciones[i][0], posiciones[i][1], carga);
+        }
+
+        agregarEnlace(enlaces, metal + "0", "O1");
+        agregarEnlace(enlaces, "O1", metal + "2");
+        agregarEnlace(enlaces, metal + "0", "O3");
+        agregarEnlace(enlaces, "O3", metal + "4");
+        agregarEnlace(enlaces, metal + "4", "O5");
+        agregarEnlace(enlaces, "O5", metal + "8");
+        agregarEnlace(enlaces, metal + "4", "O7");
+        agregarEnlace(enlaces, "O7", metal + "6");
+        agregarEnlace(enlaces, metal + "2", "O5");
+        agregarEnlace(enlaces, "O3", metal + "6");
+    }
+
     private void construirLayoutLineal(
             List<AtomoRepresentacionDTO> atomos,
             List<EnlaceRepresentacionDTO> enlaces,
             String metal,
             int cantidadMetal,
-            int cantidadOxigeno
+            int cantidadOxigeno,
+            int cargaMetal
     ) {
         List<String> simbolos = construirSimbolosOrdenados(metal, cantidadMetal, cantidadOxigeno);
         int stepX = 62;
@@ -137,8 +170,9 @@ public class OxidoIonico2DService {
         for (int i = 0; i < simbolos.size(); i++) {
             String simbolo = simbolos.get(i);
             String id = simbolo + i;
+            int carga = "O".equals(simbolo) ? -2 : cargaMetal;
 
-            agregarIon(atomos, id, simbolo, startX + i * stepX, 78, 0);
+            agregarIon(atomos, id, simbolo, startX + i * stepX, 78, carga);
 
             if (i > 0) {
                 agregarEnlace(enlaces, simbolos.get(i - 1) + (i - 1), id);
@@ -152,9 +186,9 @@ public class OxidoIonico2DService {
             String simbolo,
             int x,
             int y,
-            int paresLibres
+            Integer carga
     ) {
-        atomos.add(new AtomoRepresentacionDTO(id, simbolo, x, y, null, paresLibres));
+        atomos.add(new AtomoRepresentacionDTO(id, simbolo, x, y, carga, 0));
     }
 
     private void agregarEnlace(List<EnlaceRepresentacionDTO> enlaces, String origen, String destino) {
