@@ -14,8 +14,6 @@ public interface MoleculaRepository extends JpaRepository<MoleculaEntity, Long> 
 
     Optional<MoleculaEntity> findByNombreIgnoreCase(String nombre);
 
-    List<MoleculaEntity> findByTipoCompuestoIgnoreCase(String tipoCompuesto);
-
     @Query("""
             SELECT m
             FROM MoleculaEntity m
