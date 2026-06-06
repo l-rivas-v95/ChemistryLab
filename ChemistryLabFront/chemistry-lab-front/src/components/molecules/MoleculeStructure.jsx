@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import SmilesDrawer from "smiles-drawer";
 import { useMoleculeRepresentation } from "../../hooks/useMoleculeRepresentation";
 import ChemicalFormulaText from "./ChemicalFormulaText";
+import "./MoleculeRepresentation.css";
 
 function MoleculeStructure({ molecula }) {
     const moleculaId = molecula?.id;
@@ -17,6 +18,7 @@ function MoleculeStructure({ molecula }) {
                 src={representacion.imagen2d}
                 alt={molecula?.nombre || representacion.formulaVisual || "Molécula"}
                 formula={representacion.formulaVisual || molecula?.formula}
+                tipoRepresentacion={representacion.tipoRepresentacion}
             />
         );
     }
@@ -42,10 +44,6 @@ function MoleculeStructure({ molecula }) {
         );
     }
 
-    if (representacion.tipoRepresentacion === "VSEPR") {
-        return <VseprStructure representacion={representacion} />;
-    }
-
     if (representacion.tipoRepresentacion === "IONICA") {
         return <IonicStructure texto={representacion.texto} />;
     }
@@ -53,20 +51,24 @@ function MoleculeStructure({ molecula }) {
     return <FormulaStructure formula={representacion.formulaVisual || molecula?.formula} />;
 }
 
-function ExternalImageStructure({ src, alt, formula }) {
+function ExternalImageStructure({ src, alt, formula, tipoRepresentacion }) {
     const [error, setError] = useState(false);
 
     if (error || !src) {
         return <FormulaStructure formula={formula || alt} />;
     }
 
+    const imageClassName = [
+        "molecule-representation-image",
+        tipoRepresentacion === "IONICA" ? "molecule-representation-image-ionic" : "",
+    ].filter(Boolean).join(" ");
+
     return (
-        <div className="formula-structure formula-structure-html external-image-structure-html">
-            <div className="formula-bg-html" />
+        <div className="formula-structure molecule-representation-frame">
             <img
                 src={src}
                 alt={alt}
-                className="external-molecule-image"
+                className={imageClassName}
                 loading="lazy"
                 onError={() => setError(true)}
             />
@@ -304,61 +306,6 @@ function calcularOffsetPerpendicular(x1, y1, x2, y2, distancia) {
     };
 }
 
-function VseprStructure({ representacion }) {
-    const layout = getVseprLayout(representacion);
-
-    return (
-        <svg viewBox="0 0 260 180" className="formula-structure vsepr-structure">
-            <rect x="0" y="0" width="260" height="180" rx="12" className="formula-bg" />
-
-            {layout.bonds.map((bond, index) => (
-                <BondLine
-                    key={`bond-${index}`}
-                    x1={bond.x1}
-                    y1={bond.y1}
-                    x2={bond.x2}
-                    y2={bond.y2}
-                    orden={bond.orden}
-                />
-            ))}
-
-            {layout.atoms.map((atom, index) => (
-                <text
-                    key={`atom-${index}`}
-                    x={atom.x}
-                    y={atom.y}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className={`vsepr-atom vsepr-atom-${atom.symbol}`}
-                >
-                    {atom.symbol}
-                </text>
-            ))}
-
-            {layout.lonePairs.map((pair, index) => (
-                <text
-                    key={`lp-${index}`}
-                    x={pair.x}
-                    y={pair.y}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className="vsepr-lone-pair"
-                >
-                    ··
-                </text>
-            ))}
-
-            <text x="130" y="138" textAnchor="middle" className="vsepr-caption-main">
-                {representacion.vsepr} · {representacion.geometria}
-            </text>
-
-            <text x="130" y="158" textAnchor="middle" className="vsepr-caption-sub">
-                {representacion.polaridad}
-            </text>
-        </svg>
-    );
-}
-
 function BondLine({ x1, y1, x2, y2, orden = 1 }) {
     if (orden === 2) {
         const offset = calcularOffsetPerpendicular(x1, y1, x2, y2, 4);
@@ -447,117 +394,6 @@ function FormulaStructure({ formula }) {
             </div>
         </div>
     );
-}
-
-function getVseprLayout(representacion) {
-    const central = {
-        symbol: representacion.atomoCentral,
-        x: 130,
-        y: 78
-    };
-
-    const terminales = representacion.atomosTerminales || [];
-    const layout = getLayoutName(representacion.vsepr);
-
-    if (layout === "diatomic") {
-        return {
-            atoms: [
-                { symbol: representacion.atomoCentral, x: 96, y: 78 },
-                { symbol: terminales[0], x: 164, y: 78 }
-            ],
-            bonds: [
-                { x1: 118, y1: 78, x2: 142, y2: 78, orden: getBondOrder(representacion, terminales[0], 0) }
-            ],
-            lonePairs: []
-        };
-    }
-
-    if (layout === "linear") {
-        return {
-            atoms: [
-                { symbol: terminales[0], x: 70, y: 78 },
-                central,
-                { symbol: terminales[1] || terminales[0], x: 190, y: 78 }
-            ],
-            bonds: [
-                { x1: 92, y1: 78, x2: 112, y2: 78, orden: getBondOrder(representacion, terminales[0], 0) },
-                { x1: 148, y1: 78, x2: 168, y2: 78, orden: getBondOrder(representacion, terminales[1] || terminales[0], 1) }
-            ],
-            lonePairs: []
-        };
-    }
-
-    if (layout === "bent") {
-        return {
-            atoms: [
-                central,
-                { symbol: terminales[0], x: 84, y: 116 },
-                { symbol: terminales[1] || terminales[0], x: 176, y: 116 }
-            ],
-            bonds: [
-                { x1: 114, y1: 90, x2: 98, y2: 105, orden: getBondOrder(representacion, terminales[0], 0) },
-                { x1: 146, y1: 90, x2: 162, y2: 105, orden: getBondOrder(representacion, terminales[1] || terminales[0], 1) }
-            ],
-            lonePairs: [
-                { x: 112, y: 48 },
-                { x: 148, y: 48 }
-            ].slice(0, representacion.paresLibres || 0)
-        };
-    }
-
-    if (layout === "trigonal") {
-        return {
-            atoms: [
-                central,
-                { symbol: terminales[0], x: 130, y: 30 },
-                { symbol: terminales[1] || terminales[0], x: 78, y: 112 },
-                { symbol: terminales[2] || terminales[0], x: 182, y: 112 }
-            ],
-            bonds: [
-                { x1: 130, y1: 58, x2: 130, y2: 46, orden: getBondOrder(representacion, terminales[0], 0) },
-                { x1: 114, y1: 90, x2: 94, y2: 104, orden: getBondOrder(representacion, terminales[1] || terminales[0], 1) },
-                { x1: 146, y1: 90, x2: 166, y2: 104, orden: getBondOrder(representacion, terminales[2] || terminales[0], 2) }
-            ],
-            lonePairs: []
-        };
-    }
-
-    if (layout === "pyramidal") {
-        return {
-            atoms: [
-                central,
-                { symbol: terminales[0], x: 130, y: 122 },
-                { symbol: terminales[1] || terminales[0], x: 78, y: 110 },
-                { symbol: terminales[2] || terminales[0], x: 182, y: 110 }
-            ],
-            bonds: [
-                { x1: 130, y1: 94, x2: 130, y2: 108, orden: getBondOrder(representacion, terminales[0], 0) },
-                { x1: 114, y1: 90, x2: 94, y2: 102, orden: getBondOrder(representacion, terminales[1] || terminales[0], 1) },
-                { x1: 146, y1: 90, x2: 166, y2: 102, orden: getBondOrder(representacion, terminales[2] || terminales[0], 2) }
-            ],
-            lonePairs: [
-                { x: 130, y: 42 }
-            ]
-        };
-    }
-
-    return {
-        atoms: [central],
-        bonds: [],
-        lonePairs: []
-    };
-}
-
-function getLayoutName(vsepr) {
-    const normalized = String(vsepr || "").toUpperCase();
-
-    if (normalized.startsWith("AX1")) return "diatomic";
-    if (normalized.startsWith("AX2E")) return "bent";
-    if (normalized.startsWith("AX2")) return "linear";
-    if (normalized.startsWith("AX3E")) return "pyramidal";
-    if (normalized.startsWith("AX3")) return "trigonal";
-
-    return "single";
 }
 
 function formatearCarga(carga) {
