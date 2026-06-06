@@ -188,9 +188,9 @@ No es una representación de enlace real perfecta, pero es mejor para una tarjet
 
 | Clase | Paquete | Estado | Qué hace | Decisión |
 |---|---|---|---|---|
-| MoleculaRepresentacionService | service | REVISAR | Motor anterior de representación. | Revisar usos. Probable candidato a borrar si no alimenta nada. |
+| MoleculaRepresentacionService | service | REVISAR / POSIBLE BORRAR | Motor anterior de representación: mezcla family classification, entrada química, iónica, estructura2D y VSEPR. | No debe alimentar tarjetas. Revisar si `MoleculaController` todavía lo inyecta. Si no se usa, borrar junto con dependencias antiguas. |
 | MoleculaRepresentacionIonicaService | service | CANDIDATA A BORRAR | Representación iónica antigua. | Borrar si no hay lógica educational útil dentro. |
-| MoleculaRepresentacionVesperService | service | CANDIDATA A BORRAR | VSEPR/geometría molecular. | Sacar del flujo de tarjetas. Mantener solo si se crea módulo educativo aparte. |
+| MoleculaRepresentacionVseprService | service | CANDIDATA A BORRAR | VSEPR/geometría molecular. | Sacar del flujo de tarjetas. Mantener solo si se crea módulo educativo aparte. |
 | Estructura2DService | service | CANDIDATA A BORRAR | Representación 2D manual. | Borrar si CDK SVG reemplaza. |
 | OxidoIonico2DService | service | CANDIDATA A BORRAR | Óxidos iónicos manuales. | Borrar si no se rescata nada útil. |
 
@@ -217,8 +217,8 @@ No es una representación de enlace real perfecta, pero es mejor para una tarjet
 | Clase/paquete | Estado | Qué hace | Decisión |
 |---|---|---|---|
 | FormulaParserService | MANTENER | Parseo de fórmulas con paréntesis y cantidades. | Mantener. |
-| chemistry.classification.* | MANTENER / REVISAR | Clasifica orgánica/inorgánica/ácido/base/óxido/sal. | Mantener; documentar clase a clase en siguiente barrida. |
-| chemistry.analyzer.formula.* | REVISAR | Análisis de fórmulas. | Revisar usos. |
+| chemistry.classification.* | MANTENER / REVISAR | Clasifica orgánica/inorgánica/ácido/base/óxido/sal. | Existe en `MoleculaRepresentacionService`, pero la búsqueda de GitHub no lo devuelve bien. Confirmar árbol real local antes de borrar. |
+| chemistry.analyzer.formula.* | REVISAR | Análisis de fórmulas. | No apareció en búsqueda por `Analyzer`; confirmar árbol real local. |
 | chemistry.smiles.* | REVISAR | Utilidades SMILES. | Revisar si duplican `representation`. |
 
 ## Chemistry - conectividad
@@ -248,7 +248,7 @@ EnlaceRepresentacionDTO
 Estructura2DService
 MoleculaRepresentacionService
 MoleculaRepresentacionIonicaService
-MoleculaRepresentacionVesperService
+MoleculaRepresentacionVseprService
 OxidoIonico2DService
 ```
 
@@ -315,14 +315,51 @@ Decisión:
 
 Estado: pendiente de confirmar estructura real.
 
-Se intentó localizar `CompoundFamily`, `classification` y `CompoundTypeLabelService` mediante búsqueda en GitHub, pero no aparecieron resultados en la rama actual. Esto puede indicar:
-
-- fueron eliminadas en algún refactor;
-- están en otra rama/commit;
-- la clasificación actual está implementada con otros nombres;
-- el índice de búsqueda no las está devolviendo.
+Se intentó localizar `CompoundFamily`, `classification` y `CompoundTypeLabelService` mediante búsqueda en GitHub, pero no aparecieron resultados en la rama actual. Sin embargo, `MoleculaRepresentacionService` importa esas clases, así que el paquete existe en el árbol real o el índice de búsqueda no lo está devolviendo.
 
 Decisión:
 
-- No asumir que `chemistry.classification.*` existe en esta rama hasta revisar el árbol real del proyecto local.
-- Actualizar esta sección cuando se confirme el paquete real.
+- No borrar nada relacionado con classification hasta revisar el árbol local o hasta compilar después de una limpieza.
+- Si `MoleculaRepresentacionService` se elimina, comprobar si classification sigue siendo usado por `MoleculaService` o filtros del frontend.
+
+## Barrida 3 - MoleculaRepresentacionService
+
+Estado: revisado.
+
+Hallazgo:
+
+- Es el motor viejo de representación.
+- Mezcla demasiadas decisiones:
+  - family classification;
+  - orgánicas por entrada química;
+  - sales/ácidos/hidróxidos/óxidos metálicos por representación iónica;
+  - estructura 2D interna;
+  - VSEPR;
+  - fórmula fallback.
+- Depende de muchos servicios antiguos:
+  - `Estructura2DService`;
+  - `MoleculaRepresentacionIonicaService`;
+  - `MoleculaRepresentacionVseprService`;
+  - `RepresentationInputService`;
+  - `RepresentationSmilesOverrideService`;
+  - classification services.
+
+Decisión:
+
+- No debe alimentar la tarjeta actual.
+- Si `MoleculaController` ya usa `MoleculeCardRepresentationService`, esta clase queda como candidata clara a borrar.
+- Antes de borrarla, revisar si algún endpoint secundario o tool la usa.
+
+## Barrida 4 - OxidoIonico2DService / Analyzer
+
+Estado: búsqueda inicial.
+
+Hallazgo:
+
+- La búsqueda por `OxidoIonico2DService` y `Analyzer` no devolvió resultados en GitHub.
+- Puede que esas clases ya no existan en la rama actual o que el índice no las devuelva.
+
+Decisión:
+
+- No incluirlas como borrado directo hasta confirmar con árbol local.
+- Si aparecen en local, probablemente pertenecen a motores antiguos y deben revisarse junto con `Estructura2DService`.
