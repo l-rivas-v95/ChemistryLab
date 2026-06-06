@@ -6,8 +6,8 @@ import org.chemistrylab.dto.MoleculaImportRequest;
 import org.chemistrylab.dto.MoleculaImportResponse;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.service.MoleculaImportService;
-import org.chemistrylab.service.MoleculaRepresentacionService;
 import org.chemistrylab.service.MoleculaService;
+import org.chemistrylab.service.MoleculeCardRepresentationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +19,16 @@ import org.springframework.web.bind.annotation.*;
 public class MoleculaController {
 
     private final MoleculaService moleculaService;
-    private final MoleculaRepresentacionService moleculaRepresentacionService;
+    private final MoleculeCardRepresentationService moleculeCardRepresentationService;
     private final MoleculaImportService moleculaImportService;
 
     public MoleculaController(
             MoleculaService moleculaService,
-            MoleculaRepresentacionService moleculaRepresentacionService,
+            MoleculeCardRepresentationService moleculeCardRepresentationService,
             MoleculaImportService moleculaImportService
     ) {
         this.moleculaService = moleculaService;
-        this.moleculaRepresentacionService = moleculaRepresentacionService;
+        this.moleculeCardRepresentationService = moleculeCardRepresentationService;
         this.moleculaImportService = moleculaImportService;
     }
 
@@ -39,7 +39,7 @@ public class MoleculaController {
 
     @GetMapping("/{id}/representacion")
     public ResponseEntity<MoleculaRepresentacionDTO> obtenerRepresentacion(@PathVariable Long id) {
-        return ResponseEntity.ok(moleculaRepresentacionService.obtenerRepresentacion(id));
+        return ResponseEntity.ok(moleculeCardRepresentationService.obtenerRepresentacion(id));
     }
 
     @GetMapping
