@@ -69,7 +69,6 @@ public class MoleculaImportService {
                 .masaMolecular(data.getMasaMolecular())
                 .nombreIupac(data.getNombreIupac())
                 .descripcion(data.getDescripcion())
-                .tipoCompuesto(null)
                 .estadoFisico(null)
                 .carga(data.getCarga())
                 .imagen2d(data.getImagen2d())
