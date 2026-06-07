@@ -47,14 +47,11 @@ public class RepresentationSmilesOverrideService {
     }
 
     private static void covalentesPequenas(Map<String, String> overrides) {
-        put(overrides, "H2O", "[H]O[H]", "OH2");
         put(overrides, "NH3", "[H]N([H])[H]", "H3N");
-        put(overrides, "H2O2", "[H]OO[H]", "O2H2");
         put(overrides, "CO", "[C-]#[O+]", "OC");
         put(overrides, "CO2", "O=C=O", "O2C");
         put(overrides, "NO", "N=O", "ON");
         put(overrides, "NO2", "O=[N+][O-]", "O2N");
-        put(overrides, "N2O", "N#[N+]O", "ON2");
         put(overrides, "HCN", "[H]C#N", "CNH");
     }
 
@@ -99,7 +96,6 @@ public class RepresentationSmilesOverrideService {
     }
 
     private static void oxidosCovalentes(Map<String, String> overrides) {
-        put(overrides, "SO2", "O=S=O", "O2S");
         put(overrides, "SO3", "O=S(=O)=O", "O3S");
         put(overrides, "P2O5", "O=P(=O)OP(=O)=O", "O5P2");
         put(overrides, "Cl2O", "ClOCl", "OCl2");
