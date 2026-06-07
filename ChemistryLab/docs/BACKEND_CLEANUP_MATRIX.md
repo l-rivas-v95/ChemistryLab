@@ -1,8 +1,8 @@
 # ChemistryLab - Matriz de limpieza del backend
 
-> Rama: `cleanup/minimal-chemistrylab`
+> Rama: `refactor/educational-smiles-layer`
 >
-> Objetivo: decidir qué clases se mantienen, cuáles se revisan y cuáles son candidatas a borrar antes de seguir añadiendo representación química.
+> Objetivo: limpiar el backend de motores antiguos de representación y consolidar la representación visual basada en SMILES + CDK + SVG.
 >
 > Este documento se usa como índice vivo del backend. Cada vez que se revise una clase o se tome una decisión de limpieza, debe actualizarse aquí.
 
@@ -15,113 +15,31 @@
 | TEMPORAL | Útil durante la reconstrucción, pero puede borrarse después. |
 | REVISAR | No borrar aún; hay que comprobar usos reales. |
 | CANDIDATA A BORRAR | Parece parte de motores viejos o duplicados. Borrar solo tras comprobar referencias. |
+| BORRADA | Eliminada de la rama actual. |
 
 ---
 
-# Árbol real del backend observado
+# Estado actual de la representación
 
-Según capturas del árbol local en IntelliJ, el backend actual tiene esta estructura principal:
+La dirección decidida es:
 
 ```text
-src/main/java/org/chemistrylab
-├── ChemistryLabApplication
-├── chemistry
-│   ├── analyzer.formula
-│   │   ├── ElementNode
-│   │   ├── FormulaNode
-│   │   └── GroupNode
-│   ├── catalog
-│   │   └── IonCatalogService
-│   ├── classification
-│   │   ├── CompoundFamily
-│   │   ├── CompoundFamilyService
-│   │   └── CompoundTypeLabelService
-│   ├── config
-│   │   └── IonConfig
-│   ├── connectivity
-│   │   ├── rules
-│   │   │   ├── CovalentX2OConnectivityRule
-│   │   │   ├── DiatomicConnectivityRule
-│   │   │   ├── HydrogenPeroxideConnectivityRule
-│   │   │   ├── MolecularConnectivityContext
-│   │   │   ├── MolecularConnectivityRule
-│   │   │   └── NitrogenDioxideConnectivityRule
-│   │   ├── MolecularBond
-│   │   ├── MolecularConnectivity
-│   │   └── MolecularConnectivityService
-│   ├── formula
-│   │   ├── FormulaParserService
-│   │   └── IonicFormulaResolution
-│   ├── ionic
-│   │   ├── IonicFormulaResolution
-│   │   ├── IonicFormulaResolver
-│   │   └── IonMatch
-│   └── smiles
-│       ├── SmilesGenerationResult
-│       └── SmilesGenerationService
-├── config
-│   ├── CorsConfig
-│   └── WebClientConfig
-├── controller
-│   ├── ElementoController
-│   └── MoleculaController
-├── dto
-│   ├── AtomoRepresentacionDTO
-│   ├── ElementoDTO
-│   ├── EnlaceRepresentacionDTO
-│   ├── MoleculaDTO
-│   ├── MoleculaImportRequest
-│   ├── MoleculaImportResponse
-│   └── MoleculaRepresentacionDTO
-├── entity
-│   ├── ElementoEntity
-│   ├── EstadoOxidacionEntity
-│   └── MoleculaEntity
-├── mapper
-│   ├── ElementoMapper
-│   └── MoleculaMapper
-├── pubchem
-│   ├── PubChemClient
-│   └── PubChemCompoundData
-├── repository
-│   ├── ElementoRepository
-│   └── MoleculaRepository
-├── representation
-│   ├── ImageRepresentationSource
-│   ├── IonicSmilesBuilderService
-│   ├── RepresentationDecision
-│   ├── RepresentationDecisionService
-│   ├── RepresentationFamily
-│   ├── RepresentationInputResult
-│   ├── RepresentationInputService
-│   ├── RepresentationInputSource
-│   ├── RepresentationSmilesOverrideService
-│   ├── RepresentationStrategy
-│   └── SmilesToSvgService
-├── service
-│   ├── ElementoService
-│   ├── Estructura2DService
-│   ├── MoleculaFormulaService
-│   ├── MoleculaImportService
-│   ├── MoleculaRepresentacionIonicaService
-│   ├── MoleculaRepresentacionService
-│   ├── MoleculaRepresentacionVseprService
-│   ├── MoleculaService
-│   ├── MoleculeCardRepresentationService
-│   └── OxidoIonico2DService
-└── tools
+formula / SMILES de BD
+    -> reglas mínimas de grupos reconocibles cuando proceda
+    -> SMILES
+    -> CDK
+    -> SVG
 ```
 
----
+No se quiere mantener otro motor basado en coordenadas manuales, DTOs de átomos/enlaces o VSEPR para las tarjetas.
 
-# Índice de representación actual
-
-La tarjeta de molécula debe estar pintada siempre que sea posible:
+## Flujo principal deseado
 
 ```text
 MoleculeCardRepresentationService
-    -> RepresentationSmilesOverrideService      // capa educational
-    -> IonicSmilesBuilderService                // solo si genera SMILES visual compacto
+    -> oxoácido neutro desde EducationalOxoanionSmilesCatalog
+    -> RepresentationSmilesOverrideService, solo casos curados puntuales
+    -> IonicSmilesBuilderService, apoyo genérico para grupos iónicos
     -> canonicalSmiles / isomericSmiles de BD
     -> imagen PubChem
     -> fórmula
@@ -134,22 +52,6 @@ MoleculeStructure.jsx
     SVG       -> inline SVG
     IMAGEN_2D -> img externa
     FORMULA   -> ChemicalFormulaText
-```
-
-## Punto más importante: capa `educational`
-
-La parte que hay que recuperar no es un simple formateo bonito de fórmulas. Es una capa de **SMILES educativos/curados**.
-
-Debe vivir principalmente en:
-
-```text
-org.chemistrylab.representation.RepresentationSmilesOverrideService
-```
-
-Función esperada:
-
-```text
-formula química -> SMILES educativo -> CDK -> SVG
 ```
 
 ---
@@ -187,6 +89,7 @@ IonCatalogService
 IonMatch
 IonicFormulaResolver
 chemistry.ionic.IonicFormulaResolution
+EducationalOxoanionSmilesCatalog
 RepresentationSmilesOverrideService
 SmilesToSvgService
 MoleculeCardRepresentationService
@@ -205,6 +108,9 @@ RepresentationFamily
 RepresentationStrategy
 ImageRepresentationSource
 EstadoOxidacionEntity
+MoleculaRepresentacionDTO
+AtomoRepresentacionDTO
+EnlaceRepresentacionDTO
 ```
 
 ## Candidatos fuertes a borrar
@@ -214,10 +120,7 @@ MoleculaFormulaService
 MoleculaRepresentacionService
 MoleculaRepresentacionIonicaService
 MoleculaRepresentacionVseprService
-Estructura2DService
 OxidoIonico2DService
-AtomoRepresentacionDTO
-EnlaceRepresentacionDTO
 chemistry.smiles.SmilesGenerationService
 chemistry.smiles.SmilesGenerationResult
 chemistry.formula.IonicFormulaResolution
@@ -225,6 +128,12 @@ MolecularConnectivityService
 MolecularConnectivity
 MolecularBond
 chemistry.connectivity.rules.*
+```
+
+## Ya borrado
+
+```text
+Estructura2DService
 ```
 
 ---
@@ -237,25 +146,14 @@ Estado: revisado.
 
 Hallazgo:
 
-- La clase existe y se usa como capa de overrides.
-- Actualmente contiene algunos valores contrarios al objetivo educational:
-  - `H2O -> O`, cuando debería ser `[H]O[H]`.
-  - `NH3 -> N`, cuando debería ser `[H]N([H])[H]`.
-  - `H2O2 -> OO`, cuando debería ser `[H]OO[H]`.
-  - Óxidos metálicos como `CaO -> [Ca+2].[O-2]`, lo que puede volver a separar fragmentos.
-- Contiene buenos overrides para algunos covalentes pequeños:
-  - `SO3 -> O=S(=O)=O`
-  - `SO2 -> O=S=O`
-  - `NO -> N=O`
-  - `NO2 -> O=[N+][O-]`
-  - `CO2 -> O=C=O`
+- Es la capa de overrides curados.
+- Debe ir reduciéndose: los casos generales deben ir a catálogos/grupos o a BD, no a más reglas sueltas.
+- Los casos curados puntuales como H2O, NH3, H2O2, CO, NO, NO2 o N2O pueden vivir aquí mientras se decide si se pisan en BD.
 
 Decisión:
 
-- Mantener la clase.
-- Convertirla en la capa educational principal.
-- Corregir primero overrides explícitos de moléculas pequeñas.
-- Después añadir sales/hidróxidos compactos caso a caso.
+- Mantener, pero no convertirla en otro motor.
+- Usarla solo para casos concretos y excepciones visuales.
 
 ## Barrida 2 - classification
 
@@ -265,7 +163,7 @@ Hallazgo:
 
 - Existen `CompoundFamily`, `CompoundFamilyService` y `CompoundTypeLabelService`.
 - `CompoundFamilyService` clasifica por fórmula parseada y categorías de elementos.
-- `CompoundTypeLabelService` solo convierte familia a etiqueta visible.
+- `CompoundTypeLabelService` convierte familia a etiqueta visible.
 
 Decisión:
 
@@ -279,43 +177,31 @@ Estado: revisado.
 Hallazgo:
 
 - Es el motor viejo de representación.
-- Mezcla demasiadas decisiones: classification, orgánicas por entrada química, sales/ácidos/hidróxidos/óxidos metálicos por representación iónica, estructura 2D interna, VSEPR y fórmula fallback.
-- Depende de `Estructura2DService`, `MoleculaRepresentacionIonicaService`, `MoleculaRepresentacionVseprService`, `RepresentationInputService`, `RepresentationSmilesOverrideService` y classification services.
+- Mezcla classification, orgánicas por entrada química, sales/ácidos/hidróxidos/óxidos metálicos por representación iónica, estructura 2D interna, VSEPR y fórmula fallback.
+- Dependía de `Estructura2DService`, `MoleculaRepresentacionIonicaService`, `MoleculaRepresentacionVseprService`, `RepresentationInputService`, `RepresentationSmilesOverrideService` y classification services.
 
 Decisión:
 
 - No debe alimentar la tarjeta actual.
 - `MoleculaController` ya usa `MoleculeCardRepresentationService` para `/api/moleculas/{id}/representacion`, así que esta clase queda como candidata clara a borrar si no hay otros usos.
 
-## Barrida 4 - Árbol real del backend
+## Barrida 4 - Estructura2DService
 
-Estado: actualizado con capturas del usuario.
-
-Hallazgo:
-
-- El árbol real confirma paquetes que GitHub Search no devolvía.
-
-Decisión:
-
-- Usar el árbol de IntelliJ como fuente para el inventario.
-- GitHub Search no es fiable para confirmar inexistencia de clases en esta rama.
-
-## Barrida 5 - Estructura2DService
-
-Estado: inspección parcial desde captura.
+Estado: BORRADA.
 
 Hallazgo:
 
-- La clase existe en `service`.
-- Importa `MolecularBond`, `MolecularConnectivity`, `MolecularConnectivityService`, `AtomoRepresentacionDTO`, `EnlaceRepresentacionDTO` y `MoleculaRepresentacionDTO`.
-- Tiene método `intentarConstruir(String formulaVisual)`.
-- Parece convertir conectividad molecular interna en DTOs manuales de átomos/enlaces.
+- Servicio de representación 2D manual.
+- Convertía `MolecularConnectivity` en `AtomoRepresentacionDTO` y `EnlaceRepresentacionDTO`.
+- Tenía lógica manual para cadenas, posiciones, pares libres y H2O2.
+- Pertenecía al motor antiguo basado en coordenadas y DTOs.
 
 Decisión:
 
-- Candidata a borrar si se elimina la representación manual.
+- Eliminada en la rama `refactor/educational-smiles-layer`.
+- Commit de borrado: `e3e47ead213929cd79770c19eca211deeaae32cf`.
 
-## Barrida 6 - representation package
+## Barrida 5 - representation package
 
 Estado: árbol identificado.
 
@@ -327,7 +213,7 @@ Decisión:
 
 - Evitar tener dos orquestadores finales. La app debería quedarse con uno solo.
 
-## Barrida 7 - RepresentationDecisionService
+## Barrida 6 - RepresentationDecisionService
 
 Estado: revisado.
 
@@ -342,7 +228,7 @@ Decisión:
 - Si no se usa, borrar o fusionar su lógica en `MoleculeCardRepresentationService`.
 - Si se conserva, añadir `@Service` y convertirlo en parte oficial del flujo.
 
-## Barrida 8 - SmilesGenerationService
+## Barrida 7 - SmilesGenerationService
 
 Estado: revisado.
 
@@ -357,23 +243,22 @@ Decisión:
 
 - Candidato a borrar si nadie lo usa.
 
-## Barrida 9 - MoleculeCardRepresentationService
+## Barrida 8 - MoleculeCardRepresentationService
 
-Estado: revisado.
+Estado: revisado y modificado.
 
 Hallazgo:
 
-- Es el flujo actual de tarjeta.
-- Orden: `RepresentationSmilesOverrideService`, `IonicSmilesBuilderService`, canonical/isomeric SMILES, imagen PubChem, fórmula.
-- Genera SVG mediante `SmilesToSvgService.renderSvg(smiles)`.
-- No usa `RepresentationInputService`, aunque duplica parte de su lógica.
+- Es el flujo individual actual de representación.
+- Ya prioriza oxoácidos neutros mediante `EducationalOxoanionSmilesCatalog.findNeutralOxoacid(formula)`.
+- Después usa `RepresentationSmilesOverrideService`, `IonicSmilesBuilderService`, SMILES de BD, imagen PubChem y fórmula.
 
 Decisión:
 
 - Mantener como entrada principal.
-- El problema visual actual no está aquí, sino en qué SMILES devuelven `RepresentationSmilesOverrideService` e `IonicSmilesBuilderService`.
+- Falta revisar si el grid/listado usa otro flujo distinto.
 
-## Barrida 10 - RepresentationInputService
+## Barrida 9 - RepresentationInputService
 
 Estado: revisado.
 
@@ -387,23 +272,23 @@ Decisión:
 
 - Decidir entre incorporarlo al flujo actual o borrarlo junto con `RepresentationInputResult` y `RepresentationInputSource`.
 
-## Barrida 11 - IonicSmilesBuilderService
+## Barrida 10 - IonicSmilesBuilderService
 
-Estado: revisado.
+Estado: revisado y modificado.
 
 Hallazgo:
 
 - Usa `IonicFormulaResolver` para obtener catión/anión.
-- Tiene tabla de oxoaniones.
+- Usa `EducationalOxoanionSmilesCatalog` como fuente compartida de oxoaniones.
 - Genera compactos para sales monoatómicas, hidróxidos, óxidos y cianuros.
-- Para oxoaniones añade cationes como fragmentos separados con punto (`.`), lo que todavía puede provocar que CDK coloque iones alejados.
+- Para oxoaniones añade cationes como fragmentos separados con punto (`.`), lo que puede parecerse más a PubChem en sales iónicas.
 
 Decisión:
 
 - Mantener temporalmente.
-- Las sales/hidróxidos importantes deberían pasar primero por `RepresentationSmilesOverrideService` con overrides educational específicos.
+- No convertirlo en motor visual nuevo.
 
-## Barrida 12 - MolecularConnectivityService
+## Barrida 11 - MolecularConnectivityService
 
 Estado: revisado.
 
@@ -412,29 +297,26 @@ Hallazgo:
 - Construye conectividad molecular desde fórmula visual.
 - Usa `FormulaParserService`, `ElementoRepository` y una lista de `MolecularConnectivityRule`.
 - Solo acepta moléculas covalentes pequeñas: 2 o 3 tipos de átomos, máximo 6 átomos totales y todos no metales/metaloides.
-- Intenta aplicar reglas específicas primero.
-- Si ninguna regla aplica, elige átomo central, terminales, órdenes de enlace y pares libres.
-- Su salida es `MolecularConnectivity`, con átomo central, lista de `MolecularBond` y lonePairs.
-- Esto es motor de representación manual/VSEPR-like, no la capa educational de SMILES.
+- Esto es motor de representación manual/VSEPR-like, no la capa de SMILES.
 
 Decisión:
 
-- Candidato a borrar si se elimina `Estructura2DService`.
+- Candidato a borrar tras eliminar dependencias restantes.
 
-## Barrida 13 - MolecularConnectivity y MolecularBond
+## Barrida 12 - MolecularConnectivity y MolecularBond
 
 Estado: revisado.
 
 Hallazgo:
 
-- Son modelos simples: `MolecularConnectivity` tiene central, bonds y lonePairs; `MolecularBond` tiene from, to y order.
+- Modelos simples: `MolecularConnectivity` tiene central, bonds y lonePairs; `MolecularBond` tiene from, to y order.
 - No contienen lógica.
 
 Decisión:
 
-- Borrables si se borra `MolecularConnectivityService` y `Estructura2DService`.
+- Borrables si se borra `MolecularConnectivityService` y VSEPR.
 
-## Barrida 14 - chemistry.connectivity.rules
+## Barrida 13 - chemistry.connectivity.rules
 
 Estado: revisado.
 
@@ -450,14 +332,14 @@ Clases revisadas:
 Hallazgo:
 
 - Todas pertenecen al motor manual de conectividad.
-- Lo interesante de estas reglas no es la conectividad manual, sino que confirman qué casos deberían estar en educational overrides: CO, H2O2, NO2 y posibles X2O/N2O.
+- Lo útil de estas reglas son sus casos especiales: CO, H2O2, NO2 y posibles X2O/N2O.
 
 Decisión:
 
-- Marcar `chemistry.connectivity.rules.*` como candidato fuerte a borrar junto con `MolecularConnectivityService` y `Estructura2DService`.
-- Rescatar antes sus casos como entradas de `RepresentationSmilesOverrideService`.
+- Candidatas a borrar junto con `MolecularConnectivityService`.
+- Casos útiles ya están contemplados como SMILES curados.
 
-## Barrida 15 - MoleculaRepresentacionIonicaService
+## Barrida 14 - MoleculaRepresentacionIonicaService
 
 Estado: revisado.
 
@@ -465,30 +347,28 @@ Hallazgo:
 
 - No genera estructuras ni SVG. Genera texto iónico tipo `Na⁺ + Cl⁻`, `Ca²⁺ + 2OH⁻`, `2H⁺ + CO3²⁻`.
 - Usa `IonicFormulaResolver`, `IonCatalogService`, `FormulaParserService` y `ElementoRepository`.
-- Contiene varios casos manuales: ácido carbónico, ácido bórico, hidróxido de aluminio, hidróxido amónico, dióxido de titanio, fosfatos y fosfatos ácidos.
+- Contiene casos manuales: ácido carbónico, ácido bórico, hidróxido de aluminio, hidróxido amónico, dióxido de titanio, fosfatos y fosfatos ácidos.
 
 Decisión:
 
-- Candidata a borrar del flujo de representación visual.
-- Puede tener valor si se quiere mostrar una explicación textual de disociación iónica en una ficha educativa, pero no debe alimentar tarjetas.
+- Candidata a borrar del flujo visual.
+- Podría tener valor futuro solo como explicación textual de disociación iónica, separada de tarjetas.
 
-## Barrida 16 - MoleculaRepresentacionVseprService
+## Barrida 15 - MoleculaRepresentacionVseprService
 
 Estado: revisado.
 
 Hallazgo:
 
 - Depende directamente de `MolecularConnectivityService`.
-- Construye un DTO VSEPR con átomo central, terminales, enlaces, pares libres, código AXE, geometría y polaridad.
-- Geometrías soportadas: lineal, angular, trigonal plana, piramidal trigonal y tetraédrica.
+- Construye DTO VSEPR con átomo central, terminales, enlaces, pares libres, código AXE, geometría y polaridad.
 - No genera SMILES ni SVG CDK.
 
 Decisión:
 
-- Candidata fuerte a borrar del flujo actual.
-- Solo tendría sentido conservarla si se crea una sección educativa específica de VSEPR, separada de tarjetas.
+- Candidata fuerte a borrar salvo futura sección educativa VSEPR separada.
 
-## Barrida 17 - OxidoIonico2DService
+## Barrida 16 - OxidoIonico2DService
 
 Estado: revisado.
 
@@ -497,16 +377,13 @@ Hallazgo:
 - Servicio manual de dibujo de óxidos iónicos.
 - Genera `AtomoRepresentacionDTO` y `EnlaceRepresentacionDTO` con posiciones fijas.
 - Para óxidos 1:1 crea una red 3x3 de iones.
-- Para otros patrones construye layouts lineales o manuales.
-- Devuelve `MoleculaRepresentacionDTO.estructura2d(..., "red iónica", null)`.
-- Es exactamente el origen de las representaciones de óxidos grandes y feas que se querían eliminar.
+- Es origen de representaciones de óxidos grandes y feas.
 
 Decisión:
 
 - Candidata muy fuerte a borrar.
-- No rescatar para tarjetas. Los óxidos deben pasar por `RepresentationSmilesOverrideService`, `IonicSmilesBuilderService` limitado, SMILES de BD o imagen PubChem.
 
-## Barrida 18 - MoleculaFormulaService
+## Barrida 17 - MoleculaFormulaService
 
 Estado: revisado.
 
@@ -514,25 +391,65 @@ Hallazgo:
 
 - Clase mínima.
 - Solo inyecta `FormulaParserService` y expone `obtenerFormulaVisible(nombre, formula)`, que devuelve `formulaParserService.normalizarFormulaVisual(formula)`.
-- El parámetro `nombre` ni siquiera se usa.
-- La búsqueda no muestra usos relevantes.
+- El parámetro `nombre` no se usa.
 
 Decisión:
 
 - Candidata fuerte a borrar.
-- Sustituir llamadas, si existen, por `FormulaParserService.normalizarFormulaVisual(formula)` directamente.
+- Sustituir llamadas por `FormulaParserService.normalizarFormulaVisual(formula)` directamente.
 
-## Barrida 19 - MoleculaController
+## Barrida 18 - MoleculaController
 
 Estado: revisado.
 
 Hallazgo:
 
-- El endpoint `/api/moleculas/{id}/representacion` ya usa `MoleculeCardRepresentationService`.
+- El endpoint `/api/moleculas/{id}/representacion` usa `MoleculeCardRepresentationService`.
 - No inyecta `MoleculaRepresentacionService`.
-- Esto confirma que el motor viejo de representación ya no alimenta el endpoint principal.
 
 Decisión:
 
 - Mantener controller.
-- Usarlo como prueba de que `MoleculaRepresentacionService` y dependencias antiguas se pueden empezar a aislar/borrar si no hay otros usos.
+- Confirmar qué usa el grid/listado porque los cambios del endpoint individual no se reflejan en la página 2.
+
+## Barrida 19 - RepresentationInputResult y RepresentationInputSource
+
+Estado: revisado.
+
+Hallazgo:
+
+- `RepresentationInputResult` es un wrapper simple con `value`, `source`, `reason` y `hasValue()`.
+- `RepresentationInputSource` es un enum con `EDUCATIONAL_RULE`, `CANONICAL_SMILES`, `ISOMERIC_SMILES`, `INCHI`, `UNKNOWN`.
+
+Decisión:
+
+- Mantener solo si se integra `RepresentationInputService` en `MoleculeCardRepresentationService`.
+- Si no, borrar los tres juntos.
+
+## Barrida 20 - RepresentationDecision, RepresentationFamily, RepresentationStrategy
+
+Estado: revisado.
+
+Hallazgo:
+
+- `RepresentationDecision` es un record con familia, estrategia y motivo.
+- `RepresentationFamily` es otro enum de familias, más detallado que `CompoundFamily`, pero no parece conectado al flujo actual.
+- `RepresentationStrategy` enumera estrategias como `DIRECT_SMILES`, `INCHI_CONVERSION`, `EDUCATIONAL_CANDIDATE`, `SPECIAL_CASE`, `FALLBACK`.
+
+Decisión:
+
+- Candidatas a borrar junto con `RepresentationDecisionService`, salvo que se decida rehacer un orquestador formal.
+
+## Barrida 21 - ImageRepresentationSource
+
+Estado: revisado.
+
+Hallazgo:
+
+- Enum con fuentes: `PUBCHEM_IMAGE_2D`, `SMILES`, `STRUCTURE_2D`, `VSEPR`, `CARD_TEXT_ONLY`, `FORMULA_ONLY`.
+- Conserva valores del sistema antiguo (`STRUCTURE_2D`, `VSEPR`).
+
+Decisión:
+
+- Candidata a borrar si no hay usos reales.
+- Si se mantiene, limpiar valores antiguos.
