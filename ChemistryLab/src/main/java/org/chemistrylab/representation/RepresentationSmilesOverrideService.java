@@ -113,8 +113,8 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "CuO", "[Cu]=O", "OCu");
         put(overrides, "ZnO", "[Zn]=O", "OZn");
         put(overrides, "TiO2", "O=[Ti]=O", "O2Ti");
-        put(overrides, "Al2O3", "O[Al]O[Al]O", "O3Al2");
-        put(overrides, "Fe2O3", "O[Fe]O[Fe]O", "O3Fe2");
+        put(overrides, "Al2O3", "[O-2].[O-2].[Al+3].[Al+3].[O-2]", "O3Al2");
+        put(overrides, "Fe2O3", "[O-2].[O-2].[Fe+3].[Fe+3].[O-2]", "O3Fe2");
     }
 
     private static void oxisalesCompactas(Map<String, String> overrides) {
@@ -143,7 +143,7 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "ZnSO4", "O=S(=O)(O[Zn])O");
         put(overrides, "FeSO4", "O=S(=O)(O[Fe])O");
         put(overrides, "Al2(SO4)3", "O=S(=O)(O[Al]OS(=O)(=O)O[Al]OS(=O)(=O)O)O");
-        put(overrides, "(NH4)2SO4", AMMONIUM + "." + AMMONIUM + ".[O-]S(=O)(=O)[O-]");
+        put(overrides, "(NH4)2SO4", AMMONIUM + "." + AMMONIUM + ".[O-]S(=O)(=O)[O-]", "H8N2O4S");
 
         put(overrides, "Na3PO4", "[Na]OP(=O)(O[Na])O[Na]");
         put(overrides, "K3PO4", "[K]OP(=O)(O[K])O[K]");
@@ -167,8 +167,8 @@ public class RepresentationSmilesOverrideService {
     }
 
     private static void casosIonicLegacyUtiles(Map<String, String> overrides) {
-        put(overrides, "(NH4)3PO4", AMMONIUM + "." + AMMONIUM + "." + AMMONIUM + ".[O-]P(=O)([O-])[O-]");
-        put(overrides, "NH4NO3", AMMONIUM + ".[O-][N+](=O)[O-]", "H4NNO3");
+        put(overrides, "(NH4)3PO4", AMMONIUM + "." + AMMONIUM + "." + AMMONIUM + ".[O-]P(=O)([O-])[O-]", "H12N3O4P");
+        put(overrides, "NH4NO3", AMMONIUM + ".[O-][N+](=O)[O-]", "H4N2O3", "H4NNO3");
     }
 
     private static void put(Map<String, String> overrides, String formula, String smiles, String... aliases) {
