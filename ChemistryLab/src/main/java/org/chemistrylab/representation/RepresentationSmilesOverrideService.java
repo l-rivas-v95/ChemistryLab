@@ -36,6 +36,8 @@ public class RepresentationSmilesOverrideService {
 
         covalentesPequenas(overrides);
         acidosHidracidos(overrides);
+        hidroxidosSeleccionados(overrides);
+        salesBinariasUnoAUno(overrides);
         oxidosCovalentes(overrides);
         oxidosMetalicosCompactos(overrides);
         oxisalesCompactas(overrides);
@@ -48,7 +50,6 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "NH3", "[H]N([H])[H]", "H3N");
         put(overrides, "CO", "[C-]#[O+]", "OC");
         put(overrides, "CO2", "O=C=O", "O2C");
-        put(overrides, "NO", "N=O", "ON");
         put(overrides, "NO2", "O=[N+][O-]", "O2N");
         put(overrides, "HCN", "[H]C#N", "CNH");
     }
@@ -59,6 +60,24 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "HBr", "[H]Br", "BrH");
         put(overrides, "HI", "[H]I", "IH");
         put(overrides, "H2S", "[H]S[H]", "SH2");
+    }
+
+    private static void hidroxidosSeleccionados(Map<String, String> overrides) {
+        put(overrides, "NaOH", "[H]O[Na]");
+        put(overrides, "NH4OH", "[NH4+].[OH-]");
+    }
+
+    private static void salesBinariasUnoAUno(Map<String, String> overrides) {
+        put(overrides, "NaCl", "[Na]Cl", "ClNa");
+        put(overrides, "KCl", "[K]Cl", "ClK");
+        put(overrides, "LiCl", "[Li]Cl", "ClLi");
+        put(overrides, "AgCl", "[Ag]Cl", "ClAg");
+        put(overrides, "NaF", "[Na]F", "FNa");
+        put(overrides, "KF", "[K]F", "FK");
+        put(overrides, "NaBr", "[Na]Br", "BrNa");
+        put(overrides, "KBr", "[K]Br", "BrK");
+        put(overrides, "NaI", "[Na]I", "INa");
+        put(overrides, "KI", "[K]I", "IK");
     }
 
     private static void oxidosCovalentes(Map<String, String> overrides) {
