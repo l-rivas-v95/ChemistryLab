@@ -17,11 +17,7 @@ function MoleculeCard({ molecula, onClick }) {
     const formulaVisible = getFormulaVisible(molecula);
 
     return (
-        <button
-            type="button"
-            className={`molecule-card molecule-card-${categoria}`}
-            onClick={onClick}
-        >
+        <article className={`molecule-card molecule-card-${categoria}`}>
             <div className="molecule-card-top">
                 <span className="molecule-type">
                     {tipoVisible}
@@ -76,10 +72,14 @@ function MoleculeCard({ molecula, onClick }) {
                 />
             </div>
 
-            <div className="molecule-open-hint">
+            <button
+                type="button"
+                className="molecule-open-hint"
+                onClick={onClick}
+            >
                 Ver ficha completa
-            </div>
-        </button>
+            </button>
+        </article>
     );
 }
 
