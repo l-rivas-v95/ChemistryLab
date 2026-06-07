@@ -2,6 +2,7 @@ package org.chemistrylab.service;
 
 import lombok.RequiredArgsConstructor;
 import org.chemistrylab.dto.MoleculaDTO;
+import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.mapper.MoleculaMapper;
 import org.chemistrylab.repository.MoleculaRepository;
@@ -20,6 +21,7 @@ public class MoleculaService {
 
     private final MoleculaRepository moleculaRepository;
     private final MoleculaMapper moleculaMapper;
+    private final MoleculeCardRepresentationService moleculeCardRepresentationService;
 
     public Page<MoleculaDTO> findAllPaginado(String search, String categoria, String familia, Pageable pageable) {
         String searchLimpio = limpiarParametro(search);
@@ -28,7 +30,7 @@ public class MoleculaService {
 
         List<MoleculaDTO> filtradas = moleculaRepository.buscarPorTexto(searchLimpio)
                 .stream()
-                .map(moleculaMapper::toDTO)
+                .map(this::toDTOConRepresentacion)
                 .filter(dto -> coincideBusquedaCalculada(dto, searchLimpio))
                 .filter(dto -> coincideCategoria(dto, categoriaLimpia))
                 .filter(dto -> coincideFamilia(dto, familiaLimpia))
@@ -46,29 +48,44 @@ public class MoleculaService {
     public List<MoleculaDTO> findAll() {
         return moleculaRepository.findAll()
                 .stream()
-                .map(moleculaMapper::toDTO)
+                .map(this::toDTOConRepresentacion)
                 .toList();
     }
 
     public MoleculaDTO findById(Long id) {
         MoleculaEntity entity = moleculaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Molécula no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Molecula no encontrada"));
 
-        return moleculaMapper.toDTO(entity);
+        return toDTOConRepresentacion(entity);
     }
 
     public MoleculaDTO findByPubchemCid(Long pubchemCid) {
         MoleculaEntity entity = moleculaRepository.findByPubchemCid(pubchemCid)
-                .orElseThrow(() -> new RuntimeException("Molécula no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Molecula no encontrada"));
 
-        return moleculaMapper.toDTO(entity);
+        return toDTOConRepresentacion(entity);
     }
 
     public MoleculaDTO findByNombre(String nombre) {
         MoleculaEntity entity = moleculaRepository.findByNombreIgnoreCase(nombre)
-                .orElseThrow(() -> new RuntimeException("Molécula no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Molecula no encontrada"));
 
-        return moleculaMapper.toDTO(entity);
+        return toDTOConRepresentacion(entity);
+    }
+
+    private MoleculaDTO toDTOConRepresentacion(MoleculaEntity entity) {
+        MoleculaDTO dto = moleculaMapper.toDTO(entity);
+        MoleculaRepresentacionDTO representacion = moleculeCardRepresentationService.construirRepresentacion(entity);
+
+        dto.setTipoRepresentacion(representacion.getTipoRepresentacion());
+        dto.setSvg(representacion.getSvg());
+        dto.setImagenRepresentacionSource(representacion.getImagenRepresentacionSource());
+        dto.setImagenRepresentacionReason(representacion.getImagenRepresentacionReason());
+        dto.setRepresentationInput(representacion.getRepresentationInput());
+        dto.setRepresentationInputSource(representacion.getRepresentationInputSource());
+        dto.setRepresentationInputReason(representacion.getRepresentationInputReason());
+
+        return dto;
     }
 
     private boolean coincideBusquedaCalculada(MoleculaDTO dto, String search) {
