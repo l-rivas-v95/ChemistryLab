@@ -7,7 +7,7 @@ final class CuratedSmilesRegistry {
     private CuratedSmilesRegistry() {
     }
 
-    static void register(Map<String, String> smilesByFormula, String formula, String smiles, String... aliases) {
+    static void add(Map<String, String> smilesByFormula, String formula, String smiles, String... aliases) {
         smilesByFormula.put(formula, smiles);
         for (String alias : aliases) {
             smilesByFormula.put(alias, smiles);
