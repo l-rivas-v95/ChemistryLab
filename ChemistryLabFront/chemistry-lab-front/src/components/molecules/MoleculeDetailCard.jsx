@@ -17,9 +17,17 @@ import {
 function MoleculeDetailCard({ molecula, onClose }) {
     const [mostrarModelo3d, setMostrarModelo3d] = useState(false);
 
-    const safety = getSafetySummary(molecula.riesgos);
-    const usos = getUsesSummary(molecula.usos);
-    const sinonimos = getSynonymSummary(molecula.sinonimos);
+    if (!molecula) {
+        return null;
+    }
+
+    const safety = getSafetySummary(molecula.riesgos) || {
+        level: "unknown",
+        label: "Sin información",
+        items: []
+    };
+    const usos = getUsesSummary(molecula.usos) || [];
+    const sinonimos = getSynonymSummary(molecula.sinonimos) || [];
 
     return (
         <div className="molecule-modal-overlay" onClick={onClose}>
@@ -39,11 +47,11 @@ function MoleculeDetailCard({ molecula, onClose }) {
                 <section className="molecule-detail-column molecule-detail-main">
                     <div className="molecule-detail-title">
                         <div>
-                            <h2>{molecula.nombre}</h2>
+                            <h2>{molecula.nombre || "Molécula sin nombre"}</h2>
                             <p>{molecula.nombreIupac || "Nombre IUPAC no disponible"}</p>
                         </div>
 
-                        <strong>{molecula.formula}</strong>
+                        <strong>{molecula.formula || "Sin fórmula"}</strong>
                     </div>
 
                     <div className="molecule-detail-image">
@@ -162,27 +170,34 @@ function DetailItem({ icono, label, value, unit }) {
 }
 
 function SafetyCard({ safety }) {
+    const safeSafety = safety || {
+        level: "unknown",
+        label: "Sin información",
+        items: []
+    };
+    const items = Array.isArray(safeSafety.items) ? safeSafety.items : [];
+
     return (
-        <div className={`molecule-safety-card molecule-safety-${safety.level}`}>
+        <div className={`molecule-safety-card molecule-safety-${safeSafety.level || "unknown"}`}>
             <div className="molecule-panel-header">
                 <span>☣️</span>
                 <h4>Riesgos</h4>
             </div>
 
             <strong className="molecule-safety-label">
-                {safety.label}
+                {safeSafety.label || "Sin información"}
             </strong>
 
             <div className="molecule-hazard-list">
-                {safety.items.slice(0, 5).map((item, index) => (
+                {items.slice(0, 5).map((item, index) => (
                     <div
-                        key={`${item.code || "hazard"}-${index}`}
-                        className={`molecule-hazard-item molecule-hazard-${item.severity}`}
+                        key={`${item?.code || "hazard"}-${index}`}
+                        className={`molecule-hazard-item molecule-hazard-${item?.severity || "unknown"}`}
                     >
-                        <span>{item.icon}</span>
+                        <span>{item?.icon || "ℹ️"}</span>
                         <div>
-                            {item.code && <b>{item.code}</b>}
-                            <p>{item.description}</p>
+                            {item?.code && <b>{item.code}</b>}
+                            <p>{item?.description || "Sin descripción disponible"}</p>
                         </div>
                     </div>
                 ))}
@@ -192,6 +207,8 @@ function SafetyCard({ safety }) {
 }
 
 function BulletListCard({ icono, titulo, items }) {
+    const safeItems = Array.isArray(items) ? items : [];
+
     return (
         <div className="molecule-simple-list-card">
             <div className="molecule-panel-header">
@@ -200,17 +217,23 @@ function BulletListCard({ icono, titulo, items }) {
             </div>
 
             <ul className="molecule-bullet-list">
-                {items.map((item) => (
-                    <li key={item} title={item}>
-                        {cleanLongText(item, 120)}
-                    </li>
-                ))}
+                {safeItems.length > 0 ? (
+                    safeItems.map((item, index) => (
+                        <li key={`${item}-${index}`} title={item}>
+                            {cleanLongText(item, 120)}
+                        </li>
+                    ))
+                ) : (
+                    <li>Sin información disponible.</li>
+                )}
             </ul>
         </div>
     );
 }
 
 function TagListCard({ icono, titulo, items }) {
+    const safeItems = Array.isArray(items) ? items : [];
+
     return (
         <div className="molecule-simple-list-card">
             <div className="molecule-panel-header">
@@ -219,11 +242,15 @@ function TagListCard({ icono, titulo, items }) {
             </div>
 
             <div className="molecule-simple-list">
-                {items.map((item) => (
-                    <span key={item} title={item}>
-                        {cleanLongText(item, 38)}
-                    </span>
-                ))}
+                {safeItems.length > 0 ? (
+                    safeItems.map((item, index) => (
+                        <span key={`${item}-${index}`} title={item}>
+                            {cleanLongText(item, 38)}
+                        </span>
+                    ))
+                ) : (
+                    <span>Sin información disponible.</span>
+                )}
             </div>
         </div>
     );
