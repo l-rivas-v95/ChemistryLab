@@ -3,6 +3,7 @@ package org.chemistrylab.service;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.repository.MoleculaRepository;
+import org.chemistrylab.representation.EducationalOxoanionSmilesCatalog;
 import org.chemistrylab.representation.IonicSmilesBuilderService;
 import org.chemistrylab.representation.RepresentationSmilesOverrideService;
 import org.chemistrylab.representation.SmilesToSvgService;
@@ -35,7 +36,8 @@ public class MoleculeCardRepresentationService {
                 .orElseThrow(() -> new RuntimeException("Molécula no encontrada"));
 
         String formula = limpiar(molecula.getFormula());
-        String smiles = representationSmilesOverrideService.findOverride(formula)
+        String smiles = EducationalOxoanionSmilesCatalog.findNeutralOxoacid(formula)
+                .or(() -> representationSmilesOverrideService.findOverride(formula))
                 .or(() -> ionicSmilesBuilderService.build(formula))
                 .orElseGet(() -> primerTexto(molecula.getCanonicalSmiles(), molecula.getIsomericSmiles()));
 
@@ -50,7 +52,7 @@ public class MoleculeCardRepresentationService {
                 );
                 dto.setRepresentationInput(smiles);
                 dto.setRepresentationInputSource("CARD_CURATED_OR_DATABASE_SMILES_CDK");
-                dto.setRepresentationInputReason("Orden: SMILES explícito curado, SMILES iónico por catálogo, SMILES de base de datos.");
+                dto.setRepresentationInputReason("Orden: oxoácido neutro, SMILES explícito curado, SMILES iónico por catálogo, SMILES de base de datos.");
                 return dto;
             }
         }
