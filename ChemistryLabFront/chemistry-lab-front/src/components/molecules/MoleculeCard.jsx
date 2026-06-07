@@ -16,8 +16,25 @@ function MoleculeCard({ molecula, onClick }) {
     const tipoVisible = getTipoVisible(molecula);
     const formulaVisible = getFormulaVisible(molecula);
 
+    const abrirFicha = () => {
+        if (typeof onClick === "function") {
+            onClick();
+        }
+    };
+
     return (
-        <article className={`molecule-card molecule-card-${categoria}`}>
+        <article
+            className={`molecule-card molecule-card-${categoria}`}
+            role="button"
+            tabIndex={0}
+            onClick={abrirFicha}
+            onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    abrirFicha();
+                }
+            }}
+        >
             <div className="molecule-card-top">
                 <span className="molecule-type">
                     {tipoVisible}
@@ -72,13 +89,9 @@ function MoleculeCard({ molecula, onClick }) {
                 />
             </div>
 
-            <button
-                type="button"
-                className="molecule-open-hint"
-                onClick={onClick}
-            >
+            <div className="molecule-open-hint">
                 Ver ficha completa
-            </button>
+            </div>
         </article>
     );
 }
