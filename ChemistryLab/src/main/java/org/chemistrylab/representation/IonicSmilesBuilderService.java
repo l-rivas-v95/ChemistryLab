@@ -21,16 +21,23 @@ public class IonicSmilesBuilderService {
 
     public Optional<String> build(String formula) {
         return ionicFormulaResolver.resolver(formula)
+                .filter(this::isRealIonicResolution)
                 .flatMap(this::buildFromResolution);
+    }
+
+    private boolean isRealIonicResolution(IonicFormulaResolution resolution) {
+        if (resolution == null || resolution.cation() == null || resolution.anion() == null) {
+            return false;
+        }
+        if (resolution.cation().ion() == null || resolution.anion().ion() == null) {
+            return false;
+        }
+        return resolution.cation().ion().getCarga() > 0 && resolution.anion().ion().getCarga() < 0;
     }
 
     private Optional<String> buildFromResolution(IonicFormulaResolution resolution) {
         IonMatch cationMatch = resolution.cation();
         IonMatch anionMatch = resolution.anion();
-
-        if (cationMatch == null || anionMatch == null || cationMatch.ion() == null || anionMatch.ion() == null) {
-            return Optional.empty();
-        }
 
         Optional<String> ionicFragments = buildIonicFragments(cationMatch, anionMatch);
         if (ionicFragments.isPresent()) {
@@ -120,10 +127,6 @@ public class IonicSmilesBuilderService {
         String atom = neutralAtom(formula);
         if (atom == null) {
             return null;
-        }
-
-        if (charge == 0) {
-            return "[" + atom + "]";
         }
 
         String sign = charge > 0 ? "+" : "-";
