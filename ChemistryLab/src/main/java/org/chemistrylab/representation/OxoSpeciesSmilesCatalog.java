@@ -91,10 +91,6 @@ public final class OxoSpeciesSmilesCatalog {
             Map.entry("BrHO2", "OBr=O"),
             Map.entry("BrHO3", "OBr(=O)=O"),
             Map.entry("BrHO4", "OBr(=O)(=O)=O"),
-            Map.entry("HIO", "OI"),
-            Map.entry("HIO2", "OI=O"),
-            Map.entry("HIO3", "OI(=O)=O"),
-            Map.entry("HIO4", "OI(=O)(=O)=O"),
             Map.entry("CrH2O4", "O[Cr](=O)(=O)O"),
             Map.entry("Cr2H2O7", "O[Cr](=O)(=O)O[Cr](=O)(=O)O")
     );
