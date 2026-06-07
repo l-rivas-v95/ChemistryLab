@@ -1,5 +1,6 @@
 package org.chemistrylab.representation;
 
+import org.chemistrylab.chemistry.formula.FormulaParserService;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.springframework.stereotype.Service;
 
@@ -8,13 +9,16 @@ import java.util.Optional;
 @Service
 public class RepresentationSmilesResolver {
 
+    private final FormulaParserService formulaParserService;
     private final CuratedFormulaSmilesService curatedFormulaSmilesService;
     private final IonicSmilesBuilderService ionicSmilesBuilderService;
 
     public RepresentationSmilesResolver(
+            FormulaParserService formulaParserService,
             CuratedFormulaSmilesService curatedFormulaSmilesService,
             IonicSmilesBuilderService ionicSmilesBuilderService
     ) {
+        this.formulaParserService = formulaParserService;
         this.curatedFormulaSmilesService = curatedFormulaSmilesService;
         this.ionicSmilesBuilderService = ionicSmilesBuilderService;
     }
@@ -24,7 +28,7 @@ public class RepresentationSmilesResolver {
             return Optional.empty();
         }
 
-        String formula = clean(molecule.getFormula());
+        String formula = cleanFormula(molecule.getFormula());
 
         Optional<String> oxoacidSmiles = OxoSpeciesSmilesCatalog.findNeutralOxoacid(formula);
         if (oxoacidSmiles.isPresent()) {
@@ -81,8 +85,8 @@ public class RepresentationSmilesResolver {
         return Optional.empty();
     }
 
-    private String clean(String value) {
-        return value == null ? "" : value.trim();
+    private String cleanFormula(String value) {
+        return formulaParserService.limpiarFormula(value);
     }
 
     private boolean hasText(String value) {
