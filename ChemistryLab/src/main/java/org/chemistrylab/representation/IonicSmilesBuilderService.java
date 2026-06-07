@@ -32,6 +32,13 @@ public class IonicSmilesBuilderService {
         if (resolution.cation().ion() == null || resolution.anion().ion() == null) {
             return false;
         }
+
+        String cationFormula = resolution.cation().ion().getFormula();
+        String anionFormula = resolution.anion().ion().getFormula();
+        if ("H".equals(cationFormula) && "OH".equals(anionFormula)) {
+            return false;
+        }
+
         return resolution.cation().ion().getCarga() > 0 && resolution.anion().ion().getCarga() < 0;
     }
 
