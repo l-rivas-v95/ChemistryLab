@@ -13,6 +13,13 @@ import java.util.Optional;
 @Service
 public class IonicSmilesBuilderService {
 
+    private static final String AMMONIUM_FORMULA = "NH4";
+    private static final String AMMONIUM_SMILES = "[NH4+]";
+    private static final String HYDROXIDE_FORMULA = "OH";
+    private static final String HYDROXIDE_SMILES = "[OH-]";
+    private static final String CYANIDE_FORMULA = "CN";
+    private static final String CYANIDE_SMILES = "[C-]#N";
+
     private final IonicFormulaResolver ionicFormulaResolver;
 
     public IonicSmilesBuilderService(IonicFormulaResolver ionicFormulaResolver) {
@@ -35,7 +42,7 @@ public class IonicSmilesBuilderService {
 
         String cationFormula = resolution.cation().ion().getFormula();
         String anionFormula = resolution.anion().ion().getFormula();
-        if ("H".equals(cationFormula) && "OH".equals(anionFormula)) {
+        if ("H".equals(cationFormula) && HYDROXIDE_FORMULA.equals(anionFormula)) {
             return false;
         }
 
@@ -119,16 +126,16 @@ public class IonicSmilesBuilderService {
         String formula = ion.getFormula();
         int charge = ion.getCarga();
 
-        if ("NH4".equals(formula)) {
-            return "[NH4+]";
+        if (AMMONIUM_FORMULA.equals(formula)) {
+            return AMMONIUM_SMILES;
         }
 
-        if ("OH".equals(formula)) {
-            return "[OH-]";
+        if (HYDROXIDE_FORMULA.equals(formula)) {
+            return HYDROXIDE_SMILES;
         }
 
-        if ("CN".equals(formula)) {
-            return "[C-]#N";
+        if (CYANIDE_FORMULA.equals(formula)) {
+            return CYANIDE_SMILES;
         }
 
         String atom = neutralAtom(formula);
