@@ -28,6 +28,11 @@ public class RepresentationSmilesOverrideService {
             return Optional.empty();
         }
 
+        Optional<String> neutralOxoacid = EducationalOxoanionSmilesCatalog.findNeutralOxoacid(normalizedFormula);
+        if (neutralOxoacid.isPresent()) {
+            return neutralOxoacid;
+        }
+
         return Optional.ofNullable(OVERRIDES.get(normalizedFormula));
     }
 
@@ -40,7 +45,6 @@ public class RepresentationSmilesOverrideService {
         salesBinariasCompactas(overrides);
         oxidosCovalentes(overrides);
         oxidosMetalicosCompactos(overrides);
-        oxoacidos(overrides);
         oxisalesCompactas(overrides);
         casosIonicLegacyUtiles(overrides);
 
@@ -118,24 +122,6 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "TiO2", "O=[Ti]=O", "O2Ti");
         put(overrides, "Al2O3", "O[Al]O[Al]O", "O3Al2");
         put(overrides, "Fe2O3", "O[Fe]O[Fe]O", "O3Fe2");
-    }
-
-    private static void oxoacidos(Map<String, String> overrides) {
-        put(overrides, "HNO3", "O=N(=O)O[H]");
-        put(overrides, "HNO2", "O=NO[H]");
-        put(overrides, "H2SO4", "O=S(=O)(O[H])O[H]");
-        put(overrides, "H2SO3", "O=S(O[H])O[H]");
-        put(overrides, "H2CO3", "O=C(O[H])O[H]");
-        put(overrides, "H3PO4", "O=P(O[H])(O[H])O[H]");
-        put(overrides, "H3BO3", "B(O[H])(O[H])O[H]");
-        put(overrides, "B(OH)3", "B(O[H])(O[H])O[H]");
-        put(overrides, "HClO", "ClO[H]");
-        put(overrides, "HClO2", "O=ClO[H]");
-        put(overrides, "HClO3", "O=Cl(=O)O[H]");
-        put(overrides, "HClO4", "O=Cl(=O)(=O)O[H]");
-        put(overrides, "HMnO4", "O=[Mn](=O)(=O)O[H]");
-        put(overrides, "H2CrO4", "O=[Cr](=O)(O[H])O[H]");
-        put(overrides, "H2Cr2O7", "O=[Cr](=O)(O[H])O[Cr](=O)(=O)O[H]");
     }
 
     private static void oxisalesCompactas(Map<String, String> overrides) {
