@@ -36,8 +36,6 @@ public class RepresentationSmilesOverrideService {
 
         covalentesPequenas(overrides);
         acidosHidracidos(overrides);
-        hidroxidosCompactos(overrides);
-        salesBinariasCompactas(overrides);
         oxidosCovalentes(overrides);
         oxidosMetalicosCompactos(overrides);
         oxisalesCompactas(overrides);
@@ -61,38 +59,6 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "HBr", "[H]Br", "BrH");
         put(overrides, "HI", "[H]I", "IH");
         put(overrides, "H2S", "[H]S[H]", "SH2");
-    }
-
-    private static void hidroxidosCompactos(Map<String, String> overrides) {
-        put(overrides, "NaOH", "[Na]O[H]");
-        put(overrides, "KOH", "[K]O[H]");
-        put(overrides, "LiOH", "[Li]O[H]");
-        put(overrides, "Ca(OH)2", "[H]O[Ca]O[H]");
-        put(overrides, "Mg(OH)2", "[H]O[Mg]O[H]");
-        put(overrides, "Ba(OH)2", "[H]O[Ba]O[H]");
-        put(overrides, "Cu(OH)2", "[H]O[Cu]O[H]");
-        put(overrides, "Zn(OH)2", "[H]O[Zn]O[H]");
-        put(overrides, "Fe(OH)2", "[H]O[Fe]O[H]");
-        put(overrides, "Fe(OH)3", "O[Fe](O)O");
-        put(overrides, "Al(OH)3", "O[Al](O)O");
-        put(overrides, "NH4OH", "[NH4+].[OH-]");
-    }
-
-    private static void salesBinariasCompactas(Map<String, String> overrides) {
-        put(overrides, "NaCl", "[Na]Cl", "ClNa");
-        put(overrides, "KCl", "[K]Cl", "ClK");
-        put(overrides, "LiCl", "[Li]Cl", "ClLi");
-        put(overrides, "NaF", "[Na]F", "FNa");
-        put(overrides, "KF", "[K]F", "FK");
-        put(overrides, "NaBr", "[Na]Br", "BrNa");
-        put(overrides, "KBr", "[K]Br", "BrK");
-        put(overrides, "NaI", "[Na]I", "INa");
-        put(overrides, "KI", "[K]I", "IK");
-        put(overrides, "MgCl2", "Cl[Mg]Cl", "Cl2Mg");
-        put(overrides, "CaCl2", "Cl[Ca]Cl", "Cl2Ca");
-        put(overrides, "AlCl3", "Cl[Al](Cl)Cl", "Cl3Al");
-        put(overrides, "NaCN", "[Na]C#N", "CNNa");
-        put(overrides, "KCN", "[K]C#N", "CNK");
     }
 
     private static void oxidosCovalentes(Map<String, String> overrides) {
@@ -167,7 +133,6 @@ public class RepresentationSmilesOverrideService {
     private static void casosIonicLegacyUtiles(Map<String, String> overrides) {
         put(overrides, "(NH4)3PO4", "[NH4]OP(=O)(O[NH4])O[NH4]");
         put(overrides, "NH4NO3", "[NH4]O[N+](=O)[O-]");
-        put(overrides, "NH4Cl", "[NH4]Cl");
     }
 
     private static void put(Map<String, String> overrides, String formula, String smiles, String... aliases) {
