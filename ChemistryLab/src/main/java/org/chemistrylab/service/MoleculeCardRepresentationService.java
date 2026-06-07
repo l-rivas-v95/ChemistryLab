@@ -52,21 +52,13 @@ public class MoleculeCardRepresentationService {
                         formula,
                         svg.get(),
                         "CDK_SVG",
-                        "Representacion 2D aislada generada desde SMILES curado/ionico con CDK."
+                        "Representacion 2D generada desde SMILES con CDK."
                 );
                 dto.setRepresentationInput(smiles);
                 dto.setRepresentationInputSource("CARD_CURATED_OR_DATABASE_SMILES_CDK");
                 dto.setRepresentationInputReason("Orden: oxoacido neutro, SMILES explicito curado, SMILES ionico por catalogo, SMILES de base de datos.");
                 return dto;
             }
-        }
-
-        if (tieneTexto(molecula.getImagen2d())) {
-            return MoleculaRepresentacionDTO.imagenExterna(
-                    formula,
-                    molecula.getImagen2d(),
-                    "Fallback: imagen 2D externa importada desde PubChem."
-            );
         }
 
         return MoleculaRepresentacionDTO.formula(formula);
