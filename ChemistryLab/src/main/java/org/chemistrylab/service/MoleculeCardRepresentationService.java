@@ -13,6 +13,9 @@ import java.util.Optional;
 @Service
 public class MoleculeCardRepresentationService {
 
+    private static final String CDK_SVG_SOURCE = "CDK_SVG";
+    private static final String CDK_SVG_REASON = "Representacion 2D generada desde SMILES con CDK.";
+
     private final MoleculaRepository moleculaRepository;
     private final SmilesToSvgService smilesToSvgService;
     private final RepresentationSmilesResolver representationSmilesResolver;
@@ -36,26 +39,29 @@ public class MoleculeCardRepresentationService {
 
     public MoleculaRepresentacionDTO construirRepresentacion(MoleculaEntity molecula) {
         String formula = limpiar(molecula.getFormula());
-        Optional<RepresentationSmilesResolution> resolution = representationSmilesResolver.resolve(molecula);
 
-        if (resolution.isPresent()) {
-            RepresentationSmilesResolution resolved = resolution.get();
-            Optional<String> svg = smilesToSvgService.renderSvg(resolved.smiles());
-            if (svg.isPresent()) {
-                MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.svg(
-                        formula,
-                        svg.get(),
-                        "CDK_SVG",
-                        "Representacion 2D generada desde SMILES con CDK."
-                );
-                dto.setRepresentationInput(resolved.smiles());
-                dto.setRepresentationInputSource(resolved.source());
-                dto.setRepresentationInputReason(resolved.reason());
-                return dto;
-            }
-        }
+        return representationSmilesResolver.resolve(molecula)
+                .flatMap(resolved -> buildSvgRepresentation(formula, resolved))
+                .orElseGet(() -> MoleculaRepresentacionDTO.formula(formula));
+    }
 
-        return MoleculaRepresentacionDTO.formula(formula);
+    private Optional<MoleculaRepresentacionDTO> buildSvgRepresentation(
+            String formula,
+            RepresentationSmilesResolution resolved
+    ) {
+        return smilesToSvgService.renderSvg(resolved.smiles())
+                .map(svg -> {
+                    MoleculaRepresentacionDTO dto = MoleculaRepresentacionDTO.svg(
+                            formula,
+                            svg,
+                            CDK_SVG_SOURCE,
+                            CDK_SVG_REASON
+                    );
+                    dto.setRepresentationInput(resolved.smiles());
+                    dto.setRepresentationInputSource(resolved.source());
+                    dto.setRepresentationInputReason(resolved.reason());
+                    return dto;
+                });
     }
 
     private String limpiar(String value) {
