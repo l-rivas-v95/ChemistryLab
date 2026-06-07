@@ -20,7 +20,7 @@
 
     main {
       padding: 24px;
-      max-width: 1200px;
+      max-width: 1680px;
       margin: 0 auto;
     }
 
@@ -51,14 +51,34 @@
       resize: vertical;
     }
 
-    button {
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
       margin-top: 12px;
+    }
+
+    button {
       padding: 10px 16px;
       border: 0;
       border-radius: 999px;
       background: #fbbf24;
       font-weight: 800;
       cursor: pointer;
+    }
+
+    .toolbar label {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    input[type="range"] {
+      width: 220px;
     }
 
     .hint {
@@ -69,8 +89,8 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 18px;
     }
 
     .card {
@@ -82,12 +102,12 @@
 
     .card h3 {
       margin: 0 0 6px 0;
-      font-size: 18px;
+      font-size: 20px;
     }
 
     .smiles {
       font-family: Consolas, Monaco, monospace;
-      font-size: 12px;
+      font-size: 13px;
       background: #f1f5f9;
       padding: 6px;
       border-radius: 6px;
@@ -96,7 +116,7 @@
     }
 
     .svg-box {
-      height: 220px;
+      height: 420px;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
       display: flex;
@@ -107,8 +127,10 @@
     }
 
     .svg-box svg {
-      max-width: 100%;
-      max-height: 100%;
+      width: var(--svg-size, 360px) !important;
+      height: var(--svg-size, 360px) !important;
+      max-width: 96%;
+      max-height: 96%;
     }
 
     .error {
@@ -137,7 +159,14 @@ Sulfur trioxide|O=S(=O)=O
 Nitric oxide|N=O
 Nitrogen dioxide|O=[N+][O-]
 Dinitrogen monoxide|[N-]=[N+]=O</textarea>
-    <button onclick="renderAll()">Generar SVG</button>
+    <div class="toolbar">
+      <button onclick="renderAll()">Generar SVG</button>
+      <label>
+        Tamaño SVG
+        <input id="sizeRange" type="range" min="220" max="720" value="420" step="20" oninput="updateSize()" />
+        <span id="sizeValue">420px</span>
+      </label>
+    </div>
     <div class="hint">
       Formato: <code>Nombre|SMILES</code>, una molécula por línea. Endpoint usado: <code>/api/tools/smiles/svg?smiles=...</code>
     </div>
@@ -147,7 +176,14 @@ Dinitrogen monoxide|[N-]=[N+]=O</textarea>
 </main>
 
 <script>
+  function updateSize() {
+    const value = document.getElementById('sizeRange').value;
+    document.documentElement.style.setProperty('--svg-size', value + 'px');
+    document.getElementById('sizeValue').textContent = value + 'px';
+  }
+
   async function renderAll() {
+    updateSize();
     const container = document.getElementById('results');
     container.innerHTML = '';
 
@@ -206,6 +242,7 @@ Dinitrogen monoxide|[N-]=[N+]=O</textarea>
       .replaceAll("'", '&#039;');
   }
 
+  updateSize();
   renderAll();
 </script>
 </body>
