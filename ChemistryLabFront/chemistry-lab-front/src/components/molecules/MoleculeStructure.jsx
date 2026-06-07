@@ -1,35 +1,16 @@
-import { useState } from "react";
-import { useMoleculeRepresentation } from "../../hooks/useMoleculeRepresentation";
 import ChemicalFormulaText from "./ChemicalFormulaText";
 
 function MoleculeStructure({ molecula }) {
-    const moleculaId = molecula?.id;
-    const { representacion, error } = useMoleculeRepresentation(moleculaId);
-
-    if (error || !representacion) {
-        return <FormulaStructure formula={molecula?.formula} />;
-    }
-
-    if (representacion.tipoRepresentacion === "SVG" && representacion.svg) {
+    if (molecula?.tipoRepresentacion === "SVG" && molecula?.svg) {
         return (
             <SvgStructure
-                svg={representacion.svg}
-                formula={representacion.formulaVisual || molecula?.formula}
+                svg={molecula.svg}
+                formula={molecula.formula}
             />
         );
     }
 
-    if (representacion.tipoRepresentacion === "IMAGEN_2D" && representacion.imagen2d) {
-        return (
-            <ExternalImageStructure
-                src={representacion.imagen2d}
-                alt={molecula?.nombre || representacion.formulaVisual || "Molécula"}
-                formula={representacion.formulaVisual || molecula?.formula}
-            />
-        );
-    }
-
-    return <FormulaStructure formula={representacion.formulaVisual || molecula?.formula} />;
+    return <FormulaStructure formula={molecula?.formula} />;
 }
 
 function SvgStructure({ svg, formula }) {
@@ -45,26 +26,6 @@ function SvgStructure({ svg, formula }) {
     );
 }
 
-function ExternalImageStructure({ src, alt, formula }) {
-    const [error, setError] = useState(false);
-
-    if (error || !src) {
-        return <FormulaStructure formula={formula || alt} />;
-    }
-
-    return (
-        <div className="formula-structure formula-structure-html external-image-structure-html">
-            <img
-                src={src}
-                alt={alt}
-                className="external-molecule-image"
-                loading="lazy"
-                onError={() => setError(true)}
-            />
-        </div>
-    );
-}
-
 function FormulaStructure({ formula }) {
     return (
         <div className="formula-structure formula-structure-html">
@@ -73,7 +34,7 @@ function FormulaStructure({ formula }) {
                 <ChemicalFormulaText value={formula || "Sin estructura"} />
             </div>
             <div className="formula-caption-html">
-                fórmula química
+                formula quimica
             </div>
         </div>
     );
