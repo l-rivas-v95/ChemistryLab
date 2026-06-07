@@ -38,6 +38,7 @@ public class RepresentationSmilesOverrideService {
         acidosHidracidos(overrides);
         hidroxidosSeleccionados(overrides);
         salesBinariasUnoAUno(overrides);
+        salesAmonioHalogenuro(overrides);
         oxidosCovalentes(overrides);
         oxidosMetalicosCompactos(overrides);
         oxisalesCompactas(overrides);
@@ -85,6 +86,13 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "KBr", "[K]Br", "BrK");
         put(overrides, "NaI", "[Na]I", "INa");
         put(overrides, "KI", "[K]I", "IK");
+    }
+
+    private static void salesAmonioHalogenuro(Map<String, String> overrides) {
+        put(overrides, "NH4F", "[NH4+].[F-]", "FH4N");
+        put(overrides, "NH4Cl", "[NH4+].[Cl-]", "ClH4N");
+        put(overrides, "NH4Br", "[NH4+].[Br-]", "BrH4N");
+        put(overrides, "NH4I", "[NH4+].[I-]", "H4IN");
     }
 
     private static void oxidosCovalentes(Map<String, String> overrides) {
