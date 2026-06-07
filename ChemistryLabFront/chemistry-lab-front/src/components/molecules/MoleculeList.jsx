@@ -238,7 +238,7 @@ function MoleculeList({
                 <div className="moleculas-grid">
                     {moleculas.map((molecula) => (
                         <MoleculeCard
-                            key={molecula.id}
+                            key={molecula.id ?? molecula.pubchemCid ?? molecula.nombre}
                             molecula={molecula}
                             onClick={() => setMoleculaSeleccionada(molecula)}
                         />
@@ -261,7 +261,7 @@ function MoleculeList({
                 onPaginaSiguiente={onPaginaSiguiente}
             />
 
-            {moleculaSeleccionada?.id && (
+            {moleculaSeleccionada && (
                 <MoleculeDetailCard
                     molecula={moleculaSeleccionada}
                     onClose={() => setMoleculaSeleccionada(null)}
