@@ -4,6 +4,7 @@ import org.chemistrylab.chemistry.config.IonConfig;
 import org.chemistrylab.chemistry.ionic.IonMatch;
 import org.chemistrylab.chemistry.ionic.IonicFormulaResolution;
 import org.chemistrylab.chemistry.ionic.IonicFormulaResolver;
+import org.chemistrylab.representation.smiles.OxoanionSmilesCatalog;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class IonicSmilesBuilderService {
             return ionicFragments;
         }
 
-        Optional<String> anionSmilesOptional = EducationalOxoanionSmilesCatalog.find(anionMatch.ion().getFormula());
+        Optional<String> anionSmilesOptional = OxoanionSmilesCatalog.find(anionMatch.ion().getFormula());
         if (anionSmilesOptional.isEmpty()) {
             return Optional.empty();
         }
