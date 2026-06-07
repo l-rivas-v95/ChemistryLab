@@ -33,8 +33,12 @@ public class MoleculeCardRepresentationService {
 
     public MoleculaRepresentacionDTO obtenerRepresentacion(Long id) {
         MoleculaEntity molecula = moleculaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Molécula no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Molecula no encontrada"));
 
+        return construirRepresentacion(molecula);
+    }
+
+    public MoleculaRepresentacionDTO construirRepresentacion(MoleculaEntity molecula) {
         String formula = limpiar(molecula.getFormula());
         String smiles = EducationalOxoanionSmilesCatalog.findNeutralOxoacid(formula)
                 .or(() -> representationSmilesOverrideService.findOverride(formula))
@@ -48,11 +52,11 @@ public class MoleculeCardRepresentationService {
                         formula,
                         svg.get(),
                         "CDK_SVG",
-                        "Representación 2D aislada generada desde SMILES curado/iónico con CDK."
+                        "Representacion 2D aislada generada desde SMILES curado/ionico con CDK."
                 );
                 dto.setRepresentationInput(smiles);
                 dto.setRepresentationInputSource("CARD_CURATED_OR_DATABASE_SMILES_CDK");
-                dto.setRepresentationInputReason("Orden: oxoácido neutro, SMILES explícito curado, SMILES iónico por catálogo, SMILES de base de datos.");
+                dto.setRepresentationInputReason("Orden: oxoacido neutro, SMILES explicito curado, SMILES ionico por catalogo, SMILES de base de datos.");
                 return dto;
             }
         }
