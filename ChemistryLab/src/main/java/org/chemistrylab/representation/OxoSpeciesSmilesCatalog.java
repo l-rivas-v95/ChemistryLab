@@ -3,7 +3,7 @@ package org.chemistrylab.representation;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EducationalOxoanionSmilesCatalog {
+public final class OxoSpeciesSmilesCatalog {
 
     private static final Map<String, String> OXOANION_SMILES = Map.ofEntries(
             Map.entry("NO3", "[O-][N+](=O)[O-]"),
@@ -58,7 +58,7 @@ public final class EducationalOxoanionSmilesCatalog {
             Map.entry("Cr2H2O7", "O[Cr](=O)(=O)O[Cr](=O)(=O)O")
     );
 
-    private EducationalOxoanionSmilesCatalog() {
+    private OxoSpeciesSmilesCatalog() {
     }
 
     public static Optional<String> find(String formula) {

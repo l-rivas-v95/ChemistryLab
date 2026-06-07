@@ -51,7 +51,7 @@ public class IonicSmilesBuilderService {
             return ionicFragments;
         }
 
-        Optional<String> anionSmilesOptional = EducationalOxoanionSmilesCatalog.find(anionMatch.ion().getFormula());
+        Optional<String> anionSmilesOptional = OxoSpeciesSmilesCatalog.find(anionMatch.ion().getFormula());
         if (anionSmilesOptional.isEmpty()) {
             return Optional.empty();
         }

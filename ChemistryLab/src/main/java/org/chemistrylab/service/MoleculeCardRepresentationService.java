@@ -3,7 +3,7 @@ package org.chemistrylab.service;
 import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.chemistrylab.repository.MoleculaRepository;
-import org.chemistrylab.representation.EducationalOxoanionSmilesCatalog;
+import org.chemistrylab.representation.OxoSpeciesSmilesCatalog;
 import org.chemistrylab.representation.IonicSmilesBuilderService;
 import org.chemistrylab.representation.RepresentationSmilesOverrideService;
 import org.chemistrylab.representation.SmilesToSvgService;
@@ -40,7 +40,7 @@ public class MoleculeCardRepresentationService {
 
     public MoleculaRepresentacionDTO construirRepresentacion(MoleculaEntity molecula) {
         String formula = limpiar(molecula.getFormula());
-        String smiles = EducationalOxoanionSmilesCatalog.findNeutralOxoacid(formula)
+        String smiles = OxoSpeciesSmilesCatalog.findNeutralOxoacid(formula)
                 .or(() -> representationSmilesOverrideService.findOverride(formula))
                 .or(() -> ionicSmilesBuilderService.build(formula))
                 .orElseGet(() -> primerTexto(molecula.getCanonicalSmiles(), molecula.getIsomericSmiles()));
