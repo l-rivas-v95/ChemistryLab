@@ -25,15 +25,15 @@ public class IonicSmilesBuilderService {
     }
 
     private Optional<String> buildFromResolution(IonicFormulaResolution resolution) {
-        IonMatch cationMatch = resolution.getCation();
-        IonMatch anionMatch = resolution.getAnion();
+        IonMatch cationMatch = resolution.cation();
+        IonMatch anionMatch = resolution.anion();
 
-        if (cationMatch == null || anionMatch == null || cationMatch.getIon() == null || anionMatch.getIon() == null) {
+        if (cationMatch == null || anionMatch == null || cationMatch.ion() == null || anionMatch.ion() == null) {
             return Optional.empty();
         }
 
-        IonConfig cation = cationMatch.getIon();
-        IonConfig anion = anionMatch.getIon();
+        IonConfig cation = cationMatch.ion();
+        IonConfig anion = anionMatch.ion();
 
         Optional<String> compact = buildCompactVisual(cationMatch, anionMatch);
         if (compact.isPresent()) {
@@ -54,7 +54,7 @@ public class IonicSmilesBuilderService {
             return Optional.of(anionSmiles);
         }
 
-        for (int i = 0; i < cationMatch.getCantidad(); i++) {
+        for (int i = 0; i < cationMatch.cantidad(); i++) {
             fragments.add(cationSmiles);
         }
 
@@ -62,8 +62,7 @@ public class IonicSmilesBuilderService {
     }
 
     private Optional<String> buildCompactVisual(IonMatch cationMatch, IonMatch anionMatch) {
-        IonConfig cation = cationMatch.getIon();
-        IonConfig anion = anionMatch.getIon();
+        IonConfig anion = anionMatch.ion();
 
         String anionFormula = anion.getFormula();
 
@@ -87,24 +86,24 @@ public class IonicSmilesBuilderService {
     }
 
     private Optional<String> buildMonoatomicSalt(IonMatch cationMatch, IonMatch anionMatch) {
-        String cation = neutralAtom(cationMatch.getIon().getFormula());
-        String anion = neutralAtom(anionMatch.getIon().getFormula());
+        String cation = neutralAtom(cationMatch.ion().getFormula());
+        String anion = neutralAtom(anionMatch.ion().getFormula());
 
         if (cation == null || anion == null) {
             return Optional.empty();
         }
 
-        if (cationMatch.getCantidad() == 1 && anionMatch.getCantidad() == 1) {
+        if (cationMatch.cantidad() == 1 && anionMatch.cantidad() == 1) {
             return Optional.of("[" + cation + "]" + anion);
         }
 
         List<String> chain = new ArrayList<>();
-        int max = Math.max(cationMatch.getCantidad(), anionMatch.getCantidad());
+        int max = Math.max(cationMatch.cantidad(), anionMatch.cantidad());
         for (int i = 0; i < max; i++) {
-            if (i < anionMatch.getCantidad()) {
+            if (i < anionMatch.cantidad()) {
                 chain.add(anion);
             }
-            if (i < cationMatch.getCantidad()) {
+            if (i < cationMatch.cantidad()) {
                 chain.add("[" + cation + "]");
             }
         }
@@ -117,12 +116,12 @@ public class IonicSmilesBuilderService {
     }
 
     private Optional<String> buildHydroxide(IonMatch cationMatch) {
-        String cation = neutralAtom(cationMatch.getIon().getFormula());
+        String cation = neutralAtom(cationMatch.ion().getFormula());
         if (cation == null) {
             return Optional.empty();
         }
 
-        int cantidadOH = Math.max(1, cationMatch.getIon().getCarga());
+        int cantidadOH = Math.max(1, cationMatch.ion().getCarga());
 
         if (cantidadOH == 1) {
             return Optional.of("[" + cation + "]O[H]");
@@ -138,20 +137,20 @@ public class IonicSmilesBuilderService {
     }
 
     private Optional<String> buildOxide(IonMatch cationMatch, IonMatch anionMatch) {
-        String cation = neutralAtom(cationMatch.getIon().getFormula());
+        String cation = neutralAtom(cationMatch.ion().getFormula());
         if (cation == null) {
             return Optional.empty();
         }
 
-        if (cationMatch.getCantidad() == 1 && anionMatch.getCantidad() == 1) {
+        if (cationMatch.cantidad() == 1 && anionMatch.cantidad() == 1) {
             return Optional.of("[" + cation + "]=O");
         }
 
-        if (cationMatch.getCantidad() == 2 && anionMatch.getCantidad() == 3) {
+        if (cationMatch.cantidad() == 2 && anionMatch.cantidad() == 3) {
             return Optional.of("O[" + cation + "]O[" + cation + "]O");
         }
 
-        if (cationMatch.getCantidad() == 2 && anionMatch.getCantidad() == 1) {
+        if (cationMatch.cantidad() == 2 && anionMatch.cantidad() == 1) {
             return Optional.of("[" + cation + "]O[" + cation + "]");
         }
 
@@ -159,7 +158,7 @@ public class IonicSmilesBuilderService {
     }
 
     private Optional<String> buildCyanide(IonMatch cationMatch) {
-        String cation = neutralAtom(cationMatch.getIon().getFormula());
+        String cation = neutralAtom(cationMatch.ion().getFormula());
         if (cation == null) {
             return Optional.of("C#N");
         }
