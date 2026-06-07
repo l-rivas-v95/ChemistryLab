@@ -28,11 +28,6 @@ public class RepresentationSmilesOverrideService {
             return Optional.empty();
         }
 
-        Optional<String> neutralOxoacid = EducationalOxoanionSmilesCatalog.findNeutralOxoacid(normalizedFormula);
-        if (neutralOxoacid.isPresent()) {
-            return neutralOxoacid;
-        }
-
         return Optional.ofNullable(OVERRIDES.get(normalizedFormula));
     }
 
