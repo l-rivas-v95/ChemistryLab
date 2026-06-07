@@ -10,6 +10,8 @@ import java.util.Optional;
 @Service
 public class RepresentationSmilesOverrideService {
 
+    private static final String AMMONIUM = "[H][N+]([H])([H])[H]";
+
     private final FormulaParserService formulaParserService;
 
     private static final Map<String, String> OVERRIDES = construirOverrides();
@@ -72,7 +74,7 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "Ba(OH)2", "[H]O[Ba]O[H]", "BaH2O2");
         put(overrides, "Al(OH)3", "O[Al](O)O", "AlH3O3");
         put(overrides, "Fe(OH)3", "O[Fe](O)O", "FeH3O3");
-        put(overrides, "NH4OH", "[NH4+].[OH-]", "H5NO");
+        put(overrides, "NH4OH", AMMONIUM + ".[OH-]", "H5NO");
     }
 
     private static void salesBinariasUnoAUno(Map<String, String> overrides) {
@@ -89,10 +91,10 @@ public class RepresentationSmilesOverrideService {
     }
 
     private static void salesAmonioHalogenuro(Map<String, String> overrides) {
-        put(overrides, "NH4F", "[NH4+].[F-]", "FH4N");
-        put(overrides, "NH4Cl", "[NH4+].[Cl-]", "ClH4N");
-        put(overrides, "NH4Br", "[NH4+].[Br-]", "BrH4N");
-        put(overrides, "NH4I", "[NH4+].[I-]", "H4IN");
+        put(overrides, "NH4F", AMMONIUM + ".[F-]", "FH4N");
+        put(overrides, "NH4Cl", AMMONIUM + ".[Cl-]", "ClH4N");
+        put(overrides, "NH4Br", AMMONIUM + ".[Br-]", "BrH4N");
+        put(overrides, "NH4I", AMMONIUM + ".[I-]", "H4IN");
     }
 
     private static void oxidosCovalentes(Map<String, String> overrides) {
@@ -141,7 +143,7 @@ public class RepresentationSmilesOverrideService {
         put(overrides, "ZnSO4", "O=S(=O)(O[Zn])O");
         put(overrides, "FeSO4", "O=S(=O)(O[Fe])O");
         put(overrides, "Al2(SO4)3", "O=S(=O)(O[Al]OS(=O)(=O)O[Al]OS(=O)(=O)O)O");
-        put(overrides, "(NH4)2SO4", "[NH4+].[NH4+].[O-]S(=O)(=O)[O-]");
+        put(overrides, "(NH4)2SO4", AMMONIUM + "." + AMMONIUM + ".[O-]S(=O)(=O)[O-]");
 
         put(overrides, "Na3PO4", "[Na]OP(=O)(O[Na])O[Na]");
         put(overrides, "K3PO4", "[K]OP(=O)(O[K])O[K]");
@@ -165,8 +167,8 @@ public class RepresentationSmilesOverrideService {
     }
 
     private static void casosIonicLegacyUtiles(Map<String, String> overrides) {
-        put(overrides, "(NH4)3PO4", "[NH4+].[NH4+].[NH4+].[O-]P(=O)([O-])[O-]");
-        put(overrides, "NH4NO3", "[NH4+].[O-][N+](=O)[O-]", "H4NNO3");
+        put(overrides, "(NH4)3PO4", AMMONIUM + "." + AMMONIUM + "." + AMMONIUM + ".[O-]P(=O)([O-])[O-]");
+        put(overrides, "NH4NO3", AMMONIUM + ".[O-][N+](=O)[O-]", "H4NNO3");
     }
 
     private static void put(Map<String, String> overrides, String formula, String smiles, String... aliases) {
