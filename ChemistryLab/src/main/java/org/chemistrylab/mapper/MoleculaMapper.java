@@ -3,16 +3,16 @@ package org.chemistrylab.mapper;
 import lombok.RequiredArgsConstructor;
 import org.chemistrylab.chemistry.classification.CompoundFamily;
 import org.chemistrylab.chemistry.classification.CompoundFamilyService;
+import org.chemistrylab.chemistry.formula.FormulaParserService;
 import org.chemistrylab.dto.MoleculaDTO;
 import org.chemistrylab.entity.MoleculaEntity;
-import org.chemistrylab.service.MoleculaFormulaService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class MoleculaMapper {
 
-    private final MoleculaFormulaService moleculaFormulaService;
+    private final FormulaParserService formulaParserService;
     private final CompoundFamilyService compoundFamilyService;
 
     public MoleculaDTO toDTO(MoleculaEntity entity) {
@@ -20,7 +20,7 @@ public class MoleculaMapper {
             return null;
         }
 
-        String formulaVisible = moleculaFormulaService.obtenerFormulaVisible(entity.getNombre(), entity.getFormula());
+        String formulaVisible = formulaParserService.normalizarFormulaVisual(entity.getFormula());
         String tipoCalculado = obtenerTipoCalculado(entity);
 
         return MoleculaDTO.builder()
@@ -62,12 +62,12 @@ public class MoleculaMapper {
         CompoundFamily family = compoundFamilyService.clasificar(entity);
 
         return switch (family) {
-            case ORGANIC -> "Orgánica";
-            case ACID -> "Ácido inorgánico";
-            case HYDROXIDE -> "Base / hidróxido";
+            case ORGANIC -> "Organica";
+            case ACID -> "Acido inorganico";
+            case HYDROXIDE -> "Base / hidroxido";
             case SALT -> "Sal";
-            case METALLIC_OXIDE, COVALENT_OXIDE, PEROXIDE -> "Óxido";
-            case COVALENT -> "Inorgánica";
+            case METALLIC_OXIDE, COVALENT_OXIDE, PEROXIDE -> "Oxido";
+            case COVALENT -> "Inorganica";
             case UNKNOWN -> "Indefinida";
         };
     }
