@@ -20,14 +20,14 @@ public final class OxosaltSmilesCatalog {
 
     private static void nitratesAndNitrites(Map<String, String> smilesByFormula) {
         add(smilesByFormula, "NaNO3", "[O-][N+](=O)[O-].[Na+]", "NNaO3");
-        add(smilesByFormula, "KNO3", "[O-][N+](=O)[O-].[K+]", "KNO3");
-        add(smilesByFormula, "AgNO3", "[O-][N+](=O)[O-].[Ag+]", "AgNO3");
+        add(smilesByFormula, "KNO3", "[O-][N+](=O)[O-].[K+]");
+        add(smilesByFormula, "AgNO3", "[O-][N+](=O)[O-].[Ag+]");
         add(smilesByFormula, "Ca(NO3)2", "[O-][N+](=O)[O-].[Ca+2].[O-][N+](=O)[O-]");
         add(smilesByFormula, "Cu(NO3)2", "[O-][N+](=O)[O-].[Cu+2].[O-][N+](=O)[O-]");
         add(smilesByFormula, "Fe(NO3)3", "[O-][N+](=O)[O-].[O-][N+](=O)[O-].[Fe+3].[O-][N+](=O)[O-]");
 
         add(smilesByFormula, "NaNO2", "[O-]N=O.[Na+]", "NNaO2");
-        add(smilesByFormula, "KNO2", "[O-]N=O.[K+]", "KNO2");
+        add(smilesByFormula, "KNO2", "[O-]N=O.[K+]");
         add(smilesByFormula, "Ca(NO2)2", "[O-]N=O.[Ca+2].[O-]N=O");
     }
 
@@ -74,7 +74,7 @@ public final class OxosaltSmilesCatalog {
     }
 
     private static void transitionMetalOxoanions(Map<String, String> smilesByFormula) {
-        add(smilesByFormula, "KMnO4", "O=[Mn](=O)(=O)[O-].[K+]", "KMnO4");
+        add(smilesByFormula, "KMnO4", "O=[Mn](=O)(=O)[O-].[K+]");
         add(smilesByFormula, "K2Cr2O7", "[K+].O=[Cr](=O)([O-])O[Cr](=O)(=O)[O-].[K+]", "Cr2K2O7");
         add(smilesByFormula, "Na2Cr2O7", "[Na+].O=[Cr](=O)([O-])O[Cr](=O)(=O)[O-].[Na+]", "Cr2Na2O7");
     }
