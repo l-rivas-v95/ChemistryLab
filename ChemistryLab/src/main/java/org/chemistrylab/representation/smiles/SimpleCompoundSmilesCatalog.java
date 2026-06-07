@@ -2,45 +2,45 @@ package org.chemistrylab.representation.smiles;
 
 import java.util.Map;
 
-import static org.chemistrylab.representation.smiles.SmilesOverrideCatalog.put;
+import static org.chemistrylab.representation.smiles.CuratedSmilesRegistry.register;
 
 public final class SimpleCompoundSmilesCatalog {
 
     private SimpleCompoundSmilesCatalog() {
     }
 
-    public static void register(Map<String, String> overrides) {
-        covalentMolecules(overrides);
-        binaryAcids(overrides);
-        oneToOneBinarySalts(overrides);
+    public static void register(Map<String, String> smilesByFormula) {
+        covalentMolecules(smilesByFormula);
+        binaryAcids(smilesByFormula);
+        oneToOneBinarySalts(smilesByFormula);
     }
 
-    private static void covalentMolecules(Map<String, String> overrides) {
-        put(overrides, "NH3", "[H]N([H])[H]", "H3N");
-        put(overrides, "CO", "[C-]#[O+]", "OC");
-        put(overrides, "CO2", "O=C=O", "O2C");
-        put(overrides, "NO2", "O=[N+][O-]", "O2N");
-        put(overrides, "HCN", "[H]C#N", "CNH");
+    private static void covalentMolecules(Map<String, String> smilesByFormula) {
+        register(smilesByFormula, "NH3", "[H]N([H])[H]", "H3N");
+        register(smilesByFormula, "CO", "[C-]#[O+]", "OC");
+        register(smilesByFormula, "CO2", "O=C=O", "O2C");
+        register(smilesByFormula, "NO2", "O=[N+][O-]", "O2N");
+        register(smilesByFormula, "HCN", "[H]C#N", "CNH");
     }
 
-    private static void binaryAcids(Map<String, String> overrides) {
-        put(overrides, "HF", "[H]F", "FH");
-        put(overrides, "HCl", "[H]Cl", "ClH");
-        put(overrides, "HBr", "[H]Br", "BrH");
-        put(overrides, "HI", "[H]I", "IH");
-        put(overrides, "H2S", "[H]S[H]", "SH2");
+    private static void binaryAcids(Map<String, String> smilesByFormula) {
+        register(smilesByFormula, "HF", "[H]F", "FH");
+        register(smilesByFormula, "HCl", "[H]Cl", "ClH");
+        register(smilesByFormula, "HBr", "[H]Br", "BrH");
+        register(smilesByFormula, "HI", "[H]I", "IH");
+        register(smilesByFormula, "H2S", "[H]S[H]", "SH2");
     }
 
-    private static void oneToOneBinarySalts(Map<String, String> overrides) {
-        put(overrides, "NaCl", "[Na]Cl", "ClNa");
-        put(overrides, "KCl", "[K]Cl", "ClK");
-        put(overrides, "LiCl", "[Li]Cl", "ClLi");
-        put(overrides, "AgCl", "[Ag]Cl", "ClAg");
-        put(overrides, "NaF", "[Na]F", "FNa");
-        put(overrides, "KF", "[K]F", "FK");
-        put(overrides, "NaBr", "[Na]Br", "BrNa");
-        put(overrides, "KBr", "[K]Br", "BrK");
-        put(overrides, "NaI", "[Na]I", "INa");
-        put(overrides, "KI", "[K]I", "IK");
+    private static void oneToOneBinarySalts(Map<String, String> smilesByFormula) {
+        register(smilesByFormula, "NaCl", "[Na]Cl", "ClNa");
+        register(smilesByFormula, "KCl", "[K]Cl", "ClK");
+        register(smilesByFormula, "LiCl", "[Li]Cl", "ClLi");
+        register(smilesByFormula, "AgCl", "[Ag]Cl", "ClAg");
+        register(smilesByFormula, "NaF", "[Na]F", "FNa");
+        register(smilesByFormula, "KF", "[K]F", "FK");
+        register(smilesByFormula, "NaBr", "[Na]Br", "BrNa");
+        register(smilesByFormula, "KBr", "[K]Br", "BrK");
+        register(smilesByFormula, "NaI", "[Na]I", "INa");
+        register(smilesByFormula, "KI", "[K]I", "IK");
     }
 }
