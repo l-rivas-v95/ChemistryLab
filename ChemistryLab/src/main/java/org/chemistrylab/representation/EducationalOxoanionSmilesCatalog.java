@@ -45,7 +45,6 @@ public final class EducationalOxoanionSmilesCatalog {
             Map.entry("HMnO4", "O[Mn](=O)(=O)=O"),
             Map.entry("H2CrO4", "O[Cr](=O)(=O)O"),
             Map.entry("H2Cr2O7", "O[Cr](=O)(=O)O[Cr](=O)(=O)O"),
-
             Map.entry("H2O4S", "OS(=O)(=O)O"),
             Map.entry("H2O3S", "OS(=O)O"),
             Map.entry("CH2O3", "OC(=O)O"),
@@ -55,7 +54,6 @@ public final class EducationalOxoanionSmilesCatalog {
             Map.entry("ClHO2", "OCl=O"),
             Map.entry("ClHO3", "OCl(=O)=O"),
             Map.entry("ClHO4", "OCl(=O)(=O)=O"),
-            Map.entry("HMnO4", "O[Mn](=O)(=O)=O"),
             Map.entry("CrH2O4", "O[Cr](=O)(=O)O"),
             Map.entry("Cr2H2O7", "O[Cr](=O)(=O)O[Cr](=O)(=O)O")
     );
