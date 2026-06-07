@@ -23,11 +23,25 @@ public class CuratedFormulaSmilesService {
             return Optional.empty();
         }
 
-        String normalizedFormula = formulaParserService.limpiarFormula(formula);
-        if (normalizedFormula == null || normalizedFormula.isBlank()) {
+        String cleanedFormula = formulaParserService.limpiarFormula(formula);
+        if (cleanedFormula == null || cleanedFormula.isBlank()) {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(CURATED_SMILES_BY_FORMULA.get(normalizedFormula));
+        Optional<String> directMatch = findCuratedSmiles(cleanedFormula);
+        if (directMatch.isPresent()) {
+            return directMatch;
+        }
+
+        String visualFormula = formulaParserService.normalizarFormulaVisual(cleanedFormula);
+        if (visualFormula.equals(cleanedFormula)) {
+            return Optional.empty();
+        }
+
+        return findCuratedSmiles(visualFormula);
+    }
+
+    private Optional<String> findCuratedSmiles(String formula) {
+        return Optional.ofNullable(CURATED_SMILES_BY_FORMULA.get(formula));
     }
 }
