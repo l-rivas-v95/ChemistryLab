@@ -19,25 +19,64 @@ public class RepresentationSmilesResolver {
         this.ionicSmilesBuilderService = ionicSmilesBuilderService;
     }
 
-    public Optional<String> resolve(MoleculaEntity molecule) {
+    public Optional<RepresentationSmilesResolution> resolve(MoleculaEntity molecule) {
         if (molecule == null) {
             return Optional.empty();
         }
 
         String formula = clean(molecule.getFormula());
 
-        return OxoSpeciesSmilesCatalog.findNeutralOxoacid(formula)
-                .or(() -> representationSmilesOverrideService.findOverride(formula))
-                .or(() -> ionicSmilesBuilderService.build(formula))
-                .or(() -> firstText(molecule.getCanonicalSmiles(), molecule.getIsomericSmiles()));
+        Optional<String> oxoacidSmiles = OxoSpeciesSmilesCatalog.findNeutralOxoacid(formula);
+        if (oxoacidSmiles.isPresent()) {
+            return Optional.of(new RepresentationSmilesResolution(
+                    oxoacidSmiles.get(),
+                    "OXOACID_CATALOG",
+                    "SMILES curado para oxoacido neutro a partir de la formula."
+            ));
+        }
+
+        Optional<String> curatedSmiles = representationSmilesOverrideService.findOverride(formula);
+        if (curatedSmiles.isPresent()) {
+            return Optional.of(new RepresentationSmilesResolution(
+                    curatedSmiles.get(),
+                    "CURATED_FORMULA_CATALOG",
+                    "SMILES explicito curado para la formula."
+            ));
+        }
+
+        Optional<String> ionicSmiles = ionicSmilesBuilderService.build(formula);
+        if (ionicSmiles.isPresent()) {
+            return Optional.of(new RepresentationSmilesResolution(
+                    ionicSmiles.get(),
+                    "IONIC_FORMULA_RESOLVER",
+                    "SMILES ionico construido desde catalogo de iones y formula."
+            ));
+        }
+
+        Optional<String> canonicalSmiles = text(molecule.getCanonicalSmiles());
+        if (canonicalSmiles.isPresent()) {
+            return Optional.of(new RepresentationSmilesResolution(
+                    canonicalSmiles.get(),
+                    "DATABASE_CANONICAL_SMILES",
+                    "SMILES canonical obtenido desde la base de datos."
+            ));
+        }
+
+        Optional<String> isomericSmiles = text(molecule.getIsomericSmiles());
+        if (isomericSmiles.isPresent()) {
+            return Optional.of(new RepresentationSmilesResolution(
+                    isomericSmiles.get(),
+                    "DATABASE_ISOMERIC_SMILES",
+                    "SMILES isomerico obtenido desde la base de datos."
+            ));
+        }
+
+        return Optional.empty();
     }
 
-    private Optional<String> firstText(String first, String second) {
-        if (hasText(first)) {
-            return Optional.of(first);
-        }
-        if (hasText(second)) {
-            return Optional.of(second);
+    private Optional<String> text(String value) {
+        if (hasText(value)) {
+            return Optional.of(value);
         }
         return Optional.empty();
     }
