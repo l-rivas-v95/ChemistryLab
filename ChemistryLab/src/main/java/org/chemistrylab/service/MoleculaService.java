@@ -28,19 +28,21 @@ public class MoleculaService {
         String categoriaLimpia = limpiarParametro(categoria);
         String familiaLimpia = limpiarParametro(familia);
 
-        List<MoleculaDTO> filtradas = moleculaRepository.buscarPorTexto(searchLimpio)
+        List<MoleculaEntity> filtradas = moleculaRepository.buscarPorTexto(searchLimpio)
                 .stream()
-                .map(this::toDTOConRepresentacion)
-                .filter(dto -> coincideBusquedaCalculada(dto, searchLimpio))
-                .filter(dto -> coincideCategoria(dto, categoriaLimpia))
-                .filter(dto -> coincideFamilia(dto, familiaLimpia))
+                .filter(entity -> coincideBusquedaCalculada(entity, searchLimpio))
+                .filter(entity -> coincideCategoria(entity, categoriaLimpia))
+                .filter(entity -> coincideFamilia(entity, familiaLimpia))
                 .toList();
 
         int start = Math.toIntExact(pageable.getOffset());
         int end = Math.min(start + pageable.getPageSize(), filtradas.size());
         List<MoleculaDTO> contenido = start >= filtradas.size()
                 ? List.of()
-                : filtradas.subList(start, end);
+                : filtradas.subList(start, end)
+                        .stream()
+                        .map(this::toDTOConRepresentacion)
+                        .toList();
 
         return new PageImpl<>(contenido, pageable, filtradas.size());
     }
@@ -88,25 +90,25 @@ public class MoleculaService {
         return dto;
     }
 
-    private boolean coincideBusquedaCalculada(MoleculaDTO dto, String search) {
+    private boolean coincideBusquedaCalculada(MoleculaEntity entity, String search) {
         if (search == null || search.isBlank()) {
             return true;
         }
 
         String patron = normalizar(search);
 
-        return normalizar(dto.getNombre()).contains(patron)
-                || normalizar(dto.getFormula()).contains(patron)
-                || normalizar(dto.getSinonimos()).contains(patron)
-                || normalizar(dto.getTipoCompuesto()).contains(patron);
+        return normalizar(entity.getNombre()).contains(patron)
+                || normalizar(entity.getFormula()).contains(patron)
+                || normalizar(entity.getSinonimos()).contains(patron)
+                || normalizar(moleculaMapper.toDTO(entity).getTipoCompuesto()).contains(patron);
     }
 
-    private boolean coincideCategoria(MoleculaDTO dto, String categoria) {
+    private boolean coincideCategoria(MoleculaEntity entity, String categoria) {
         if (categoria == null || categoria.isBlank() || "all".equals(categoria)) {
             return true;
         }
 
-        String tipo = normalizar(dto.getTipoCompuesto());
+        String tipo = normalizar(moleculaMapper.toDTO(entity).getTipoCompuesto());
 
         if ("organic".equals(categoria)) {
             return tipo.equals("organica");
@@ -119,7 +121,7 @@ public class MoleculaService {
         return true;
     }
 
-    private boolean coincideFamilia(MoleculaDTO dto, String familia) {
+    private boolean coincideFamilia(MoleculaEntity entity, String familia) {
         if (familia == null || familia.isBlank()
                 || "all".equals(familia)
                 || "all-organic".equals(familia)
@@ -127,7 +129,7 @@ public class MoleculaService {
             return true;
         }
 
-        String tipo = normalizar(dto.getTipoCompuesto());
+        String tipo = normalizar(moleculaMapper.toDTO(entity).getTipoCompuesto());
 
         return switch (familia) {
             case "acid" -> tipo.contains("acido");
