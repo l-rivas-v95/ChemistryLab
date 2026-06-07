@@ -108,19 +108,6 @@ public class IonicFormulaResolver {
         return Optional.ofNullable(mejor);
     }
 
-    public Optional<IonMatch> resolverAnionRestante(String formulaAnion, int cargaEsperada) {
-        Map<String, Integer> composicion = formulaParserService.parsearFormula(formulaAnion);
-
-        return ionCatalogService.obtenerAniones().stream()
-                .filter(ion -> ion.getCarga() != null && ion.getCarga() == cargaEsperada)
-                .filter(ion -> mismaComposicion(
-                        composicion,
-                        formulaParserService.parsearFormula(ion.getFormula())
-                ))
-                .findFirst()
-                .map(ion -> new IonMatch(ion, 1));
-    }
-
     private int calcularPuntuacion(
             IonConfig cation,
             IonConfig anion,
@@ -146,9 +133,5 @@ public class IonicFormulaResolver {
         puntuacion -= cantidadAnion;
 
         return puntuacion;
-    }
-
-    private boolean mismaComposicion(Map<String, Integer> a, Map<String, Integer> b) {
-        return a.equals(b);
     }
 }
