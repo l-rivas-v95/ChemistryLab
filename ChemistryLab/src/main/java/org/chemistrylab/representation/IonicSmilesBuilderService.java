@@ -9,9 +9,12 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class IonicSmilesBuilderService {
+
+    private static final Pattern SINGLE_ATOM_FORMULA = Pattern.compile("[A-Z][a-z]?");
 
     private static final String AMMONIUM_FORMULA = "NH4";
     private static final String AMMONIUM_SMILES = "[NH4+]";
@@ -149,7 +152,7 @@ public class IonicSmilesBuilderService {
     }
 
     private String neutralAtom(String formula) {
-        if (formula == null || !formula.matches("[A-Z][a-z]?")) {
+        if (formula == null || !SINGLE_ATOM_FORMULA.matcher(formula).matches()) {
             return null;
         }
         return formula;
