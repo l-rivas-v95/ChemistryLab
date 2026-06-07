@@ -8,14 +8,14 @@ import java.util.Optional;
 @Service
 public class RepresentationSmilesResolver {
 
-    private final RepresentationSmilesOverrideService representationSmilesOverrideService;
+    private final CuratedFormulaSmilesService curatedFormulaSmilesService;
     private final IonicSmilesBuilderService ionicSmilesBuilderService;
 
     public RepresentationSmilesResolver(
-            RepresentationSmilesOverrideService representationSmilesOverrideService,
+            CuratedFormulaSmilesService curatedFormulaSmilesService,
             IonicSmilesBuilderService ionicSmilesBuilderService
     ) {
-        this.representationSmilesOverrideService = representationSmilesOverrideService;
+        this.curatedFormulaSmilesService = curatedFormulaSmilesService;
         this.ionicSmilesBuilderService = ionicSmilesBuilderService;
     }
 
@@ -35,7 +35,7 @@ public class RepresentationSmilesResolver {
             ));
         }
 
-        Optional<String> curatedSmiles = representationSmilesOverrideService.findOverride(formula);
+        Optional<String> curatedSmiles = curatedFormulaSmilesService.findByFormula(formula);
         if (curatedSmiles.isPresent()) {
             return Optional.of(new RepresentationSmilesResolution(
                     curatedSmiles.get(),
