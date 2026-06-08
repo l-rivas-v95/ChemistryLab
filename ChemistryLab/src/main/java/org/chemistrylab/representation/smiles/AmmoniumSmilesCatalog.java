@@ -50,6 +50,6 @@ public final class AmmoniumSmilesCatalog {
     }
 
     private static void hydroxide(Map<String, String> smilesByFormula) {
-        add(smilesByFormula, "NH4OH", AMMONIUM + ".[OH-]", "H5NO");
+        add(smilesByFormula, "NH4OH", AMMONIUM + ".[H]O", "H5NO");
     }
 }
