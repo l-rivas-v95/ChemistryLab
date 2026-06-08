@@ -61,10 +61,21 @@ public class HydroxideSmilesRule {
         }
 
         return elementoRepository.findBySimboloIgnoreCase(symbol)
-                .map(ElementoEntity::getCategoria)
-                .map(String::toLowerCase)
-                .map(this::isMetalCategory)
+                .map(this::isSupportedMetalElement)
                 .orElse(false);
+    }
+
+    private boolean isSupportedMetalElement(ElementoEntity element) {
+        if (element == null) {
+            return false;
+        }
+
+        Integer group = element.getGrupoPeriodico();
+        if (group != null && group >= 1 && group <= 12) {
+            return true;
+        }
+
+        return isMetalCategory(element.getCategoria());
     }
 
     private boolean isMetalCategory(String category) {
@@ -72,15 +83,17 @@ public class HydroxideSmilesRule {
             return false;
         }
 
-        if (category.contains("nonmetal")) {
+        String normalized = category.toLowerCase();
+
+        if (normalized.contains("nonmetal")) {
             return false;
         }
 
-        if (category.contains("metalloid")) {
+        if (normalized.contains("metalloid")) {
             return false;
         }
 
-        return category.contains("metal");
+        return normalized.contains("metal");
     }
 
     private String smiles(String elementSymbol, int hydroxideCount) {
