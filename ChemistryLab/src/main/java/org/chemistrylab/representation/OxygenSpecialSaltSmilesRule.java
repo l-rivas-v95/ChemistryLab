@@ -1,6 +1,5 @@
 package org.chemistrylab.representation;
 
-import org.chemistrylab.chemistry.ionic.IonMatch;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -23,10 +22,6 @@ public class OxygenSpecialSaltSmilesRule {
                 .or(() -> buildAlkaliMetalSuperoxide(formula));
     }
 
-    public Optional<String> build(IonMatch cationMatch, IonMatch anionMatch) {
-        return Optional.empty();
-    }
-
     private Optional<String> buildAlkaliMetalPeroxide(String formula) {
         var matcher = ALKALI_METAL_PEROXIDE.matcher(formula);
         if (!matcher.matches()) {
@@ -34,7 +29,7 @@ public class OxygenSpecialSaltSmilesRule {
         }
 
         String metal = matcher.group(1);
-        return Optional.of("[" + metal + "+].[O-][O-].[" + metal + "+]");
+        return Optional.of("[" + metal + "]OO[" + metal + "]");
     }
 
     private Optional<String> buildAlkalineEarthPeroxide(String formula) {
@@ -44,7 +39,7 @@ public class OxygenSpecialSaltSmilesRule {
         }
 
         String metal = matcher.group(1);
-        return Optional.of("[" + metal + "+2].[O-][O-]");
+        return Optional.of("[" + metal + "]OO");
     }
 
     private Optional<String> buildAlkaliMetalSuperoxide(String formula) {
@@ -54,6 +49,6 @@ public class OxygenSpecialSaltSmilesRule {
         }
 
         String metal = matcher.group(1);
-        return Optional.of("[" + metal + "+].[O-][O]");
+        return Optional.of("[" + metal + "]O[O]");
     }
 }
