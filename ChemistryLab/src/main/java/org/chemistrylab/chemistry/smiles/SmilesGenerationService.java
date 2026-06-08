@@ -1,9 +1,9 @@
 package org.chemistrylab.chemistry.smiles;
 
-import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.inchi.InChIToStructure;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.springframework.stereotype.Service;
@@ -42,7 +42,7 @@ public class SmilesGenerationService {
         try {
             InChIToStructure inchiToStructure = new InChIToStructure(
                     inchi.trim(),
-                    DefaultChemObjectBuilder.getInstance()
+                    SilentChemObjectBuilder.getInstance()
             );
 
             IAtomContainer molecule = inchiToStructure.getAtomContainer();
