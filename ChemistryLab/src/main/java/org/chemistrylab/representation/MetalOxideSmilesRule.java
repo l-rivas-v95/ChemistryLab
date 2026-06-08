@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
-public class MetalOxideSmilesRule {
+public class MetalOxideSmilesRule implements FormulaSmilesRule {
 
     private static final Pattern ALKALI_METAL_OXIDE = Pattern.compile("^(Li|Na|K|Rb|Cs)2O$");
     private static final Pattern SIMPLE_MONOXIDE = Pattern.compile("^(Mg|Ca|Sr|Ba|Fe|Cu|Zn|Mn|Ni|Co|Pb|Sn|Hg)O$");
@@ -20,6 +20,7 @@ public class MetalOxideSmilesRule {
         this.formulaParserService = formulaParserService;
     }
 
+    @Override
     public Optional<String> build(String formula) {
         if (formula == null || formula.isBlank()) {
             return Optional.empty();
