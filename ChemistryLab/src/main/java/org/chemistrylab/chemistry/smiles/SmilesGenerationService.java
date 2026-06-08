@@ -2,6 +2,7 @@ package org.chemistrylab.chemistry.smiles;
 
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.inchi.InChIGeneratorFactory;
 import org.openscience.cdk.inchi.InChIToStructure;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmiFlavor;
@@ -40,7 +41,8 @@ public class SmilesGenerationService {
         }
 
         try {
-            InChIToStructure inchiToStructure = new InChIToStructure(
+            InChIGeneratorFactory factory = InChIGeneratorFactory.getInstance();
+            InChIToStructure inchiToStructure = factory.getInChIToStructure(
                     inchi.trim(),
                     SilentChemObjectBuilder.getInstance()
             );
