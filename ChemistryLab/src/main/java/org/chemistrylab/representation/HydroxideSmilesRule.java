@@ -69,7 +69,7 @@ public class HydroxideSmilesRule {
 
     private String smiles(String elementSymbol, int hydroxideCount) {
         return switch (hydroxideCount) {
-            case 1 -> "[H]O[" + elementSymbol + "]";
+            case 1 -> "[" + elementSymbol + "]O[H]";
             case 2 -> "[H]O[" + elementSymbol + "]O[H]";
             case 3 -> "O[" + elementSymbol + "](O)O";
             case 4 -> "O[" + elementSymbol + "](O)(O)O";
