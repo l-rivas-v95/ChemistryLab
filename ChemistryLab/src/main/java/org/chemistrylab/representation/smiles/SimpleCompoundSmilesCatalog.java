@@ -12,7 +12,6 @@ public final class SimpleCompoundSmilesCatalog {
     public static void register(Map<String, String> smilesByFormula) {
         covalentMolecules(smilesByFormula);
         binaryAcids(smilesByFormula);
-        oneToOneBinarySalts(smilesByFormula);
     }
 
     private static void covalentMolecules(Map<String, String> smilesByFormula) {
@@ -29,18 +28,5 @@ public final class SimpleCompoundSmilesCatalog {
         add(smilesByFormula, "HBr", "[H]Br", "BrH");
         add(smilesByFormula, "HI", "[H]I", "IH");
         add(smilesByFormula, "H2S", "[H]S[H]", "SH2");
-    }
-
-    private static void oneToOneBinarySalts(Map<String, String> smilesByFormula) {
-        add(smilesByFormula, "NaCl", "[Na]Cl", "ClNa");
-        add(smilesByFormula, "KCl", "[K]Cl", "ClK");
-        add(smilesByFormula, "LiCl", "[Li]Cl", "ClLi");
-        add(smilesByFormula, "AgCl", "[Ag]Cl", "ClAg");
-        add(smilesByFormula, "NaF", "[Na]F", "FNa");
-        add(smilesByFormula, "KF", "[K]F", "FK");
-        add(smilesByFormula, "NaBr", "[Na]Br", "BrNa");
-        add(smilesByFormula, "KBr", "[K]Br", "BrK");
-        add(smilesByFormula, "NaI", "[Na]I", "INa");
-        add(smilesByFormula, "KI", "[K]I", "IK");
     }
 }
