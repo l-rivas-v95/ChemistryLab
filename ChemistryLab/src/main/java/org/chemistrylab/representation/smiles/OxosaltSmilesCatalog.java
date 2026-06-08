@@ -10,21 +10,9 @@ public final class OxosaltSmilesCatalog {
     }
 
     public static void register(Map<String, String> smilesByFormula) {
-        sulfates(smilesByFormula);
         phosphates(smilesByFormula);
         chlorineOxoanions(smilesByFormula);
         transitionMetalOxoanions(smilesByFormula);
-    }
-
-    private static void sulfates(Map<String, String> smilesByFormula) {
-        add(smilesByFormula, "Na2SO4", "[Na+].[O-]S(=O)(=O)[O-].[Na+]");
-        add(smilesByFormula, "K2SO4", "[K+].[O-]S(=O)(=O)[O-].[K+]");
-        add(smilesByFormula, "CaSO4", "[O-]S(=O)(=O)[O-].[Ca+2]");
-        add(smilesByFormula, "MgSO4", "[O-]S(=O)(=O)[O-].[Mg+2]");
-        add(smilesByFormula, "CuSO4", "[O-]S(=O)(=O)[O-].[Cu+2]");
-        add(smilesByFormula, "ZnSO4", "[O-]S(=O)(=O)[O-].[Zn+2]");
-        add(smilesByFormula, "FeSO4", "[O-]S(=O)(=O)[O-].[Fe+2]");
-        add(smilesByFormula, "Al2(SO4)3", "[O-]S(=O)(=O)[O-].[Al+3].[O-]S(=O)(=O)[O-].[Al+3].[O-]S(=O)(=O)[O-]");
     }
 
     private static void phosphates(Map<String, String> smilesByFormula) {
