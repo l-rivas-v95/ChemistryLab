@@ -115,8 +115,8 @@ public class IonicSmilesBuilderService {
         return switch (anionMatch.cantidad()) {
             case 1 -> Optional.of("[" + metal + "]O[H]");
             case 2 -> Optional.of("[H]O[" + metal + "]O[H]");
-            case 3 -> Optional.of("O[" + metal + "](O)O");
-            case 4 -> Optional.of("O[" + metal + "](O)(O)O");
+            case 3 -> Optional.of("[H]O[" + metal + "](O[H])O[H]");
+            case 4 -> Optional.of("[H]O[" + metal + "](O[H])(O[H])O[H]");
             default -> Optional.empty();
         };
     }
