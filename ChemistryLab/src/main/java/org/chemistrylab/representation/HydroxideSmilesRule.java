@@ -63,8 +63,24 @@ public class HydroxideSmilesRule {
         return elementoRepository.findBySimboloIgnoreCase(symbol)
                 .map(ElementoEntity::getCategoria)
                 .map(String::toLowerCase)
-                .map(categoria -> categoria.contains("metal"))
+                .map(this::isMetalCategory)
                 .orElse(false);
+    }
+
+    private boolean isMetalCategory(String category) {
+        if (category == null || category.isBlank()) {
+            return false;
+        }
+
+        if (category.contains("nonmetal")) {
+            return false;
+        }
+
+        if (category.contains("metalloid")) {
+            return false;
+        }
+
+        return category.contains("metal");
     }
 
     private String smiles(String elementSymbol, int hydroxideCount) {
