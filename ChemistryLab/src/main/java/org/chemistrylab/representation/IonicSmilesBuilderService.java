@@ -28,21 +28,29 @@ public class IonicSmilesBuilderService {
     private final IonicFormulaResolver ionicFormulaResolver;
     private final MetalHydroxideSmilesRule metalHydroxideSmilesRule;
     private final OxygenSpecialSaltSmilesRule oxygenSpecialSaltSmilesRule;
+    private final BorohydrideSmilesRule borohydrideSmilesRule;
 
     public IonicSmilesBuilderService(
             IonicFormulaResolver ionicFormulaResolver,
             MetalHydroxideSmilesRule metalHydroxideSmilesRule,
-            OxygenSpecialSaltSmilesRule oxygenSpecialSaltSmilesRule
+            OxygenSpecialSaltSmilesRule oxygenSpecialSaltSmilesRule,
+            BorohydrideSmilesRule borohydrideSmilesRule
     ) {
         this.ionicFormulaResolver = ionicFormulaResolver;
         this.metalHydroxideSmilesRule = metalHydroxideSmilesRule;
         this.oxygenSpecialSaltSmilesRule = oxygenSpecialSaltSmilesRule;
+        this.borohydrideSmilesRule = borohydrideSmilesRule;
     }
 
     public Optional<String> build(String formula) {
         Optional<String> oxygenSpecialSalt = oxygenSpecialSaltSmilesRule.build(formula);
         if (oxygenSpecialSalt.isPresent()) {
             return oxygenSpecialSalt;
+        }
+
+        Optional<String> borohydride = borohydrideSmilesRule.build(formula);
+        if (borohydride.isPresent()) {
+            return borohydride;
         }
 
         return ionicFormulaResolver.resolver(formula)
