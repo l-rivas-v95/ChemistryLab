@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Service
@@ -22,6 +23,7 @@ public class IonicSmilesBuilderService {
     private static final String HYDROXIDE_SMILES = "[OH-]";
     private static final String CYANIDE_FORMULA = "CN";
     private static final String CYANIDE_SMILES = "[C-]#N";
+    private static final Set<String> HALIDE_FORMULAS = Set.of("F", "Cl", "Br", "I");
 
     private final IonicFormulaResolver ionicFormulaResolver;
 
@@ -64,6 +66,11 @@ public class IonicSmilesBuilderService {
         Optional<String> metalHydroxide = buildMetalHydroxide(cationMatch, anionMatch);
         if (metalHydroxide.isPresent()) {
             return metalHydroxide;
+        }
+
+        Optional<String> metalHalide = buildMetalHalide(cationMatch, anionMatch);
+        if (metalHalide.isPresent()) {
+            return metalHalide;
         }
 
         Optional<String> ionicFragments = buildIonicFragments(cationMatch, anionMatch);
@@ -117,6 +124,26 @@ public class IonicSmilesBuilderService {
             case 2 -> Optional.of("[H]O[" + metal + "]O[H]");
             case 3 -> Optional.of("O[" + metal + "](O)O");
             case 4 -> Optional.of("O[" + metal + "](O)(O)O");
+            default -> Optional.empty();
+        };
+    }
+
+    private Optional<String> buildMetalHalide(IonMatch cationMatch, IonMatch anionMatch) {
+        String halide = anionMatch.ion().getFormula();
+        if (!HALIDE_FORMULAS.contains(halide)) {
+            return Optional.empty();
+        }
+
+        String metal = neutralAtom(cationMatch.ion().getFormula());
+        if (metal == null || cationMatch.cantidad() != 1) {
+            return Optional.empty();
+        }
+
+        return switch (anionMatch.cantidad()) {
+            case 1 -> Optional.of("[" + metal + "]" + halide);
+            case 2 -> Optional.of(halide + "[" + metal + "]" + halide);
+            case 3 -> Optional.of(halide + "[" + metal + "](" + halide + ")" + halide);
+            case 4 -> Optional.of(halide + "[" + metal + "](" + halide + ")(" + halide + ")" + halide);
             default -> Optional.empty();
         };
     }
