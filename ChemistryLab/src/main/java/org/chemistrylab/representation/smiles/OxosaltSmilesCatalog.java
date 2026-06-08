@@ -15,7 +15,7 @@ public final class OxosaltSmilesCatalog {
     }
 
     private static void chlorineOxoanions(Map<String, String> smilesByFormula) {
-        add(smilesByFormula, "NaClO", "Cl[O-].[Na+]", "ClNaO");
+        add(smilesByFormula, "NaClO", "[Na]OCl", "ClNaO");
         add(smilesByFormula, "NaClO2", "O=Cl[O-].[Na+]", "ClNaO2");
         add(smilesByFormula, "NaClO3", "O=Cl(=O)[O-].[Na+]", "ClNaO3");
         add(smilesByFormula, "KClO3", "O=Cl(=O)[O-].[K+]", "ClKO3");
