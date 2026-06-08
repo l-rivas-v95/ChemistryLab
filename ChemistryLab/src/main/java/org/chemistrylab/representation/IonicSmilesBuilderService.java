@@ -150,16 +150,24 @@ public class IonicSmilesBuilderService {
         }
 
         String anionSmiles = anionSmilesOptional.get();
-        if (anionMatch.cantidad() == 2 && cationMatch.cantidad() == 1) {
-            return Optional.of(anionSmiles + "." + cationSmiles + "." + anionSmiles);
-        }
-
-        return Optional.of(arrangeFragmentsAroundCenter(
+        return Optional.of(arrangeOxoanionSalt(
                 anionSmiles,
                 anionMatch.cantidad(),
                 cationSmiles,
                 cationMatch.cantidad()
         ));
+    }
+
+    private String arrangeOxoanionSalt(String anionSmiles, int anionCount, String cationSmiles, int cationCount) {
+        if (cationCount == 1 && anionCount == 2) {
+            return anionSmiles + "." + cationSmiles + "." + anionSmiles;
+        }
+
+        if (cationCount == 1 && anionCount == 3) {
+            return anionSmiles + "." + anionSmiles + "." + cationSmiles + "." + anionSmiles;
+        }
+
+        return arrangeFragmentsAroundCenter(anionSmiles, anionCount, cationSmiles, cationCount);
     }
 
     private Optional<String> buildIonicFragments(IonMatch cationMatch, IonMatch anionMatch) {
