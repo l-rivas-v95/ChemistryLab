@@ -9,7 +9,8 @@ import java.util.regex.Pattern;
 @Component
 public class BorohydrideSmilesRule {
 
-    private static final Pattern ALKALI_METAL_BOROHYDRIDE = Pattern.compile("^(Li|Na|K|Rb|Cs)BH4$");
+    private static final Pattern METAL_FIRST_BOROHYDRIDE = Pattern.compile("^(Li|Na|K|Rb|Cs)BH4$");
+    private static final Pattern BOROHYDRIDE_FIRST = Pattern.compile("^BH4(Li|Na|K|Rb|Cs)$");
     private static final String BOROHYDRIDE_SMILES = "[H][B-]([H])([H])[H]";
 
     private final FormulaParserService formulaParserService;
@@ -24,12 +25,21 @@ public class BorohydrideSmilesRule {
         }
 
         String normalizedFormula = formulaParserService.normalizarFormulaVisual(formula);
-        var matcher = ALKALI_METAL_BOROHYDRIDE.matcher(normalizedFormula);
-        if (!matcher.matches()) {
-            return Optional.empty();
+        return extractMetal(normalizedFormula)
+                .map(metal -> "[" + metal + "+]." + BOROHYDRIDE_SMILES);
+    }
+
+    private Optional<String> extractMetal(String formula) {
+        var metalFirstMatcher = METAL_FIRST_BOROHYDRIDE.matcher(formula);
+        if (metalFirstMatcher.matches()) {
+            return Optional.of(metalFirstMatcher.group(1));
         }
 
-        String metal = matcher.group(1);
-        return Optional.of("[" + metal + "+]." + BOROHYDRIDE_SMILES);
+        var borohydrideFirstMatcher = BOROHYDRIDE_FIRST.matcher(formula);
+        if (borohydrideFirstMatcher.matches()) {
+            return Optional.of(borohydrideFirstMatcher.group(1));
+        }
+
+        return Optional.empty();
     }
 }
