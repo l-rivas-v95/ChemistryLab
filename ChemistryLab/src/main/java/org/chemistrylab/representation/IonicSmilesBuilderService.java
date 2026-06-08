@@ -27,51 +27,38 @@ public class IonicSmilesBuilderService {
 
     private final IonicFormulaResolver ionicFormulaResolver;
     private final MetalHydroxideSmilesRule metalHydroxideSmilesRule;
-    private final OxygenSpecialSaltSmilesRule oxygenSpecialSaltSmilesRule;
-    private final BorohydrideSmilesRule borohydrideSmilesRule;
-    private final MetalOxideSmilesRule metalOxideSmilesRule;
-    private final MixedOxideSmilesRule mixedOxideSmilesRule;
+    private final List<FormulaSmilesRule> formulaRules;
 
     public IonicSmilesBuilderService(
             IonicFormulaResolver ionicFormulaResolver,
             MetalHydroxideSmilesRule metalHydroxideSmilesRule,
-            OxygenSpecialSaltSmilesRule oxygenSpecialSaltSmilesRule,
-            BorohydrideSmilesRule borohydrideSmilesRule,
-            MetalOxideSmilesRule metalOxideSmilesRule,
-            MixedOxideSmilesRule mixedOxideSmilesRule
+            List<FormulaSmilesRule> formulaRules
     ) {
         this.ionicFormulaResolver = ionicFormulaResolver;
         this.metalHydroxideSmilesRule = metalHydroxideSmilesRule;
-        this.oxygenSpecialSaltSmilesRule = oxygenSpecialSaltSmilesRule;
-        this.borohydrideSmilesRule = borohydrideSmilesRule;
-        this.metalOxideSmilesRule = metalOxideSmilesRule;
-        this.mixedOxideSmilesRule = mixedOxideSmilesRule;
+        this.formulaRules = formulaRules;
     }
 
     public Optional<String> build(String formula) {
-        Optional<String> oxygenSpecialSalt = oxygenSpecialSaltSmilesRule.build(formula);
-        if (oxygenSpecialSalt.isPresent()) {
-            return oxygenSpecialSalt;
-        }
-
-        Optional<String> borohydride = borohydrideSmilesRule.build(formula);
-        if (borohydride.isPresent()) {
-            return borohydride;
-        }
-
-        Optional<String> metalOxide = metalOxideSmilesRule.build(formula);
-        if (metalOxide.isPresent()) {
-            return metalOxide;
-        }
-
-        Optional<String> mixedOxide = mixedOxideSmilesRule.build(formula);
-        if (mixedOxide.isPresent()) {
-            return mixedOxide;
+        Optional<String> formulaRuleSmiles = buildFromFormulaRules(formula);
+        if (formulaRuleSmiles.isPresent()) {
+            return formulaRuleSmiles;
         }
 
         return ionicFormulaResolver.resolver(formula)
                 .filter(this::isRealIonicResolution)
                 .flatMap(this::buildFromResolution);
+    }
+
+    private Optional<String> buildFromFormulaRules(String formula) {
+        for (FormulaSmilesRule rule : formulaRules) {
+            Optional<String> smiles = rule.build(formula);
+            if (smiles.isPresent()) {
+                return smiles;
+            }
+        }
+
+        return Optional.empty();
     }
 
     private boolean isRealIonicResolution(IonicFormulaResolution resolution) {
