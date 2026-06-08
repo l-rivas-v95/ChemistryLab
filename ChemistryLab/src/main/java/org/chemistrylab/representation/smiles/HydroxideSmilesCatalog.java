@@ -10,9 +10,6 @@ public final class HydroxideSmilesCatalog {
     }
 
     public static void register(Map<String, String> smilesByFormula) {
-        add(smilesByFormula, "LiOH", "[H]O[Li]", "HLiO");
-        add(smilesByFormula, "NaOH", "[H]O[Na]", "HNaO");
-        add(smilesByFormula, "KOH", "[H]O[K]", "HKO");
         add(smilesByFormula, "Mg(OH)2", "[H]O[Mg]O[H]", "H2MgO2");
         add(smilesByFormula, "Ca(OH)2", "[H]O[Ca]O[H]", "CaH2O2");
         add(smilesByFormula, "Ba(OH)2", "[H]O[Ba]O[H]", "BaH2O2");
