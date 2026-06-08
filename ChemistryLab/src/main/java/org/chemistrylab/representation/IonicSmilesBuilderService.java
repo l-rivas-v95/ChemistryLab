@@ -26,9 +26,14 @@ public class IonicSmilesBuilderService {
     private static final Set<String> HALIDE_FORMULAS = Set.of("F", "Cl", "Br", "I");
 
     private final IonicFormulaResolver ionicFormulaResolver;
+    private final MetalHydroxideSmilesRule metalHydroxideSmilesRule;
 
-    public IonicSmilesBuilderService(IonicFormulaResolver ionicFormulaResolver) {
+    public IonicSmilesBuilderService(
+            IonicFormulaResolver ionicFormulaResolver,
+            MetalHydroxideSmilesRule metalHydroxideSmilesRule
+    ) {
         this.ionicFormulaResolver = ionicFormulaResolver;
+        this.metalHydroxideSmilesRule = metalHydroxideSmilesRule;
     }
 
     public Optional<String> build(String formula) {
@@ -63,7 +68,7 @@ public class IonicSmilesBuilderService {
             return ammoniumHydroxide;
         }
 
-        Optional<String> metalHydroxide = buildMetalHydroxide(cationMatch, anionMatch);
+        Optional<String> metalHydroxide = metalHydroxideSmilesRule.build(cationMatch, anionMatch);
         if (metalHydroxide.isPresent()) {
             return metalHydroxide;
         }
@@ -97,25 +102,6 @@ public class IonicSmilesBuilderService {
             return Optional.empty();
         }
         return Optional.of(AMMONIUM_SMILES + ".[H]O");
-    }
-
-    private Optional<String> buildMetalHydroxide(IonMatch cationMatch, IonMatch anionMatch) {
-        if (!HYDROXIDE_FORMULA.equals(anionMatch.ion().getFormula())) {
-            return Optional.empty();
-        }
-
-        String metal = neutralAtom(cationMatch.ion().getFormula());
-        if (metal == null || cationMatch.cantidad() != 1) {
-            return Optional.empty();
-        }
-
-        return switch (anionMatch.cantidad()) {
-            case 1 -> Optional.of("[" + metal + "]O[H]");
-            case 2 -> Optional.of("[H]O[" + metal + "]O[H]");
-            case 3 -> Optional.of("O[" + metal + "](O)O");
-            case 4 -> Optional.of("O[" + metal + "](O)(O)O");
-            default -> Optional.empty();
-        };
     }
 
     private Optional<String> buildMetalHalide(IonMatch cationMatch, IonMatch anionMatch) {
