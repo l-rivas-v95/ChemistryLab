@@ -1,9 +1,8 @@
 import ChemicalFormulaText from "./ChemicalFormulaText";
 import SmilesDrawerStructure from "./SmilesDrawerStructure";
-import { getMoleculeCategoryClass } from "../../utils/moleculeCategory";
 
-function MoleculeStructure({ molecula }) {
-    if (shouldUseSmilesDrawer(molecula)) {
+function MoleculeStructure({ molecula, categoria }) {
+    if (shouldUseSmilesDrawer(molecula, categoria)) {
         return (
             <SmilesDrawerStructure
                 smiles={molecula.canonicalSmiles || molecula.isomericSmiles}
@@ -24,12 +23,12 @@ function MoleculeStructure({ molecula }) {
     return <FormulaStructure formula={molecula?.formula} />;
 }
 
-function shouldUseSmilesDrawer(molecula) {
+function shouldUseSmilesDrawer(molecula, categoria) {
     if (!molecula?.canonicalSmiles && !molecula?.isomericSmiles) {
         return false;
     }
 
-    return getMoleculeCategoryClass(molecula) === "organic";
+    return categoria === "organic";
 }
 
 function SvgStructure({ svg, formula }) {
