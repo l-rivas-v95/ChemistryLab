@@ -1,4 +1,9 @@
 export function getMoleculeCategoryClass(molecula) {
+    const formulaCategory = getCategoryFromFormula(molecula?.formula);
+    if (formulaCategory !== "unknown") {
+        return formulaCategory;
+    }
+
     const tipo = normalizeText(
         molecula?.tipoCompuesto ||
         molecula?.tipo_compuesto ||
@@ -6,15 +11,15 @@ export function getMoleculeCategoryClass(molecula) {
         ""
     );
 
-    const typeCategory = getCategoryFromType(tipo);
-    if (typeCategory) {
-        return typeCategory;
-    }
-
-    return getCategoryFromFormula(molecula?.formula);
+    return getCategoryFromType(tipo) || "unknown";
 }
 
 export function getTipoVisible(molecula) {
+    const formulaCategory = getCategoryFromFormula(molecula?.formula);
+    if (formulaCategory !== "unknown") {
+        return getVisibleTypeFromCategory(formulaCategory);
+    }
+
     const tipo =
         molecula?.tipoCompuesto ||
         molecula?.tipo_compuesto ||
@@ -24,7 +29,7 @@ export function getTipoVisible(molecula) {
         return tipo;
     }
 
-    return getVisibleTypeFromCategory(getCategoryFromFormula(molecula?.formula));
+    return "Sin clasificar";
 }
 
 export function normalizeText(value) {
