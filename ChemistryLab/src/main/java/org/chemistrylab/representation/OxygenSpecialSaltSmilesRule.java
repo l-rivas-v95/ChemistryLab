@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
-public class OxygenSpecialSaltSmilesRule {
+public class OxygenSpecialSaltSmilesRule implements FormulaSmilesRule {
 
     private static final Pattern ALKALI_METAL_PEROXIDE = Pattern.compile("^(Li|Na|K|Rb|Cs)2O2$");
     private static final Pattern ALKALINE_EARTH_PEROXIDE = Pattern.compile("^(Mg|Ca|Sr|Ba)O2$");
@@ -19,6 +19,7 @@ public class OxygenSpecialSaltSmilesRule {
         this.formulaParserService = formulaParserService;
     }
 
+    @Override
     public Optional<String> build(String formula) {
         if (formula == null || formula.isBlank()) {
             return Optional.empty();
