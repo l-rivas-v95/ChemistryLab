@@ -39,7 +39,7 @@ public class MetalNitrideSmilesRule implements FormulaSmilesRule {
         }
 
         String metal = matcher.group(1);
-        return Optional.of("[" + metal + "].N([" + metal + "])[" + metal + "]");
+        return Optional.of("[" + metal + "+].[" + metal + "+].[" + metal + "+].[N-3]");
     }
 
     private Optional<String> buildAlkalineEarthNitride(String formula) {
@@ -49,7 +49,7 @@ public class MetalNitrideSmilesRule implements FormulaSmilesRule {
         }
 
         String metal = matcher.group(1);
-        return Optional.of("N[" + metal + "][" + metal + "][" + metal + "]N");
+        return Optional.of("[" + metal + "+2].[" + metal + "+2].[" + metal + "+2].[N-3].[N-3]");
     }
 
     private Optional<String> buildGroup13Nitride(String formula) {
@@ -59,6 +59,6 @@ public class MetalNitrideSmilesRule implements FormulaSmilesRule {
         }
 
         String metal = matcher.group(1);
-        return Optional.of("[" + metal + "]N");
+        return Optional.of("[" + metal + "+3].[N-3]");
     }
 }
