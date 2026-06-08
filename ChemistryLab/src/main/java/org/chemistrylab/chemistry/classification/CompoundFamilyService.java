@@ -50,7 +50,7 @@ public class CompoundFamilyService {
             return CompoundFamily.COVALENT;
         }
 
-        if (esOrganica(atomos) || tieneSmiles(molecula)) {
+        if (esOrganica(atomos)) {
             return CompoundFamily.ORGANIC;
         }
 
@@ -61,16 +61,20 @@ public class CompoundFamilyService {
         return CompoundFamily.UNKNOWN;
     }
 
-    private boolean tieneSmiles(MoleculaEntity molecula) {
-        return tieneTexto(molecula.getCanonicalSmiles()) || tieneTexto(molecula.getIsomericSmiles());
-    }
-
-    private boolean tieneTexto(String valor) {
-        return valor != null && !valor.isBlank();
-    }
-
     private boolean esOrganica(Map<String, Integer> atomos) {
-        return atomos.containsKey("C") && atomos.containsKey("H");
+        return atomos.containsKey("C")
+                && atomos.containsKey("H")
+                && !esCarbonoInorganico(atomos);
+    }
+
+    private boolean esCarbonoInorganico(Map<String, Integer> atomos) {
+        return atomos.containsKey("C")
+                && (atomos.containsKey("O") || atomos.containsKey("N") || atomos.containsKey("S"))
+                && !atomos.keySet().stream().anyMatch(simbolo -> !"C".equals(simbolo)
+                && !"H".equals(simbolo)
+                && !"O".equals(simbolo)
+                && !"N".equals(simbolo)
+                && !"S".equals(simbolo));
     }
 
     private boolean esPeroxido(Map<String, Integer> atomos) {
@@ -128,10 +132,6 @@ public class CompoundFamilyService {
     }
 
     private boolean esSal(Map<String, Integer> atomos, Map<String, ElementoEntity> elementos) {
-        if (esOrganica(atomos)) {
-            return false;
-        }
-
         boolean tieneMetal = atomos.keySet().stream()
                 .map(elementos::get)
                 .anyMatch(this::esMetal);
