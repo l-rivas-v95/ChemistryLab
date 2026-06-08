@@ -9,13 +9,16 @@ import java.util.Optional;
 public class RepresentationSmilesResolver {
 
     private final CuratedFormulaSmilesService curatedFormulaSmilesService;
+    private final HydroxideSmilesRule hydroxideSmilesRule;
     private final IonicSmilesBuilderService ionicSmilesBuilderService;
 
     public RepresentationSmilesResolver(
             CuratedFormulaSmilesService curatedFormulaSmilesService,
+            HydroxideSmilesRule hydroxideSmilesRule,
             IonicSmilesBuilderService ionicSmilesBuilderService
     ) {
         this.curatedFormulaSmilesService = curatedFormulaSmilesService;
+        this.hydroxideSmilesRule = hydroxideSmilesRule;
         this.ionicSmilesBuilderService = ionicSmilesBuilderService;
     }
 
@@ -41,6 +44,15 @@ public class RepresentationSmilesResolver {
                     curatedSmiles.get(),
                     "CURATED_FORMULA_CATALOG",
                     "SMILES explicito curado para la formula."
+            ));
+        }
+
+        Optional<String> hydroxideSmiles = hydroxideSmilesRule.build(formula);
+        if (hydroxideSmiles.isPresent()) {
+            return Optional.of(new RepresentationSmilesResolution(
+                    hydroxideSmiles.get(),
+                    "HYDROXIDE_FORMULA_RULE",
+                    "SMILES generado desde patron general de hidroxido metalico."
             ));
         }
 
