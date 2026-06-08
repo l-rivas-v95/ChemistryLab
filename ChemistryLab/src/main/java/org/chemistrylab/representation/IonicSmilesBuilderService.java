@@ -30,19 +30,22 @@ public class IonicSmilesBuilderService {
     private final OxygenSpecialSaltSmilesRule oxygenSpecialSaltSmilesRule;
     private final BorohydrideSmilesRule borohydrideSmilesRule;
     private final MetalOxideSmilesRule metalOxideSmilesRule;
+    private final MixedOxideSmilesRule mixedOxideSmilesRule;
 
     public IonicSmilesBuilderService(
             IonicFormulaResolver ionicFormulaResolver,
             MetalHydroxideSmilesRule metalHydroxideSmilesRule,
             OxygenSpecialSaltSmilesRule oxygenSpecialSaltSmilesRule,
             BorohydrideSmilesRule borohydrideSmilesRule,
-            MetalOxideSmilesRule metalOxideSmilesRule
+            MetalOxideSmilesRule metalOxideSmilesRule,
+            MixedOxideSmilesRule mixedOxideSmilesRule
     ) {
         this.ionicFormulaResolver = ionicFormulaResolver;
         this.metalHydroxideSmilesRule = metalHydroxideSmilesRule;
         this.oxygenSpecialSaltSmilesRule = oxygenSpecialSaltSmilesRule;
         this.borohydrideSmilesRule = borohydrideSmilesRule;
         this.metalOxideSmilesRule = metalOxideSmilesRule;
+        this.mixedOxideSmilesRule = mixedOxideSmilesRule;
     }
 
     public Optional<String> build(String formula) {
@@ -59,6 +62,11 @@ public class IonicSmilesBuilderService {
         Optional<String> metalOxide = metalOxideSmilesRule.build(formula);
         if (metalOxide.isPresent()) {
             return metalOxide;
+        }
+
+        Optional<String> mixedOxide = mixedOxideSmilesRule.build(formula);
+        if (mixedOxide.isPresent()) {
+            return mixedOxide;
         }
 
         return ionicFormulaResolver.resolver(formula)
