@@ -149,8 +149,13 @@ public class IonicSmilesBuilderService {
             return Optional.of(anionSmilesOptional.get());
         }
 
+        String anionSmiles = anionSmilesOptional.get();
+        if (anionMatch.cantidad() == 2 && cationMatch.cantidad() == 1) {
+            return Optional.of(anionSmiles + "." + cationSmiles + "." + anionSmiles);
+        }
+
         return Optional.of(arrangeFragmentsAroundCenter(
-                anionSmilesOptional.get(),
+                anionSmiles,
                 anionMatch.cantidad(),
                 cationSmiles,
                 cationMatch.cantidad()
