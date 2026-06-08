@@ -1,8 +1,9 @@
 package org.chemistrylab.representation;
 
+import org.chemistrylab.entity.ElementoEntity;
+import org.chemistrylab.repository.ElementoRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,14 +14,11 @@ public class HydroxideSmilesRule {
     private static final Pattern SIMPLE_HYDROXIDE = Pattern.compile("^([A-Z][a-z]?)OH$");
     private static final Pattern GROUPED_HYDROXIDE = Pattern.compile("^([A-Z][a-z]?)\\(OH\\)([2-4])$");
 
-    private static final Set<String> METAL_SYMBOLS = Set.of(
-            "Li", "Be", "Na", "Mg", "Al", "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
-            "Ga", "Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn",
-            "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu",
-            "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi",
-            "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr",
-            "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Nh", "Fl", "Mc", "Lv"
-    );
+    private final ElementoRepository elementoRepository;
+
+    public HydroxideSmilesRule(ElementoRepository elementoRepository) {
+        this.elementoRepository = elementoRepository;
+    }
 
     public Optional<String> build(String formula) {
         if (formula == null || formula.isBlank()) {
@@ -58,7 +56,35 @@ public class HydroxideSmilesRule {
     }
 
     private boolean isSupportedMetal(String symbol) {
-        return METAL_SYMBOLS.contains(symbol);
+        return elementoRepository.findBySimboloIgnoreCase(symbol)
+                .map(this::isSupportedMetalElement)
+                .orElse(false);
+    }
+
+    private boolean isSupportedMetalElement(ElementoEntity element) {
+        if (element == null || "H".equalsIgnoreCase(element.getSimbolo())) {
+            return false;
+        }
+
+        Integer group = element.getGrupoPeriodico();
+        if (group != null && group >= 1 && group <= 12) {
+            return true;
+        }
+
+        return isMetalCategory(element.getCategoria());
+    }
+
+    private boolean isMetalCategory(String category) {
+        if (category == null || category.isBlank()) {
+            return false;
+        }
+
+        String normalized = category.toLowerCase();
+        if (normalized.contains("nonmetal") || normalized.contains("metalloid")) {
+            return false;
+        }
+
+        return normalized.contains("metal");
     }
 
     private String smiles(String elementSymbol, int hydroxideCount) {
