@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 public class BorohydrideSmilesRule {
 
     private static final Pattern ALKALI_METAL_BOROHYDRIDE = Pattern.compile("^(Li|Na|K|Rb|Cs)BH4$");
+    private static final String BOROHYDRIDE_SMILES = "[H][B-]([H])([H])[H]";
 
     private final FormulaParserService formulaParserService;
 
@@ -29,6 +30,6 @@ public class BorohydrideSmilesRule {
         }
 
         String metal = matcher.group(1);
-        return Optional.of("[" + metal + "+].[BH4-]");
+        return Optional.of("[" + metal + "+]." + BOROHYDRIDE_SMILES);
     }
 }
