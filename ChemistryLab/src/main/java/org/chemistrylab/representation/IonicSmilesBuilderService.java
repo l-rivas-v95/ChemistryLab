@@ -56,6 +56,11 @@ public class IonicSmilesBuilderService {
         IonMatch cationMatch = resolution.cation();
         IonMatch anionMatch = resolution.anion();
 
+        Optional<String> metalHydroxide = buildMetalHydroxide(cationMatch, anionMatch);
+        if (metalHydroxide.isPresent()) {
+            return metalHydroxide;
+        }
+
         Optional<String> ionicFragments = buildIonicFragments(cationMatch, anionMatch);
         if (ionicFragments.isPresent()) {
             return ionicFragments;
@@ -77,6 +82,25 @@ public class IonicSmilesBuilderService {
                 cationSmiles,
                 cationMatch.cantidad()
         ));
+    }
+
+    private Optional<String> buildMetalHydroxide(IonMatch cationMatch, IonMatch anionMatch) {
+        if (!HYDROXIDE_FORMULA.equals(anionMatch.ion().getFormula())) {
+            return Optional.empty();
+        }
+
+        String metal = neutralAtom(cationMatch.ion().getFormula());
+        if (metal == null || cationMatch.cantidad() != 1) {
+            return Optional.empty();
+        }
+
+        return switch (anionMatch.cantidad()) {
+            case 1 -> Optional.of("[" + metal + "]O[H]");
+            case 2 -> Optional.of("[H]O[" + metal + "]O[H]");
+            case 3 -> Optional.of("O[" + metal + "](O)O");
+            case 4 -> Optional.of("O[" + metal + "](O)(O)O");
+            default -> Optional.empty();
+        };
     }
 
     private Optional<String> buildIonicFragments(IonMatch cationMatch, IonMatch anionMatch) {
