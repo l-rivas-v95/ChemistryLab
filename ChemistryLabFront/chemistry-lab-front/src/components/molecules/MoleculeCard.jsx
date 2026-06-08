@@ -48,7 +48,7 @@ function MoleculeCard({ molecula, onClick }) {
             </div>
 
             <div className="molecule-image-box">
-                <MoleculeStructure molecula={molecula} />
+                <MoleculeStructure molecula={molecula} categoria={categoria} />
             </div>
 
             <div className="molecule-main-info">
