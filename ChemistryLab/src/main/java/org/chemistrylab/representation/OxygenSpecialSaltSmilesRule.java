@@ -1,5 +1,6 @@
 package org.chemistrylab.representation;
 
+import org.chemistrylab.chemistry.formula.FormulaParserService;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -12,14 +13,22 @@ public class OxygenSpecialSaltSmilesRule {
     private static final Pattern ALKALINE_EARTH_PEROXIDE = Pattern.compile("^(Mg|Ca|Sr|Ba)O2$");
     private static final Pattern ALKALI_METAL_SUPEROXIDE = Pattern.compile("^(Li|Na|K|Rb|Cs)O2$");
 
+    private final FormulaParserService formulaParserService;
+
+    public OxygenSpecialSaltSmilesRule(FormulaParserService formulaParserService) {
+        this.formulaParserService = formulaParserService;
+    }
+
     public Optional<String> build(String formula) {
         if (formula == null || formula.isBlank()) {
             return Optional.empty();
         }
 
-        return buildAlkaliMetalPeroxide(formula)
-                .or(() -> buildAlkalineEarthPeroxide(formula))
-                .or(() -> buildAlkaliMetalSuperoxide(formula));
+        String normalizedFormula = formulaParserService.normalizarFormulaVisual(formula);
+
+        return buildAlkaliMetalPeroxide(normalizedFormula)
+                .or(() -> buildAlkalineEarthPeroxide(normalizedFormula))
+                .or(() -> buildAlkaliMetalSuperoxide(normalizedFormula));
     }
 
     private Optional<String> buildAlkaliMetalPeroxide(String formula) {
