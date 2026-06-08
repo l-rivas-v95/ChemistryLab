@@ -1,6 +1,16 @@
 import ChemicalFormulaText from "./ChemicalFormulaText";
+import SmilesDrawerStructure from "./SmilesDrawerStructure";
 
 function MoleculeStructure({ molecula }) {
+    if (shouldUseSmilesDrawer(molecula)) {
+        return (
+            <SmilesDrawerStructure
+                smiles={molecula.canonicalSmiles || molecula.isomericSmiles}
+                formula={molecula.formula}
+            />
+        );
+    }
+
     if (molecula?.tipoRepresentacion === "SVG" && molecula?.svg) {
         return (
             <SvgStructure
@@ -11,6 +21,15 @@ function MoleculeStructure({ molecula }) {
     }
 
     return <FormulaStructure formula={molecula?.formula} />;
+}
+
+function shouldUseSmilesDrawer(molecula) {
+    if (!molecula?.canonicalSmiles && !molecula?.isomericSmiles) {
+        return false;
+    }
+
+    return molecula?.representationInputSource === "DATABASE_CANONICAL_SMILES"
+        || molecula?.representationInputSource === "DATABASE_ISOMERIC_SMILES";
 }
 
 function SvgStructure({ svg, formula }) {
