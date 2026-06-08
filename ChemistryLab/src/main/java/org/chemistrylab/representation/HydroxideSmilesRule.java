@@ -31,7 +31,7 @@ public class HydroxideSmilesRule {
         }
 
         HydroxideFormula hydroxide = hydroxideFormula.get();
-        if (!isMetal(hydroxide.elementSymbol())) {
+        if (!isSupportedMetal(hydroxide.elementSymbol())) {
             return Optional.empty();
         }
 
@@ -55,7 +55,11 @@ public class HydroxideSmilesRule {
         return Optional.empty();
     }
 
-    private boolean isMetal(String symbol) {
+    private boolean isSupportedMetal(String symbol) {
+        if ("H".equals(symbol)) {
+            return false;
+        }
+
         return elementoRepository.findBySimboloIgnoreCase(symbol)
                 .map(ElementoEntity::getCategoria)
                 .map(String::toLowerCase)
