@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
-public class BorohydrideSmilesRule {
+public class BorohydrideSmilesRule implements FormulaSmilesRule {
 
     private static final Pattern METAL_FIRST_BOROHYDRIDE = Pattern.compile("^(Li|Na|K|Rb|Cs)BH4$");
     private static final Pattern BOROHYDRIDE_FIRST = Pattern.compile("^BH4(Li|Na|K|Rb|Cs)$");
@@ -19,6 +19,7 @@ public class BorohydrideSmilesRule {
         this.formulaParserService = formulaParserService;
     }
 
+    @Override
     public Optional<String> build(String formula) {
         if (formula == null || formula.isBlank()) {
             return Optional.empty();
