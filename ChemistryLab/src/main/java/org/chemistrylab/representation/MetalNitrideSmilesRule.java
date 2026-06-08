@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
-public class MetalNitrideSmilesRule {
+public class MetalNitrideSmilesRule implements FormulaSmilesRule {
 
     private static final Pattern ALKALI_METAL_NITRIDE = Pattern.compile("^(Li|Na|K|Rb|Cs)3N$");
     private static final Pattern ALKALINE_EARTH_NITRIDE = Pattern.compile("^(Mg|Ca|Sr|Ba)3N2$");
@@ -19,6 +19,7 @@ public class MetalNitrideSmilesRule {
         this.formulaParserService = formulaParserService;
     }
 
+    @Override
     public Optional<String> build(String formula) {
         if (formula == null || formula.isBlank()) {
             return Optional.empty();
