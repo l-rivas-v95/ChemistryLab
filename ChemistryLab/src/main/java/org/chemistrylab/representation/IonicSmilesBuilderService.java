@@ -73,27 +73,17 @@ public class IonicSmilesBuilderService {
             return metalHalide;
         }
 
+        Optional<String> oxoanionSalt = buildOxoanionSalt(cationMatch, anionMatch);
+        if (oxoanionSalt.isPresent()) {
+            return oxoanionSalt;
+        }
+
         Optional<String> ionicFragments = buildIonicFragments(cationMatch, anionMatch);
         if (ionicFragments.isPresent()) {
             return ionicFragments;
         }
 
-        Optional<String> anionSmilesOptional = OxoSpeciesSmilesCatalog.find(anionMatch.ion().getFormula());
-        if (anionSmilesOptional.isEmpty()) {
-            return Optional.empty();
-        }
-
-        String cationSmiles = ionicFragment(cationMatch.ion());
-        if (cationSmiles == null || cationSmiles.isBlank()) {
-            return Optional.of(anionSmilesOptional.get());
-        }
-
-        return Optional.of(arrangeFragmentsAroundCenter(
-                anionSmilesOptional.get(),
-                anionMatch.cantidad(),
-                cationSmiles,
-                cationMatch.cantidad()
-        ));
+        return Optional.empty();
     }
 
     private Optional<String> buildAmmoniumHydroxide(IonMatch cationMatch, IonMatch anionMatch) {
@@ -146,6 +136,25 @@ public class IonicSmilesBuilderService {
             case 4 -> Optional.of(halide + "[" + metal + "](" + halide + ")(" + halide + ")" + halide);
             default -> Optional.empty();
         };
+    }
+
+    private Optional<String> buildOxoanionSalt(IonMatch cationMatch, IonMatch anionMatch) {
+        Optional<String> anionSmilesOptional = OxoSpeciesSmilesCatalog.find(anionMatch.ion().getFormula());
+        if (anionSmilesOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String cationSmiles = ionicFragment(cationMatch.ion());
+        if (cationSmiles == null || cationSmiles.isBlank()) {
+            return Optional.of(anionSmilesOptional.get());
+        }
+
+        return Optional.of(arrangeFragmentsAroundCenter(
+                anionSmilesOptional.get(),
+                anionMatch.cantidad(),
+                cationSmiles,
+                cationMatch.cantidad()
+        ));
     }
 
     private Optional<String> buildIonicFragments(IonMatch cationMatch, IonMatch anionMatch) {
