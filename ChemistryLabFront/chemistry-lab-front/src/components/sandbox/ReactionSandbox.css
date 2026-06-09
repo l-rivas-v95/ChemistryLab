@@ -302,48 +302,147 @@
     font-size: 13px;
 }
 
-.reaction-query-card,
-.reaction-result-card {
-    margin-top: 14px;
-    padding: 15px 16px;
-    border-radius: 18px;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    background: rgba(248, 250, 252, 0.92);
-}
-
-.reaction-query-card {
-    display: flex;
-    justify-content: space-between;
+.reaction-formula-strip {
+    width: fit-content;
+    max-width: 100%;
+    margin: 12px auto 0;
+    display: inline-flex;
     align-items: center;
-    gap: 14px;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid rgba(245, 158, 11, 0.24);
+    border-radius: 999px;
+    background: rgba(255, 251, 235, 0.8);
+    color: #334155;
 }
 
-.reaction-query-card span {
+.reaction-formula-strip span {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.reaction-formula-strip strong {
+    color: #0f172a;
+    font-size: 19px;
+    font-weight: 950;
+}
+
+.reaction-formula-strip small {
     color: #64748b;
     font-weight: 800;
 }
 
-.reaction-query-card strong {
-    color: #0f172a;
-    font-size: 20px;
-    text-align: right;
-}
-
-.reaction-result-card {
+.reaction-suggestions-panel {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(148, 163, 184, 0.18);
     text-align: center;
 }
 
-.reaction-result-card h3 {
-    margin: 0 0 8px;
+.reaction-suggestions-panel h3 {
+    margin: 0 0 10px;
 }
 
-.reaction-result-card code {
-    display: inline-flex;
+.reaction-suggestion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
     margin-top: 12px;
-    padding: 8px 12px;
-    border-radius: 12px;
-    background: #0f172a;
-    color: #f8fafc;
+}
+
+.reaction-suggestion-card {
+    min-height: 108px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 16px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    color: #0f172a;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.reaction-suggestion-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(14, 165, 233, 0.38);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
+}
+
+.reaction-suggestion-card span {
+    display: inline-flex;
+    width: fit-content;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(14, 165, 233, 0.1);
+    color: #0369a1;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.reaction-suggestion-card strong {
+    color: #0f172a;
+    font-size: 26px;
+    font-weight: 950;
+    line-height: 1;
+}
+
+.reaction-suggestion-card small {
+    max-width: 100%;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reaction-suggestion-card-exact {
+    border-color: rgba(245, 158, 11, 0.42);
+    background: linear-gradient(135deg, #fff7ed, #ffffff);
+    box-shadow: 0 12px 26px rgba(217, 119, 6, 0.12);
+}
+
+.reaction-suggestion-card-exact span {
+    background: rgba(245, 158, 11, 0.14);
+    color: #b45309;
+}
+
+.reaction-suggestions-empty,
+.reaction-error-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 74px;
+    padding: 14px;
+    border: 1px dashed rgba(148, 163, 184, 0.3);
+    border-radius: 18px;
+    background: rgba(248, 250, 252, 0.76);
+    color: #64748b;
+}
+
+.reaction-suggestions-empty span {
+    font-size: 24px;
+}
+
+.reaction-suggestions-empty p {
+    margin: 0;
+}
+
+.reaction-error-card {
+    border-style: solid;
+    border-color: rgba(239, 68, 68, 0.25);
+    background: rgba(254, 242, 242, 0.9);
+    color: #b91c1c;
     font-weight: 800;
 }
 
@@ -374,13 +473,14 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .reaction-query-card,
     .reaction-workbench-header {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .reaction-query-card strong {
-        text-align: left;
+    .reaction-formula-strip {
+        width: 100%;
+        flex-direction: column;
+        border-radius: 18px;
     }
 }
