@@ -50,7 +50,7 @@ public class CompoundFamilyService {
             return CompoundFamily.COVALENT;
         }
 
-        if (esOrganica(atomos) || tieneSmiles(molecula)) {
+        if (esOrganica(atomos) || (tieneSmiles(molecula) && atomos.containsKey("C"))) {
             return CompoundFamily.ORGANIC;
         }
 
