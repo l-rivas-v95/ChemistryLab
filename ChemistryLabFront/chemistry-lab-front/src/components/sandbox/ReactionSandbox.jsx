@@ -74,7 +74,7 @@ function ReactionSandbox({ elementos = [] }) {
             formulaEntrada,
             elementos: elementosUnicos,
             mensaje: reactivos.length > 0
-                ? "Vista preparada: esta consulta visual se usará para pedir sugerencias al backend."
+                ? "Listo para buscar en la base de datos con esta combinación de elementos."
                 : "Añade elementos para probar una combinación."
         });
     };
@@ -173,23 +173,34 @@ function ReactionSandbox({ elementos = [] }) {
                         )}
                     </div>
 
-                    <div className="reaction-query-card">
-                        <span>Consulta generada</span>
-                        <strong>{queryVisual || "—"}</strong>
-                    </div>
-
-                    <div className="reaction-query-card reaction-formula-card">
-                        <span>Fórmula de entrada</span>
-                        <strong>{formulaEntrada || "—"}</strong>
-                    </div>
-
-                    {resultadoSimulado && (
-                        <div className="reaction-result-card">
-                            <h3>Resultado preparado</h3>
-                            <p>{resultadoSimulado.mensaje}</p>
-                            {resultadoSimulado.query && <code>{resultadoSimulado.query}</code>}
+                    <div className="reaction-formula-strip">
+                        <div>
+                            <span>Fórmula construida</span>
+                            <strong>{formulaEntrada || "—"}</strong>
                         </div>
-                    )}
+                        <small>{queryVisual || "Sin elementos"}</small>
+                    </div>
+
+                    <div className="reaction-suggestions-panel">
+                        <div className="reaction-suggestions-header">
+                            <div>
+                                <h3>Compuestos encontrados</h3>
+                                <p>Al conectar el backend aparecerán aquí las moléculas compatibles.</p>
+                            </div>
+                        </div>
+
+                        {resultadoSimulado ? (
+                            <div className="reaction-pending-card">
+                                <strong>{resultadoSimulado.formulaEntrada}</strong>
+                                <span>{resultadoSimulado.mensaje}</span>
+                            </div>
+                        ) : (
+                            <div className="reaction-suggestions-empty">
+                                <span>🔎</span>
+                                <p>Construye una combinación y pulsa Probar.</p>
+                            </div>
+                        )}
+                    </div>
                 </section>
             </div>
         </section>
