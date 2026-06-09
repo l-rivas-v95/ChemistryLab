@@ -154,8 +154,9 @@ function ReactionSandbox({ elementos = [] }) {
                     </div>
 
                     <div className="reaction-summary-panel">
+                        <span className="reaction-summary-label">Resumen</span>
                         {resumenReactivos.length === 0 ? (
-                            <span>No hay elementos seleccionados.</span>
+                            <span className="reaction-summary-empty">No hay elementos seleccionados.</span>
                         ) : (
                             resumenReactivos.map((elemento) => (
                                 <button
