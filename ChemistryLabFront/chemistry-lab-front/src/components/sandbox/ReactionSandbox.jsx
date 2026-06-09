@@ -202,18 +202,12 @@ function ReactionSandbox({ elementos = [] }) {
                                     {reaccionVisual.reactivos.map((reactivo, index) => (
                                         <div className="reaction-equation-part" key={`${reactivo.formula}-${index}`}>
                                             {index > 0 && <span className="reaction-equation-plus">+</span>}
-                                            <div className="reaction-equation-term">
-                                                <strong>{formatCoefficient(reactivo.coefficient)}{reactivo.formula}</strong>
-                                                <small>{reactivo.label}</small>
-                                            </div>
+                                            <ReactionCard term={reactivo} />
                                         </div>
                                     ))}
                                 </div>
                                 <span className="reaction-equation-arrow">→</span>
-                                <div className="reaction-equation-product">
-                                    <strong>{formatCoefficient(reaccionVisual.producto.coefficient)}{reaccionVisual.producto.formula}</strong>
-                                    <small>{productoSeleccionado.nombre}</small>
-                                </div>
+                                <ReactionCard term={{ ...reaccionVisual.producto, label: productoSeleccionado.nombre }} product />
                             </div>
                             <p className="reaction-equation-note">{balanceando ? "Ajustando reacción..." : reaccionVisual.message}</p>
                         </div>
@@ -221,6 +215,18 @@ function ReactionSandbox({ elementos = [] }) {
                 </section>
             </div>
         </section>
+    );
+}
+
+function ReactionCard({ term, product = false }) {
+    return (
+        <div className="reaction-equation-card-wrap">
+            {term.coefficient > 1 && <span className="reaction-external-coefficient">{term.coefficient}</span>}
+            <div className={product ? "reaction-equation-product" : "reaction-equation-term"}>
+                <strong>{term.formula}</strong>
+                <small>{term.label}</small>
+            </div>
+        </div>
     );
 }
 
@@ -279,11 +285,6 @@ function construirReaccionVisual(resumenReactivos, producto, reaccionBalanceada)
         balanced: false,
         message: reaccionBalanceada?.message || "Vista inicial sin coeficientes."
     };
-}
-
-function formatCoefficient(coefficient) {
-    if (!coefficient || coefficient <= 1) return "";
-    return coefficient;
 }
 
 export default ReactionSandbox;
