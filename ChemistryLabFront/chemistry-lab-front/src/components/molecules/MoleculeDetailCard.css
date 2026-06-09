@@ -69,13 +69,7 @@
     cursor: pointer;
 }
 
-.molecule-detail-image {
-    overflow: hidden;
-    border-radius: 18px;
-    border: 1px solid rgba(90, 65, 25, 0.14);
-    background: #ffffff;
-}
-
+.molecule-detail-image { overflow: hidden; border-radius: 18px; border: 1px solid rgba(90, 65, 25, 0.14); background: #ffffff; }
 .molecule-detail-image .formula-structure,
 .molecule-detail-image .formula-structure-html { background: #ffffff; }
 
@@ -90,9 +84,9 @@
 }
 
 .molecule-detail-title-chip {
-    padding: 14px 18px;
+    padding: 12px 16px;
     border: 1px solid rgba(90, 65, 25, 0.16);
-    border-radius: 20px;
+    border-radius: 18px;
     background: rgba(255, 255, 255, 0.66);
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
 }
@@ -104,7 +98,7 @@
 .molecule-detail-oxide .molecule-detail-title-chip { background: linear-gradient(180deg, rgba(250, 245, 255, 0.96), rgba(255, 255, 255, 0.78)); border-color: rgba(168, 85, 247, 0.3); }
 .molecule-detail-salt .molecule-detail-title-chip { background: linear-gradient(180deg, rgba(255, 251, 235, 0.96), rgba(255, 255, 255, 0.78)); border-color: rgba(245, 158, 11, 0.34); }
 
-.molecule-detail-title h2 { margin: 0 0 6px; font-size: 28px; line-height: 1.05; }
+.molecule-detail-title h2 { margin: 0 0 5px; font-size: 26px; line-height: 1.05; }
 .molecule-detail-title p { margin: 0; color: #64748b; font-weight: 800; text-align: left; }
 .molecule-detail-title strong { flex: 0 0 auto; padding: 8px 12px; border-radius: 999px; background: #142033; color: #fff4bd; font-size: 18px; }
 
@@ -160,7 +154,6 @@
 
 .molecule-detail-info > h3,
 .molecule-detail-side > h3 { font-size: 22px; text-align: center; }
-
 .molecule-detail-3d-content,
 .molecule-3d-empty { display: flex; align-items: center; justify-content: center; min-height: 150px; color: #64748b; font-weight: 900; }
 
@@ -171,22 +164,34 @@
 .molecule-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; flex: 0 0 auto; }
 
 .molecule-detail-item {
+    position: relative;
     display: grid;
     grid-template-columns: 28px minmax(0, 1fr);
     align-items: start;
     gap: 10px;
-    min-height: 64px;
+    height: 82px;
+    min-height: 82px;
     padding: 12px;
-    border: 1px solid rgba(100, 116, 139, 0.16);
+    border: 1px solid rgba(100, 116, 139, 0.18);
     border-radius: 14px;
-    background: rgba(248, 250, 252, 0.9);
+    background: rgba(248, 250, 252, 0.94);
     box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
 }
 
 .molecule-detail-item > span { font-size: 20px; line-height: 1; text-align: center; }
 .molecule-detail-item small { display: block; margin-bottom: 4px; color: #475569; font-size: 12px; line-height: 1.25; text-align: left; }
-.molecule-detail-item strong { display: block; color: #142033; font-size: 15px; line-height: 1.3; text-align: left; word-break: break-word; }
-.molecule-detail-item:hover { overflow: visible; z-index: 5; }
+.molecule-detail-item strong {
+    display: -webkit-box;
+    color: #142033;
+    font-size: 15px;
+    line-height: 1.28;
+    text-align: left;
+    word-break: break-word;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.molecule-detail-item:hover { z-index: 5; border-color: rgba(20, 32, 51, 0.22); box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1); }
 
 .molecule-description-panel h3 { text-align: center; }
 .molecule-description-panel p { margin: 10px 0 0; color: #2d3542; font-size: 14px; line-height: 1.5; text-align: left; }
@@ -197,13 +202,10 @@
 .molecule-hazard-list,
 .molecule-bullet-list,
 .molecule-simple-list { display: grid; gap: 8px; margin: 0; padding: 0; }
-
 .molecule-bullet-list { padding-left: 18px; text-align: left; }
 .molecule-bullet-list li { padding-left: 4px; color: #243044; font-size: 14px; line-height: 1.5; text-align: left; }
-
 .molecule-hazard-item { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 8px; padding: 10px; border-radius: 12px; background: rgba(248, 250, 252, 0.9); text-align: left; }
 .molecule-hazard-item p { margin: 2px 0 0; font-size: 13px; line-height: 1.35; text-align: left; }
-
 .molecule-simple-list { display: flex; flex-wrap: wrap; }
 .molecule-simple-list span { padding: 7px 9px; border-radius: 999px; background: rgba(226, 232, 240, 0.9); color: #334155; font-size: 12px; font-weight: 800; }
 
