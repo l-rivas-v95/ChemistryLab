@@ -100,7 +100,7 @@ function MoleculeCard({ molecula, onClick }) {
 function MoleculeChip({ icono, label, value, unit }) {
     const tieneValor = hasValue(value);
     const textoCompleto = tieneValor ? cleanText(value) : "";
-    const textoVisible = tieneValor ? formatPropertyShort(value, 26) : "N/A";
+    const textoVisible = tieneValor ? formatPropertyShort(value, 18) : "N/A";
 
     return (
         <div className="molecule-chip" title={textoCompleto}>
