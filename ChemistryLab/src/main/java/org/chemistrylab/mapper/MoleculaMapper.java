@@ -8,6 +8,8 @@ import org.chemistrylab.dto.MoleculaDTO;
 import org.chemistrylab.entity.MoleculaEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 public class MoleculaMapper {
@@ -61,6 +63,10 @@ public class MoleculaMapper {
     private String obtenerTipoCalculado(MoleculaEntity entity) {
         CompoundFamily family = compoundFamilyService.clasificar(entity);
 
+        if (family == CompoundFamily.ORGANIC && esCovalenteInorganicoSinCarbono(entity)) {
+            return "Inorganica";
+        }
+
         return switch (family) {
             case ORGANIC -> "Organica";
             case ACID -> "Acido inorganico";
@@ -70,5 +76,35 @@ public class MoleculaMapper {
             case COVALENT -> "Inorganica";
             case UNKNOWN -> "Indefinida";
         };
+    }
+
+    private boolean esCovalenteInorganicoSinCarbono(MoleculaEntity entity) {
+        Map<String, Integer> atomos = formulaParserService.parsearFormula(entity.getFormula());
+
+        if (atomos.isEmpty() || atomos.containsKey("C")) {
+            return false;
+        }
+
+        return atomos.keySet().stream()
+                .noneMatch(simbolo -> "Na".equals(simbolo)
+                        || "K".equals(simbolo)
+                        || "Li".equals(simbolo)
+                        || "Rb".equals(simbolo)
+                        || "Cs".equals(simbolo)
+                        || "Mg".equals(simbolo)
+                        || "Ca".equals(simbolo)
+                        || "Sr".equals(simbolo)
+                        || "Ba".equals(simbolo)
+                        || "Al".equals(simbolo)
+                        || "Fe".equals(simbolo)
+                        || "Cu".equals(simbolo)
+                        || "Zn".equals(simbolo)
+                        || "Mn".equals(simbolo)
+                        || "Ni".equals(simbolo)
+                        || "Co".equals(simbolo)
+                        || "Ag".equals(simbolo)
+                        || "Pb".equals(simbolo)
+                        || "Sn".equals(simbolo)
+                        || "Hg".equals(simbolo));
     }
 }
