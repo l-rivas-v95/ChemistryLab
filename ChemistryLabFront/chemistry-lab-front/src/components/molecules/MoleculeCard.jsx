@@ -1,3 +1,4 @@
+import "./MoleculeCard.css";
 import MoleculeStructure from "./MoleculeStructure";
 import ChemicalFormulaText from "./ChemicalFormulaText";
 import {
