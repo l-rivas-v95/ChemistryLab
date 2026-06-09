@@ -39,7 +39,7 @@ function MoleculeDetailCard({ molecula, onClose }) {
     return (
         <div className="molecule-modal-overlay" onClick={onClose}>
             <article
-                className="molecule-detail-card molecule-detail-card-three"
+                className={`molecule-detail-card molecule-detail-card-three molecule-detail-${categoria}`}
                 onClick={(event) => event.stopPropagation()}
             >
                 <button
