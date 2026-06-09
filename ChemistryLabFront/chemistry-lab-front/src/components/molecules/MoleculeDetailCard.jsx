@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./MoleculeDetailCard.css";
 import SdfViewer from "./SdfViewer";
 import MoleculeStructure from "./MoleculeStructure";
 import {
