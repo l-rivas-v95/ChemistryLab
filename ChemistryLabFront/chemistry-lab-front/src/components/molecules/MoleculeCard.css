@@ -3,10 +3,9 @@
 .molecule-card {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 9px;
     width: 100%;
-    min-height: 520px;
-    max-height: 560px;
+    height: 520px;
     padding: 14px;
     border: 2px solid rgba(181, 138, 60, 0.42);
     border-radius: 18px;
@@ -35,9 +34,12 @@
 .molecule-cid { background: rgba(20, 32, 51, 0.1); color: #142033; }
 
 .molecule-image-box {
-    min-height: 145px;
-    max-height: 155px;
+    height: 142px;
+    min-height: 142px;
+    max-height: 142px;
     overflow: hidden;
+    border-radius: 12px;
+    background: #ffffff;
 }
 
 .molecule-card h3 { margin: 0; color: #142033; font-size: 20px; }
@@ -57,28 +59,27 @@
 .molecule-formula-line { display: flex; justify-content: center; margin: 2px 0 0; }
 .molecule-formula-pill { padding: 8px 12px; border-radius: 999px; background: #142033; color: #fff4bd; font-size: 16px; font-weight: 900; }
 .molecule-description {
-    min-height: 48px;
-    max-height: 54px;
+    height: 50px;
     margin: 0;
     color: #2d3542;
     font-size: 13px;
-    line-height: 1.35;
+    line-height: 1.28;
     overflow: hidden;
 }
-.molecule-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; }
+.molecule-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: auto; }
 .molecule-data-grid div {
-    min-height: 74px;
-    padding: 9px;
-    border: 1px solid rgba(100, 116, 139, 0.12);
+    min-height: 58px;
+    padding: 7px;
+    border: 1px solid rgba(100, 116, 139, 0.14);
     border-radius: 12px;
-    background: rgba(248, 250, 252, 0.92);
+    background: rgba(248, 250, 252, 0.94);
     box-shadow: 0 5px 12px rgba(15, 23, 42, 0.05);
 }
-.molecule-data-grid small { display: block; color: #64748b; font-size: 10px; font-weight: 900; text-transform: uppercase; }
-.molecule-data-grid strong { color: #142033; font-size: 13px; }
-.molecule-open-hint { margin-top: 2px; font-size: 16px; }
+.molecule-data-grid small { display: block; color: #64748b; font-size: 9px; font-weight: 900; text-transform: uppercase; }
+.molecule-data-grid strong { color: #142033; font-size: 12px; line-height: 1.25; }
+.molecule-open-hint { margin-top: 2px; font-size: 15px; }
 
 @media (max-width: 700px) {
-    .molecule-card { min-height: 500px; max-height: none; }
+    .molecule-card { height: auto; min-height: 500px; }
     .molecule-data-grid { grid-template-columns: 1fr; }
 }
