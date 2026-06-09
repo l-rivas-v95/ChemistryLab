@@ -4,6 +4,7 @@ import PeriodicTable from "./components/periodicTable/PeriodicTable";
 import ElementCard from "./components/elementCard/ElementCard";
 import CategoryLegend from "./components/legend/CategoryLegend";
 import MoleculeList from "./components/molecules/MoleculeList";
+import ReactionSandbox from "./components/sandbox/ReactionSandbox";
 import { useElements } from "./hooks/useElements";
 import { useMolecules } from "./hooks/useMolecules";
 import "./App.css";
@@ -75,6 +76,10 @@ function App() {
                         onPaginaAnterior={irPaginaMoleculasAnterior}
                         onPaginaSiguiente={irPaginaMoleculasSiguiente}
                     />
+                )}
+
+                {vistaActiva === "sandbox" && (
+                    <ReactionSandbox elementos={elementos} />
                 )}
             </section>
         </main>
