@@ -20,7 +20,7 @@ public class MoleculaDTO {
     private String nombreIupac;
     private String descripcion;
 
-    private String tipoCompuesto;
+    private String compoundFamily;
     private String estadoFisico;
     private Integer carga;
 
