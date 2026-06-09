@@ -13,6 +13,10 @@ import {
     formatPropertyShort,
     hasValue
 } from "../../utils/moleculeFormatters";
+import {
+    getMoleculeCategoryClass,
+    getTipoVisible
+} from "../../utils/moleculeCategory";
 
 function MoleculeDetailCard({ molecula, onClose }) {
     const [mostrarModelo3d, setMostrarModelo3d] = useState(false);
@@ -21,6 +25,8 @@ function MoleculeDetailCard({ molecula, onClose }) {
         return null;
     }
 
+    const categoria = getMoleculeCategoryClass(molecula);
+    const tipoVisible = getTipoVisible(molecula);
     const safety = getSafetySummary(molecula.riesgos) || {
         level: "unknown",
         label: "Sin información",
@@ -55,7 +61,7 @@ function MoleculeDetailCard({ molecula, onClose }) {
                     </div>
 
                     <div className="molecule-detail-image">
-                        <MoleculeStructure molecula={molecula} size="detail"/>
+                        <MoleculeStructure molecula={molecula} categoria={categoria} size="detail"/>
                     </div>
 
                     <div className="molecule-detail-3d-box">
@@ -83,7 +89,7 @@ function MoleculeDetailCard({ molecula, onClose }) {
                     </div>
 
                     <div className="molecule-detail-type">
-                        {molecula.tipoCompuesto || "Sin clasificar"}
+                        {tipoVisible}
                     </div>
 
                     <div className="molecule-detail-actions">
