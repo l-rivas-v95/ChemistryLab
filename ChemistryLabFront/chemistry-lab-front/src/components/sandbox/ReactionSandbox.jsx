@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import "./ReactionSandbox.css";
 
 const QUICK_ELEMENTS = ["H", "O", "C", "N", "Na", "Cl", "Fe", "Ca", "K", "S", "P", "Mg", "Al", "Cu", "Zn"];
+let tokenCounter = 0;
 
 function ReactionSandbox({ elementos = [] }) {
     const [reactivos, setReactivos] = useState([]);
@@ -19,17 +20,21 @@ function ReactionSandbox({ elementos = [] }) {
         return QUICK_ELEMENTS.map((simbolo) => porSimbolo.get(simbolo) || { simbolo, nombre: simbolo });
     }, [elementos]);
 
-    const queryVisual = useMemo(() => construirQueryVisual(reactivos), [reactivos]);
+    const resumenReactivos = useMemo(() => agruparReactivos(reactivos), [reactivos]);
+    const queryVisual = useMemo(() => construirQueryVisual(resumenReactivos), [resumenReactivos]);
+    const formulaEntrada = useMemo(() => construirFormulaEntrada(resumenReactivos), [resumenReactivos]);
 
     const agregarElemento = (elemento) => {
         if (!elemento?.simbolo) {
             return;
         }
 
+        tokenCounter += 1;
+
         setReactivos((actuales) => [
             ...actuales,
             {
-                id: `${elemento.simbolo}-${crypto.randomUUID()}`,
+                id: `${elemento.simbolo}-${Date.now()}-${tokenCounter}`,
                 simbolo: elemento.simbolo,
                 nombre: elemento.nombre || elemento.simbolo
             }
@@ -42,19 +47,34 @@ function ReactionSandbox({ elementos = [] }) {
         setResultadoSimulado(null);
     };
 
+    const quitarUltimoDeSimbolo = (simbolo) => {
+        setReactivos((actuales) => {
+            const index = [...actuales].reverse().findIndex((elemento) => elemento.simbolo === simbolo);
+
+            if (index === -1) {
+                return actuales;
+            }
+
+            const realIndex = actuales.length - 1 - index;
+            return actuales.filter((_, posicion) => posicion !== realIndex);
+        });
+        setResultadoSimulado(null);
+    };
+
     const limpiar = () => {
         setReactivos([]);
         setResultadoSimulado(null);
     };
 
     const probar = () => {
-        const elementosUnicos = [...new Set(reactivos.map((elemento) => elemento.simbolo))];
+        const elementosUnicos = resumenReactivos.map((elemento) => elemento.simbolo);
 
         setResultadoSimulado({
             query: queryVisual,
+            formulaEntrada,
             elementos: elementosUnicos,
             mensaje: reactivos.length > 0
-                ? "Vista preparada: aquí se llamará al backend para buscar compuestos con esos elementos."
+                ? "Vista preparada: esta consulta visual se usará para pedir sugerencias al backend."
                 : "Añade elementos para probar una combinación."
         });
     };
@@ -66,7 +86,7 @@ function ReactionSandbox({ elementos = [] }) {
                     <span className="reaction-sandbox-kicker">Sandbox químico</span>
                     <h2>Construye una búsqueda con elementos</h2>
                     <p>
-                        Arrastra mentalmente la idea: eliges elementos, se forma una consulta tipo <b>Fe + O</b> y luego el backend buscará compuestos posibles en la base de datos.
+                        Selecciona elementos como si fuera un laboratorio visual. Por dentro se genera una consulta tipo <b>Fe + O</b> para buscar compuestos posibles en la base de datos.
                     </p>
                 </div>
 
@@ -101,7 +121,7 @@ function ReactionSandbox({ elementos = [] }) {
                     <div className="reaction-workbench-header">
                         <div>
                             <h3>Reactivos</h3>
-                            <p>Esta zona funcionará como una barra de búsqueda visual.</p>
+                            <p>Esta zona funciona como una barra de búsqueda visual.</p>
                         </div>
 
                         <button type="button" className="reaction-clear-button" onClick={limpiar} disabled={reactivos.length === 0}>Limpiar</button>
@@ -133,9 +153,33 @@ function ReactionSandbox({ elementos = [] }) {
                         )}
                     </div>
 
+                    <div className="reaction-summary-panel">
+                        {resumenReactivos.length === 0 ? (
+                            <span>No hay elementos seleccionados.</span>
+                        ) : (
+                            resumenReactivos.map((elemento) => (
+                                <button
+                                    type="button"
+                                    className="reaction-summary-chip"
+                                    key={elemento.simbolo}
+                                    onClick={() => quitarUltimoDeSimbolo(elemento.simbolo)}
+                                    title="Quitar una unidad"
+                                >
+                                    <strong>{elemento.simbolo}</strong>
+                                    <span>x{elemento.cantidad}</span>
+                                </button>
+                            ))
+                        )}
+                    </div>
+
                     <div className="reaction-query-card">
                         <span>Consulta generada</span>
                         <strong>{queryVisual || "—"}</strong>
+                    </div>
+
+                    <div className="reaction-query-card reaction-formula-card">
+                        <span>Fórmula de entrada</span>
+                        <strong>{formulaEntrada || "—"}</strong>
                     </div>
 
                     {resultadoSimulado && (
@@ -151,12 +195,39 @@ function ReactionSandbox({ elementos = [] }) {
     );
 }
 
-function construirQueryVisual(elementos) {
-    if (!Array.isArray(elementos) || elementos.length === 0) {
+function agruparReactivos(elementos) {
+    const mapa = new Map();
+
+    elementos.forEach((elemento) => {
+        const actual = mapa.get(elemento.simbolo) || {
+            simbolo: elemento.simbolo,
+            nombre: elemento.nombre,
+            cantidad: 0
+        };
+
+        actual.cantidad += 1;
+        mapa.set(elemento.simbolo, actual);
+    });
+
+    return [...mapa.values()];
+}
+
+function construirQueryVisual(elementosAgrupados) {
+    if (!Array.isArray(elementosAgrupados) || elementosAgrupados.length === 0) {
         return "";
     }
 
-    return elementos.map((elemento) => elemento.simbolo).join(" + ");
+    return elementosAgrupados.map((elemento) => elemento.simbolo).join(" + ");
+}
+
+function construirFormulaEntrada(elementosAgrupados) {
+    if (!Array.isArray(elementosAgrupados) || elementosAgrupados.length === 0) {
+        return "";
+    }
+
+    return elementosAgrupados
+        .map((elemento) => `${elemento.simbolo}${elemento.cantidad > 1 ? elemento.cantidad : ""}`)
+        .join("");
 }
 
 export default ReactionSandbox;
