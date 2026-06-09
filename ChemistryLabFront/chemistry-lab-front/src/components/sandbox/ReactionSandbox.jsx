@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { suggestSandboxProducts } from "../../services/sandboxService";
+import { balanceReaction } from "../../services/reactionService";
 import "./ReactionSandbox.css";
 
 const QUICK_ELEMENTS = ["H", "O", "C", "N", "Na", "Cl", "Fe", "Ca", "K", "S", "P", "Mg", "Al", "Cu", "Zn"];
@@ -10,6 +11,8 @@ function ReactionSandbox({ elementos = [] }) {
     const [reactivos, setReactivos] = useState([]);
     const [resultado, setResultado] = useState(null);
     const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+    const [reaccionBalanceada, setReaccionBalanceada] = useState(null);
+    const [balanceando, setBalanceando] = useState(false);
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState("");
 
@@ -24,11 +27,12 @@ function ReactionSandbox({ elementos = [] }) {
     const resumenReactivos = useMemo(() => agruparReactivos(reactivos), [reactivos]);
     const queryVisual = useMemo(() => construirQueryVisual(resumenReactivos), [resumenReactivos]);
     const formulaEntrada = useMemo(() => construirFormulaEntrada(resumenReactivos), [resumenReactivos]);
-    const reaccionVisual = useMemo(() => construirReaccionVisual(resumenReactivos, productoSeleccionado), [resumenReactivos, productoSeleccionado]);
+    const reaccionVisual = useMemo(() => construirReaccionVisual(resumenReactivos, productoSeleccionado, reaccionBalanceada), [resumenReactivos, productoSeleccionado, reaccionBalanceada]);
 
     const resetBusqueda = () => {
         setResultado(null);
         setProductoSeleccionado(null);
+        setReaccionBalanceada(null);
         setError("");
     };
 
@@ -65,6 +69,7 @@ function ReactionSandbox({ elementos = [] }) {
         setError("");
         setResultado(null);
         setProductoSeleccionado(null);
+        setReaccionBalanceada(null);
         try {
             const response = await suggestSandboxProducts(resumenReactivos.map((elemento) => ({ simbolo: elemento.simbolo, cantidad: elemento.cantidad })));
             setResultado(response);
@@ -72,6 +77,23 @@ function ReactionSandbox({ elementos = [] }) {
             setError(err.message || "No se pudieron buscar compuestos.");
         } finally {
             setCargando(false);
+        }
+    };
+
+    const seleccionarProducto = async (suggestion) => {
+        setProductoSeleccionado(suggestion);
+        setReaccionBalanceada(null);
+        setBalanceando(true);
+        setError("");
+
+        try {
+            const reactantFormulas = construirReactivosParaBalance(resumenReactivos).map((reactivo) => reactivo.formula);
+            const response = await balanceReaction(reactantFormulas, [suggestion.formula]);
+            setReaccionBalanceada(response);
+        } catch (err) {
+            setError(err.message || "No se pudo balancear la reacción.");
+        } finally {
+            setBalanceando(false);
         }
     };
 
@@ -155,7 +177,7 @@ function ReactionSandbox({ elementos = [] }) {
                             resultado.suggestions?.length > 0 ? (
                                 <div className="reaction-suggestion-grid">
                                     {resultado.suggestions.map((suggestion) => (
-                                        <button type="button" onClick={() => setProductoSeleccionado(suggestion)} className={`reaction-suggestion-card ${suggestion.exactMatch ? "reaction-suggestion-card-exact" : ""} ${productoSeleccionado?.id === suggestion.id ? "reaction-suggestion-card-selected" : ""}`} key={`${suggestion.id}-${suggestion.formula}`}>
+                                        <button type="button" onClick={() => seleccionarProducto(suggestion)} className={`reaction-suggestion-card ${suggestion.exactMatch ? "reaction-suggestion-card-exact" : ""} ${productoSeleccionado?.id === suggestion.id ? "reaction-suggestion-card-selected" : ""}`} key={`${suggestion.id}-${suggestion.formula}`}>
                                             <span>{suggestion.exactMatch ? "Coincidencia exacta" : suggestion.compoundFamily || "Compuesto"}</span>
                                             <strong>{suggestion.formula}</strong>
                                             <small>{suggestion.nombre}</small>
@@ -172,7 +194,7 @@ function ReactionSandbox({ elementos = [] }) {
                     {productoSeleccionado && reaccionVisual && (
                         <div className="reaction-equation-panel">
                             <div className="reaction-equation-header">
-                                <span>Reacción propuesta</span>
+                                <span>{reaccionVisual.balanced ? "Reacción ajustada" : "Reacción propuesta"}</span>
                                 <strong>{productoSeleccionado.nombre}</strong>
                             </div>
                             <div className="reaction-equation-row">
@@ -181,7 +203,7 @@ function ReactionSandbox({ elementos = [] }) {
                                         <div className="reaction-equation-part" key={`${reactivo.formula}-${index}`}>
                                             {index > 0 && <span className="reaction-equation-plus">+</span>}
                                             <div className="reaction-equation-term">
-                                                <strong>{reactivo.formula}</strong>
+                                                <strong>{formatCoefficient(reactivo.coefficient)}{reactivo.formula}</strong>
                                                 <small>{reactivo.label}</small>
                                             </div>
                                         </div>
@@ -189,11 +211,11 @@ function ReactionSandbox({ elementos = [] }) {
                                 </div>
                                 <span className="reaction-equation-arrow">→</span>
                                 <div className="reaction-equation-product">
-                                    <strong>{productoSeleccionado.formula}</strong>
+                                    <strong>{formatCoefficient(reaccionVisual.producto.coefficient)}{reaccionVisual.producto.formula}</strong>
                                     <small>{productoSeleccionado.nombre}</small>
                                 </div>
                             </div>
-                            <p className="reaction-equation-note">Vista inicial sin coeficientes. El siguiente paso será balancearla automáticamente.</p>
+                            <p className="reaction-equation-note">{balanceando ? "Ajustando reacción..." : reaccionVisual.message}</p>
                         </div>
                     )}
                 </section>
@@ -222,15 +244,46 @@ function construirFormulaEntrada(elementosAgrupados) {
     return elementosAgrupados.map((elemento) => `${elemento.simbolo}${elemento.cantidad > 1 ? elemento.cantidad : ""}`).join("");
 }
 
-function construirReaccionVisual(resumenReactivos, producto) {
+function construirReactivosParaBalance(resumenReactivos) {
+    return resumenReactivos.map((elemento) => ({
+        formula: DIATOMIC_ELEMENTS.has(elemento.simbolo) ? `${elemento.simbolo}2` : elemento.simbolo,
+        label: elemento.nombre || elemento.simbolo,
+        coefficient: 1
+    }));
+}
+
+function construirReaccionVisual(resumenReactivos, producto, reaccionBalanceada) {
     if (!producto || !Array.isArray(resumenReactivos) || resumenReactivos.length === 0) return null;
+
+    const reactivosBase = construirReactivosParaBalance(resumenReactivos);
+
+    if (reaccionBalanceada?.balanced) {
+        return {
+            reactivos: reaccionBalanceada.reactants.map((term, index) => ({
+                formula: term.formula,
+                coefficient: term.coefficient,
+                label: reactivosBase[index]?.label || term.formula
+            })),
+            producto: {
+                formula: reaccionBalanceada.products?.[0]?.formula || producto.formula,
+                coefficient: reaccionBalanceada.products?.[0]?.coefficient || 1
+            },
+            balanced: true,
+            message: reaccionBalanceada.equation || "Reacción ajustada correctamente."
+        };
+    }
+
     return {
-        reactivos: resumenReactivos.map((elemento) => ({
-            formula: DIATOMIC_ELEMENTS.has(elemento.simbolo) ? `${elemento.simbolo}2` : elemento.simbolo,
-            label: elemento.nombre || elemento.simbolo
-        })),
-        producto
+        reactivos: reactivosBase,
+        producto: { formula: producto.formula, coefficient: 1 },
+        balanced: false,
+        message: reaccionBalanceada?.message || "Vista inicial sin coeficientes."
     };
+}
+
+function formatCoefficient(coefficient) {
+    if (!coefficient || coefficient <= 1) return "";
+    return coefficient;
 }
 
 export default ReactionSandbox;
