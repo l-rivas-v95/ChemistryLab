@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChemistryLab - SMILES SVG Playground</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f6f7fb;
+      color: #172033;
+    }
+
+    header {
+      padding: 18px 24px;
+      background: #111827;
+      color: white;
+    }
+
+    main {
+      padding: 24px;
+      max-width: 1680px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid #d7dce7;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 14px;
+      padding: 12px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      resize: vertical;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 999px;
+      background: #fbbf24;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .toolbar label {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    input[type="range"] {
+      width: 220px;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #526079;
+      margin-top: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #d7dce7;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .card h3 {
+      margin: 0 0 6px 0;
+      font-size: 20px;
+    }
+
+    .smiles {
+      font-family: Consolas, Monaco, monospace;
+      font-size: 13px;
+      background: #f1f5f9;
+      padding: 6px;
+      border-radius: 6px;
+      overflow-wrap: anywhere;
+      margin-bottom: 10px;
+    }
+
+    .svg-box {
+      height: 420px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: white;
+    }
+
+    .svg-box svg {
+      width: var(--svg-size, 360px) !important;
+      height: var(--svg-size, 360px) !important;
+      max-width: 96%;
+      max-height: 96%;
+    }
+
+    .error {
+      color: #b91c1c;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>SMILES SVG Playground</h1>
+  <p>Prueba SMILES usando el render SVG del backend.</p>
+</header>
+
+<main>
+  <section class="panel">
+    <label for="input">Moléculas a probar</label>
+    <textarea id="input">Water|[H]O[H]
+Ammonia|[H]N([H])[H]
+Hydrogen peroxide|[H]OO[H]
+Carbon dioxide|O=C=O
+Carbon monoxide|[C-]#[O+]
+Sulfur dioxide|O=S=O
+Sulfur trioxide|O=S(=O)=O
+Nitric oxide|N=O
+Nitrogen dioxide|O=[N+][O-]
+Dinitrogen monoxide|[N-]=[N+]=O</textarea>
+    <div class="toolbar">
+      <button onclick="renderAll()">Generar SVG</button>
+      <label>
+        Tamaño SVG
+        <input id="sizeRange" type="range" min="220" max="720" value="420" step="20" oninput="updateSize()" />
+        <span id="sizeValue">420px</span>
+      </label>
+    </div>
+    <div class="hint">
+      Formato: <code>Nombre|SMILES</code>, una molécula por línea. Endpoint usado: <code>/api/tools/smiles/svg?smiles=...</code>
+    </div>
+  </section>
+
+  <section id="results" class="grid"></section>
+</main>
+
+<script>
+  function updateSize() {
+    const value = document.getElementById('sizeRange').value;
+    document.documentElement.style.setProperty('--svg-size', value + 'px');
+    document.getElementById('sizeValue').textContent = value + 'px';
+  }
+
+  async function renderAll() {
+    updateSize();
+    const container = document.getElementById('results');
+    container.innerHTML = '';
+
+    const lines = document.getElementById('input').value
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    for (const line of lines) {
+      const [nameRaw, ...smilesParts] = line.split('|');
+      const name = (nameRaw || '').trim();
+      const smiles = smilesParts.join('|').trim();
+      const card = createCard(name || smiles, smiles);
+      container.appendChild(card);
+      await renderOne(card, smiles);
+    }
+  }
+
+  function createCard(name, smiles) {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `
+      <h3>${escapeHtml(name)}</h3>
+      <div class="smiles">${escapeHtml(smiles)}</div>
+      <div class="svg-box">Cargando...</div>
+    `;
+    return card;
+  }
+
+  async function renderOne(card, smiles) {
+    const box = card.querySelector('.svg-box');
+    if (!smiles) {
+      box.innerHTML = '<div class="error">SMILES vacío</div>';
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/tools/smiles/svg?smiles=' + encodeURIComponent(smiles));
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || ('HTTP ' + response.status));
+      }
+      const svg = await response.text();
+      box.innerHTML = svg;
+    } catch (error) {
+      box.innerHTML = '<div class="error">' + escapeHtml(error.message) + '</div>';
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  updateSize();
+  renderAll();
+</script>
+</body>
+</html>

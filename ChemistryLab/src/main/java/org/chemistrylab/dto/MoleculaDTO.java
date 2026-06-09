@@ -20,12 +20,20 @@ public class MoleculaDTO {
     private String nombreIupac;
     private String descripcion;
 
-    private String tipoCompuesto;
+    private String compoundFamily;
     private String estadoFisico;
     private Integer carga;
 
     private String imagen2d;
     private String modelo3dUrl;
+
+    private String tipoRepresentacion;
+    private String svg;
+    private String imagenRepresentacionSource;
+    private String imagenRepresentacionReason;
+    private String representationInput;
+    private String representationInputSource;
+    private String representationInputReason;
 
     private String puntoFusion;
     private String puntoEbullicion;

@@ -24,6 +24,14 @@ function Navbar({ vistaActiva, setVistaActiva }) {
                     <span>🧬</span>
                     Moléculas
                 </button>
+
+                <button
+                    className={vistaActiva === "sandbox" ? "activo" : ""}
+                    onClick={() => setVistaActiva("sandbox")}
+                >
+                    <span>⚗️</span>
+                    Sandbox
+                </button>
             </nav>
         </aside>
     );

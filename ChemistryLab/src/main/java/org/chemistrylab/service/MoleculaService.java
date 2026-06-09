@@ -1,66 +1,154 @@
 package org.chemistrylab.service;
 
+import lombok.RequiredArgsConstructor;
 import org.chemistrylab.dto.MoleculaDTO;
+import org.chemistrylab.dto.MoleculaRepresentacionDTO;
 import org.chemistrylab.entity.MoleculaEntity;
+import org.chemistrylab.mapper.MoleculaMapper;
 import org.chemistrylab.repository.MoleculaRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.util.List;
+import java.util.Locale;
 
 @Service
+@RequiredArgsConstructor
 public class MoleculaService {
 
     private final MoleculaRepository moleculaRepository;
-
-    public MoleculaService(MoleculaRepository moleculaRepository) {
-        this.moleculaRepository = moleculaRepository;
-    }
+    private final MoleculaMapper moleculaMapper;
+    private final MoleculeCardRepresentationService moleculeCardRepresentationService;
 
     public Page<MoleculaDTO> findAllPaginado(String search, String categoria, String familia, Pageable pageable) {
-        return moleculaRepository.buscarPaginado(
-                        limpiarParametro(search),
-                        limpiarParametro(categoria),
-                        limpiarParametro(familia),
-                        pageable
-                )
-                .map(this::toDTO);
+        String searchLimpio = limpiarParametro(search);
+        String categoriaLimpia = limpiarParametro(categoria);
+        String familiaLimpia = limpiarParametro(familia);
+
+        List<MoleculaEntity> filtradas = moleculaRepository.buscarPorTexto(searchLimpio)
+                .stream()
+                .filter(entity -> coincideBusquedaCalculada(entity, searchLimpio))
+                .filter(entity -> coincideCategoria(entity, categoriaLimpia))
+                .filter(entity -> coincideFamilia(entity, familiaLimpia))
+                .toList();
+
+        int start = Math.toIntExact(pageable.getOffset());
+        int end = Math.min(start + pageable.getPageSize(), filtradas.size());
+        List<MoleculaDTO> contenido = start >= filtradas.size()
+                ? List.of()
+                : filtradas.subList(start, end)
+                        .stream()
+                        .map(this::toDTOConRepresentacion)
+                        .toList();
+
+        return new PageImpl<>(contenido, pageable, filtradas.size());
     }
 
     public List<MoleculaDTO> findAll() {
         return moleculaRepository.findAll()
                 .stream()
-                .map(this::toDTO)
+                .map(this::toDTOConRepresentacion)
                 .toList();
     }
 
     public MoleculaDTO findById(Long id) {
         MoleculaEntity entity = moleculaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Molécula no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Molecula no encontrada"));
 
-        return toDTO(entity);
+        return toDTOConRepresentacion(entity);
     }
 
     public MoleculaDTO findByPubchemCid(Long pubchemCid) {
         MoleculaEntity entity = moleculaRepository.findByPubchemCid(pubchemCid)
-                .orElseThrow(() -> new RuntimeException("Molécula no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Molecula no encontrada"));
 
-        return toDTO(entity);
+        return toDTOConRepresentacion(entity);
     }
 
     public MoleculaDTO findByNombre(String nombre) {
         MoleculaEntity entity = moleculaRepository.findByNombreIgnoreCase(nombre)
-                .orElseThrow(() -> new RuntimeException("Molécula no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Molecula no encontrada"));
 
-        return toDTO(entity);
+        return toDTOConRepresentacion(entity);
     }
 
-    public List<MoleculaDTO> findByTipoCompuesto(String tipoCompuesto) {
-        return moleculaRepository.findByTipoCompuestoIgnoreCase(tipoCompuesto)
-                .stream()
-                .map(this::toDTO)
-                .toList();
+    private MoleculaDTO toDTOConRepresentacion(MoleculaEntity entity) {
+        MoleculaDTO dto = moleculaMapper.toDTO(entity);
+        MoleculaRepresentacionDTO representacion = moleculeCardRepresentationService.construirRepresentacion(entity);
+
+        dto.setTipoRepresentacion(representacion.getTipoRepresentacion());
+        dto.setSvg(representacion.getSvg());
+        dto.setImagenRepresentacionSource(representacion.getImagenRepresentacionSource());
+        dto.setImagenRepresentacionReason(representacion.getImagenRepresentacionReason());
+        dto.setRepresentationInput(representacion.getRepresentationInput());
+        dto.setRepresentationInputSource(representacion.getRepresentationInputSource());
+        dto.setRepresentationInputReason(representacion.getRepresentationInputReason());
+
+        return dto;
+    }
+
+    private boolean coincideBusquedaCalculada(MoleculaEntity entity, String search) {
+        if (search == null || search.isBlank()) {
+            return true;
+        }
+
+        String patron = normalizar(search);
+        MoleculaDTO dto = moleculaMapper.toDTO(entity);
+
+        return normalizar(entity.getNombre()).contains(patron)
+                || normalizar(entity.getFormula()).contains(patron)
+                || normalizar(entity.getSinonimos()).contains(patron)
+                || normalizar(dto.getCompoundFamily()).contains(patron);
+    }
+
+    private boolean coincideCategoria(MoleculaEntity entity, String categoria) {
+        if (categoria == null || categoria.isBlank() || "all".equals(categoria)) {
+            return true;
+        }
+
+        String family = normalizar(moleculaMapper.toDTO(entity).getCompoundFamily());
+
+        if ("organic".equals(categoria)) {
+            return family.equals("organic");
+        }
+
+        if ("inorganic".equals(categoria)) {
+            return !family.equals("organic");
+        }
+
+        return true;
+    }
+
+    private boolean coincideFamilia(MoleculaEntity entity, String familia) {
+        if (familia == null || familia.isBlank()
+                || "all".equals(familia)
+                || "all-organic".equals(familia)
+                || "all-inorganic".equals(familia)) {
+            return true;
+        }
+
+        String family = normalizar(moleculaMapper.toDTO(entity).getCompoundFamily());
+
+        return switch (familia) {
+            case "acid" -> family.equals("acid");
+            case "base" -> family.equals("hydroxide");
+            case "oxide" -> family.equals("metallic_oxide")
+                    || family.equals("covalent_oxide")
+                    || family.equals("peroxide");
+            case "salt" -> family.equals("salt");
+            case "other-inorganic" -> !family.equals("organic")
+                    && !family.equals("acid")
+                    && !family.equals("hydroxide")
+                    && !family.equals("metallic_oxide")
+                    && !family.equals("covalent_oxide")
+                    && !family.equals("peroxide")
+                    && !family.equals("salt");
+            case "all-organic" -> family.equals("organic");
+            default -> true;
+        };
     }
 
     private String limpiarParametro(String value) {
@@ -71,39 +159,14 @@ public class MoleculaService {
         return value.trim();
     }
 
-    private MoleculaDTO toDTO(MoleculaEntity entity) {
-        return MoleculaDTO.builder()
-                .id(entity.getId())
-                .pubchemCid(entity.getPubchemCid())
-                .nombre(entity.getNombre())
-                .formula(entity.getFormula())
-                .masaMolecular(entity.getMasaMolecular())
-                .nombreIupac(entity.getNombreIupac())
-                .descripcion(entity.getDescripcion())
-                .tipoCompuesto(entity.getTipoCompuesto())
-                .estadoFisico(entity.getEstadoFisico())
-                .carga(entity.getCarga())
-                .imagen2d(entity.getImagen2d())
-                .modelo3dUrl(entity.getModelo3dUrl())
-                .puntoFusion(entity.getPuntoFusion())
-                .puntoEbullicion(entity.getPuntoEbullicion())
-                .densidad(entity.getDensidad())
-                .solubilidad(entity.getSolubilidad())
-                .ph(entity.getPh())
-                .riesgos(entity.getRiesgos())
-                .usos(entity.getUsos())
-                .sinonimos(entity.getSinonimos())
-                .canonicalSmiles(entity.getCanonicalSmiles())
-                .isomericSmiles(entity.getIsomericSmiles())
-                .inchi(entity.getInchi())
-                .inchiKey(entity.getInchiKey())
-                .xlogp(entity.getXlogp())
-                .tpsa(entity.getTpsa())
-                .donadoresH(entity.getDonadoresH())
-                .aceptoresH(entity.getAceptoresH())
-                .enlacesRotables(entity.getEnlacesRotables())
-                .atomosPesados(entity.getAtomosPesados())
-                .complejidad(entity.getComplejidad())
-                .build();
+    private String normalizar(String valor) {
+        if (valor == null) {
+            return "";
+        }
+
+        return Normalizer.normalize(valor, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT)
+                .trim();
     }
 }
