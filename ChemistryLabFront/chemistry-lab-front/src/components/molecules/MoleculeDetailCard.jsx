@@ -52,7 +52,7 @@ function MoleculeDetailCard({ molecula, onClose }) {
                 </button>
 
                 <section className="molecule-detail-column molecule-detail-main">
-                    <div className="molecule-detail-title">
+                    <div className="molecule-detail-title molecule-detail-title-chip">
                         <div>
                             <h2>{molecula.nombre || "Molécula sin nombre"}</h2>
                             <p>{molecula.nombreIupac || "Nombre IUPAC no disponible"}</p>
@@ -124,7 +124,7 @@ function MoleculeDetailCard({ molecula, onClose }) {
                         <DetailItem icono="🧬" label="Átomos pesados" value={molecula.atomosPesados}/>
                         <DetailItem icono="🔗" label="Enlaces rotables" value={molecula.enlacesRotables}/>
                         <DetailItem icono="🧠" label="Complejidad" value={molecula.complejidad}/>
-                        <DetailItem icono="🫧" label="TPSA" value={molecula.tpsa}/>
+                        <DetailItem icono="📐" label="TPSA" value={molecula.tpsa}/>
                         <DetailItem icono="🧪" label="XLogP" value={molecula.xlogp}/>
                     </div>
 
