@@ -179,7 +179,7 @@ function ReactionSandbox({ elementos = [] }) {
                                     {resultado.suggestions.map((suggestion) => (
                                         <button type="button" onClick={() => seleccionarProducto(suggestion)} className={`reaction-suggestion-card ${suggestion.exactMatch ? "reaction-suggestion-card-exact" : ""} ${productoSeleccionado?.id === suggestion.id ? "reaction-suggestion-card-selected" : ""}`} key={`${suggestion.id}-${suggestion.formula}`}>
                                             <span>{suggestion.exactMatch ? "Coincidencia exacta" : suggestion.compoundFamily || "Compuesto"}</span>
-                                            <strong>{suggestion.formula}</strong>
+                                            <strong><FormulaText formula={suggestion.formula} /></strong>
                                             <small>{suggestion.nombre}</small>
                                         </button>
                                     ))}
@@ -202,18 +202,12 @@ function ReactionSandbox({ elementos = [] }) {
                                     {reaccionVisual.reactivos.map((reactivo, index) => (
                                         <div className="reaction-equation-part" key={`${reactivo.formula}-${index}`}>
                                             {index > 0 && <span className="reaction-equation-plus">+</span>}
-                                            <div className="reaction-equation-term">
-                                                <strong>{formatCoefficient(reactivo.coefficient)}{reactivo.formula}</strong>
-                                                <small>{reactivo.label}</small>
-                                            </div>
+                                            <ReactionTerm term={reactivo} />
                                         </div>
                                     ))}
                                 </div>
                                 <span className="reaction-equation-arrow">→</span>
-                                <div className="reaction-equation-product">
-                                    <strong>{formatCoefficient(reaccionVisual.producto.coefficient)}{reaccionVisual.producto.formula}</strong>
-                                    <small>{productoSeleccionado.nombre}</small>
-                                </div>
+                                <ReactionTerm term={{ ...reaccionVisual.producto, label: productoSeleccionado.nombre }} product />
                             </div>
                             <p className="reaction-equation-note">{balanceando ? "Ajustando reacción..." : reaccionVisual.message}</p>
                         </div>
@@ -222,6 +216,24 @@ function ReactionSandbox({ elementos = [] }) {
             </div>
         </section>
     );
+}
+
+function ReactionTerm({ term, product = false }) {
+    return (
+        <div className={product ? "reaction-equation-product" : "reaction-equation-term"}>
+            <div className="reaction-formula-composed">
+                {term.coefficient > 1 && <span className="reaction-coefficient">{term.coefficient}</span>}
+                <strong><FormulaText formula={term.formula} /></strong>
+            </div>
+            <small>{term.label}</small>
+        </div>
+    );
+}
+
+function FormulaText({ formula }) {
+    return String(formula || "").split(/(\d+)/).map((part, index) => (
+        /^\d+$/.test(part) ? <sub key={`${part}-${index}`}>{part}</sub> : <span key={`${part}-${index}`}>{part}</span>
+    ));
 }
 
 function agruparReactivos(elementos) {
@@ -279,11 +291,6 @@ function construirReaccionVisual(resumenReactivos, producto, reaccionBalanceada)
         balanced: false,
         message: reaccionBalanceada?.message || "Vista inicial sin coeficientes."
     };
-}
-
-function formatCoefficient(coefficient) {
-    if (!coefficient || coefficient <= 1) return "";
-    return coefficient;
 }
 
 export default ReactionSandbox;
