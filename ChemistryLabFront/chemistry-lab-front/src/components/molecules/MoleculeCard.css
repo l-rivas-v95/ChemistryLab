@@ -87,7 +87,21 @@
 }
 .molecule-data-grid small { display: block; color: #64748b; font-size: 9px; font-weight: 900; text-transform: uppercase; }
 .molecule-data-grid strong { color: #142033; font-size: 12px; line-height: 1.25; }
-.molecule-open-hint { margin-top: auto; font-size: 15px; }
+.molecule-open-hint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: auto;
+    padding: 10px 14px;
+    border: 1px solid rgba(90, 65, 25, 0.32);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffd45a, #f3b33d);
+    color: #1f1a12;
+    font-size: 15px;
+    font-weight: 900;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
 
 @media (max-width: 700px) {
     .molecule-card { height: auto; min-height: 610px; }
