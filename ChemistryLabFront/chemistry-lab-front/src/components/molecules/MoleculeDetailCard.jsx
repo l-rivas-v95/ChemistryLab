@@ -163,9 +163,10 @@ function DetailItem({ icono, label, value, unit }) {
     const tieneValor = hasValue(value);
     const textoCompleto = tieneValor ? cleanText(value) : "";
     const textoVisible = tieneValor ? formatPropertyShort(value, 42) : "N/A";
+    const title = textoCompleto ? `${label}: ${textoCompleto}${unit ? ` ${unit}` : ""}` : `${label}: N/A`;
 
     return (
-        <div className="molecule-detail-item molecule-detail-item-compact" title={textoCompleto}>
+        <div className="molecule-detail-item molecule-detail-item-compact" title={title}>
             <span>{icono}</span>
 
             <div>
