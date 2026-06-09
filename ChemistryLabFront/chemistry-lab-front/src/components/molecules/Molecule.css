@@ -206,9 +206,7 @@
 }
 
 .formula-bg-html {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, rgba(245, 158, 11, 0.16), transparent 55%);
+    display:none;
 }
 
 .formula-big-html {
@@ -299,9 +297,7 @@
 
 .molecule-detail-image .formula-structure,
 .molecule-detail-image .formula-structure-html {
-    min-height: 220px;
-    border-radius: 16px;
-    background: radial-gradient(circle at center, rgba(255, 244, 189, 0.78), rgba(255, 255, 255, 0.92));
+    background: #ffffff;
 }
 
 .molecule-detail-column {
