@@ -96,11 +96,12 @@ public class MoleculaService {
         }
 
         String patron = normalizar(search);
+        MoleculaDTO dto = moleculaMapper.toDTO(entity);
 
         return normalizar(entity.getNombre()).contains(patron)
                 || normalizar(entity.getFormula()).contains(patron)
                 || normalizar(entity.getSinonimos()).contains(patron)
-                || normalizar(moleculaMapper.toDTO(entity).getTipoCompuesto()).contains(patron);
+                || normalizar(dto.getCompoundFamily()).contains(patron);
     }
 
     private boolean coincideCategoria(MoleculaEntity entity, String categoria) {
@@ -108,14 +109,14 @@ public class MoleculaService {
             return true;
         }
 
-        String tipo = normalizar(moleculaMapper.toDTO(entity).getTipoCompuesto());
+        String family = normalizar(moleculaMapper.toDTO(entity).getCompoundFamily());
 
         if ("organic".equals(categoria)) {
-            return tipo.equals("organica");
+            return family.equals("organic");
         }
 
         if ("inorganic".equals(categoria)) {
-            return !tipo.equals("organica");
+            return !family.equals("organic");
         }
 
         return true;
@@ -129,21 +130,23 @@ public class MoleculaService {
             return true;
         }
 
-        String tipo = normalizar(moleculaMapper.toDTO(entity).getTipoCompuesto());
+        String family = normalizar(moleculaMapper.toDTO(entity).getCompoundFamily());
 
         return switch (familia) {
-            case "acid" -> tipo.contains("acido");
-            case "base" -> tipo.contains("base") || tipo.contains("hidroxido");
-            case "oxide" -> tipo.contains("oxido") || tipo.contains("peroxido");
-            case "salt" -> tipo.contains("sal");
-            case "other-inorganic" -> !tipo.equals("organica")
-                    && !tipo.contains("acido")
-                    && !tipo.contains("base")
-                    && !tipo.contains("hidroxido")
-                    && !tipo.contains("oxido")
-                    && !tipo.contains("peroxido")
-                    && !tipo.contains("sal");
-            case "all-organic" -> tipo.equals("organica");
+            case "acid" -> family.equals("acid");
+            case "base" -> family.equals("hydroxide");
+            case "oxide" -> family.equals("metallic_oxide")
+                    || family.equals("covalent_oxide")
+                    || family.equals("peroxide");
+            case "salt" -> family.equals("salt");
+            case "other-inorganic" -> !family.equals("organic")
+                    && !family.equals("acid")
+                    && !family.equals("hydroxide")
+                    && !family.equals("metallic_oxide")
+                    && !family.equals("covalent_oxide")
+                    && !family.equals("peroxide")
+                    && !family.equals("salt");
+            case "all-organic" -> family.equals("organic");
             default -> true;
         };
     }
