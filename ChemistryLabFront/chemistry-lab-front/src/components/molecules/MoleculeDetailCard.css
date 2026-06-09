@@ -107,6 +107,13 @@
     width: 100%;
 }
 
+.molecule-detail-organic .molecule-detail-type { border-color: rgba(20, 184, 166, 0.45); background: #ccfbf1; color: #134e4a; }
+.molecule-detail-inorganic .molecule-detail-type { border-color: rgba(59, 130, 246, 0.45); background: #dbeafe; color: #1e3a8a; }
+.molecule-detail-acid .molecule-detail-type { border-color: rgba(239, 68, 68, 0.45); background: #fee2e2; color: #7f1d1d; }
+.molecule-detail-base .molecule-detail-type { border-color: rgba(34, 197, 94, 0.45); background: #dcfce7; color: #14532d; }
+.molecule-detail-oxide .molecule-detail-type { border-color: rgba(168, 85, 247, 0.45); background: #f3e8ff; color: #581c87; }
+.molecule-detail-salt .molecule-detail-type { border-color: rgba(245, 158, 11, 0.5); background: #fef3c7; color: #78350f; }
+
 .molecule-detail-3d-box,
 .molecule-description-panel,
 .molecule-safety-card,
@@ -175,9 +182,10 @@
     align-items: start;
     gap: 10px;
     padding: 12px;
-    border: 1px solid rgba(100, 116, 139, 0.12);
+    border: 1px solid rgba(100, 116, 139, 0.16);
     border-radius: 14px;
-    background: rgba(248, 250, 252, 0.82);
+    background: rgba(248, 250, 252, 0.9);
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
 }
 
 .molecule-detail-item > span {
