@@ -236,12 +236,7 @@
 }
 
 .molecule-safety-label {
-    display: inline-block;
-    margin-bottom: 10px;
-    padding: 7px 10px;
-    border-radius: 999px;
-    background: rgba(255, 244, 189, 0.9);
-    color: #3a2b0d;
+    display: none;
 }
 
 .molecule-hazard-list,
