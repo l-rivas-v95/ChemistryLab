@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { suggestSandboxProducts } from "../../services/sandboxService";
 import "./ReactionSandbox.css";
 
 const QUICK_ELEMENTS = ["H", "O", "C", "N", "Na", "Cl", "Fe", "Ca", "K", "S", "P", "Mg", "Al", "Cu", "Zn"];
@@ -6,7 +7,9 @@ let tokenCounter = 0;
 
 function ReactionSandbox({ elementos = [] }) {
     const [reactivos, setReactivos] = useState([]);
-    const [resultadoSimulado, setResultadoSimulado] = useState(null);
+    const [resultado, setResultado] = useState(null);
+    const [cargando, setCargando] = useState(false);
+    const [error, setError] = useState("");
 
     const elementosDisponibles = useMemo(() => {
         const porSimbolo = new Map();
@@ -28,12 +31,14 @@ function ReactionSandbox({ elementos = [] }) {
         if (!elemento?.simbolo) return;
         tokenCounter += 1;
         setReactivos((actuales) => [...actuales, { id: `${elemento.simbolo}-${Date.now()}-${tokenCounter}`, simbolo: elemento.simbolo, nombre: elemento.nombre || elemento.simbolo }]);
-        setResultadoSimulado(null);
+        setResultado(null);
+        setError("");
     };
 
     const quitarElemento = (id) => {
         setReactivos((actuales) => actuales.filter((elemento) => elemento.id !== id));
-        setResultadoSimulado(null);
+        setResultado(null);
+        setError("");
     };
 
     const quitarUltimoDeSimbolo = (simbolo) => {
@@ -43,21 +48,37 @@ function ReactionSandbox({ elementos = [] }) {
             const realIndex = actuales.length - 1 - index;
             return actuales.filter((_, posicion) => posicion !== realIndex);
         });
-        setResultadoSimulado(null);
+        setResultado(null);
+        setError("");
     };
 
     const limpiar = () => {
         setReactivos([]);
-        setResultadoSimulado(null);
+        setResultado(null);
+        setError("");
     };
 
-    const probar = () => {
-        setResultadoSimulado({
-            formulaEntrada,
-            mensaje: reactivos.length > 0
-                ? "Listo para buscar en la base de datos con esta combinación de elementos."
-                : "Añade elementos para probar una combinación."
-        });
+    const probar = async () => {
+        if (resumenReactivos.length === 0) return;
+
+        setCargando(true);
+        setError("");
+        setResultado(null);
+
+        try {
+            const response = await suggestSandboxProducts(
+                resumenReactivos.map((elemento) => ({
+                    simbolo: elemento.simbolo,
+                    cantidad: elemento.cantidad
+                }))
+            );
+
+            setResultado(response);
+        } catch (err) {
+            setError(err.message || "No se pudieron buscar compuestos.");
+        } finally {
+            setCargando(false);
+        }
     };
 
     return (
@@ -70,7 +91,7 @@ function ReactionSandbox({ elementos = [] }) {
                 </div>
                 <div className="reaction-sandbox-equation-preview">
                     <span>{queryVisual || "Añade elementos"}</span>
-                    <button type="button" onClick={probar} disabled={reactivos.length === 0}>Probar</button>
+                    <button type="button" onClick={probar} disabled={reactivos.length === 0 || cargando}>{cargando ? "Buscando..." : "Buscar compuestos"}</button>
                 </div>
             </header>
 
@@ -128,20 +149,30 @@ function ReactionSandbox({ elementos = [] }) {
 
                     <div className="reaction-formula-strip">
                         <span>Fórmula construida</span>
-                        <strong>{formulaEntrada || "—"}</strong>
+                        <strong>{resultado?.formulaEntrada || formulaEntrada || "—"}</strong>
                         <small>{queryVisual || "Sin elementos"}</small>
                     </div>
 
                     <div className="reaction-suggestions-panel">
                         <h3>Compuestos encontrados</h3>
-                        {resultadoSimulado ? (
-                            <div className="reaction-pending-card">
-                                <strong>{resultadoSimulado.formulaEntrada}</strong>
-                                <span>{resultadoSimulado.mensaje}</span>
-                            </div>
-                        ) : (
-                            <div className="reaction-suggestions-empty"><span>🔎</span><p>Construye una combinación y pulsa Probar.</p></div>
+                        {cargando && <div className="reaction-suggestions-empty"><span>⏳</span><p>Buscando compuestos compatibles...</p></div>}
+                        {error && <div className="reaction-error-card">{error}</div>}
+                        {!cargando && !error && resultado && (
+                            resultado.suggestions?.length > 0 ? (
+                                <div className="reaction-suggestion-grid">
+                                    {resultado.suggestions.map((suggestion) => (
+                                        <button type="button" className={`reaction-suggestion-card ${suggestion.exactMatch ? "reaction-suggestion-card-exact" : ""}`} key={`${suggestion.id}-${suggestion.formula}`}>
+                                            <span>{suggestion.exactMatch ? "Coincidencia exacta" : suggestion.compoundFamily || "Compuesto"}</span>
+                                            <strong>{suggestion.formula}</strong>
+                                            <small>{suggestion.nombre}</small>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="reaction-suggestions-empty"><span>🧪</span><p>No hay compuestos registrados solo con esos elementos.</p></div>
+                            )
                         )}
+                        {!cargando && !error && !resultado && <div className="reaction-suggestions-empty"><span>🔎</span><p>Construye una combinación y pulsa Buscar compuestos.</p></div>}
                     </div>
                 </section>
             </div>
