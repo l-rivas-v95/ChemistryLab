@@ -86,3 +86,40 @@
     width: 100% !important;
     height: 100% !important;
 }
+.formula-structure,
+.formula-structure-html {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 140px;
+    height: 100%;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.formula-bg-html {
+    display: none;
+}
+
+.formula-big-html {
+    position: relative;
+    z-index: 1;
+    padding: 14px;
+    color: #142033;
+    font-size: 34px;
+    font-weight: 900;
+    line-height: 1.15;
+    text-align: center;
+    word-break: break-word;
+}
+
+.formula-caption-html {
+    display: none;
+}
+
+.molecule-svg-structure-html > svg {
+    width: 100% !important;
+    height: 100% !important;
+}

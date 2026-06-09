@@ -1,5 +1,6 @@
 import ChemicalFormulaText from "./ChemicalFormulaText";
 import SmilesDrawerStructure from "./SmilesDrawerStructure";
+import "./MoleculeRepresentation.css";
 
 function MoleculeStructure({ molecula, categoria }) {
     if (shouldUseSmilesDrawer(molecula, categoria)) {
