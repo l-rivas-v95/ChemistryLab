@@ -100,7 +100,8 @@ public class MoleculaService {
         return normalizar(entity.getNombre()).contains(patron)
                 || normalizar(entity.getFormula()).contains(patron)
                 || normalizar(entity.getSinonimos()).contains(patron)
-                || normalizar(moleculaMapper.toDTO(entity).getTipoCompuesto()).contains(patron);
+                || normalizar(moleculaMapper.toDTO(entity)
+                .getTipoCompuesto()).contains(patron);
     }
 
     private boolean coincideCategoria(MoleculaEntity entity, String categoria) {
