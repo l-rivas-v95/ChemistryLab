@@ -3,42 +3,45 @@ import { suggestSandboxProducts } from "../../services/sandboxService";
 import "./ReactionSandbox.css";
 
 const QUICK_ELEMENTS = ["H", "O", "C", "N", "Na", "Cl", "Fe", "Ca", "K", "S", "P", "Mg", "Al", "Cu", "Zn"];
+const DIATOMIC_ELEMENTS = new Set(["H", "N", "O", "F", "Cl", "Br", "I"]);
 let tokenCounter = 0;
 
 function ReactionSandbox({ elementos = [] }) {
     const [reactivos, setReactivos] = useState([]);
     const [resultado, setResultado] = useState(null);
+    const [productoSeleccionado, setProductoSeleccionado] = useState(null);
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState("");
 
     const elementosDisponibles = useMemo(() => {
         const porSimbolo = new Map();
-
         elementos.forEach((elemento) => {
-            if (elemento?.simbolo) {
-                porSimbolo.set(elemento.simbolo, elemento);
-            }
+            if (elemento?.simbolo) porSimbolo.set(elemento.simbolo, elemento);
         });
-
         return QUICK_ELEMENTS.map((simbolo) => porSimbolo.get(simbolo) || { simbolo, nombre: simbolo });
     }, [elementos]);
 
     const resumenReactivos = useMemo(() => agruparReactivos(reactivos), [reactivos]);
     const queryVisual = useMemo(() => construirQueryVisual(resumenReactivos), [resumenReactivos]);
     const formulaEntrada = useMemo(() => construirFormulaEntrada(resumenReactivos), [resumenReactivos]);
+    const reaccionVisual = useMemo(() => construirReaccionVisual(resumenReactivos, productoSeleccionado), [resumenReactivos, productoSeleccionado]);
+
+    const resetBusqueda = () => {
+        setResultado(null);
+        setProductoSeleccionado(null);
+        setError("");
+    };
 
     const agregarElemento = (elemento) => {
         if (!elemento?.simbolo) return;
         tokenCounter += 1;
         setReactivos((actuales) => [...actuales, { id: `${elemento.simbolo}-${Date.now()}-${tokenCounter}`, simbolo: elemento.simbolo, nombre: elemento.nombre || elemento.simbolo }]);
-        setResultado(null);
-        setError("");
+        resetBusqueda();
     };
 
     const quitarElemento = (id) => {
         setReactivos((actuales) => actuales.filter((elemento) => elemento.id !== id));
-        setResultado(null);
-        setError("");
+        resetBusqueda();
     };
 
     const quitarUltimoDeSimbolo = (simbolo) => {
@@ -48,31 +51,22 @@ function ReactionSandbox({ elementos = [] }) {
             const realIndex = actuales.length - 1 - index;
             return actuales.filter((_, posicion) => posicion !== realIndex);
         });
-        setResultado(null);
-        setError("");
+        resetBusqueda();
     };
 
     const limpiar = () => {
         setReactivos([]);
-        setResultado(null);
-        setError("");
+        resetBusqueda();
     };
 
     const probar = async () => {
         if (resumenReactivos.length === 0) return;
-
         setCargando(true);
         setError("");
         setResultado(null);
-
+        setProductoSeleccionado(null);
         try {
-            const response = await suggestSandboxProducts(
-                resumenReactivos.map((elemento) => ({
-                    simbolo: elemento.simbolo,
-                    cantidad: elemento.cantidad
-                }))
-            );
-
+            const response = await suggestSandboxProducts(resumenReactivos.map((elemento) => ({ simbolo: elemento.simbolo, cantidad: elemento.cantidad })));
             setResultado(response);
         } catch (err) {
             setError(err.message || "No se pudieron buscar compuestos.");
@@ -161,7 +155,7 @@ function ReactionSandbox({ elementos = [] }) {
                             resultado.suggestions?.length > 0 ? (
                                 <div className="reaction-suggestion-grid">
                                     {resultado.suggestions.map((suggestion) => (
-                                        <button type="button" className={`reaction-suggestion-card ${suggestion.exactMatch ? "reaction-suggestion-card-exact" : ""}`} key={`${suggestion.id}-${suggestion.formula}`}>
+                                        <button type="button" onClick={() => setProductoSeleccionado(suggestion)} className={`reaction-suggestion-card ${suggestion.exactMatch ? "reaction-suggestion-card-exact" : ""} ${productoSeleccionado?.id === suggestion.id ? "reaction-suggestion-card-selected" : ""}`} key={`${suggestion.id}-${suggestion.formula}`}>
                                             <span>{suggestion.exactMatch ? "Coincidencia exacta" : suggestion.compoundFamily || "Compuesto"}</span>
                                             <strong>{suggestion.formula}</strong>
                                             <small>{suggestion.nombre}</small>
@@ -174,6 +168,32 @@ function ReactionSandbox({ elementos = [] }) {
                         )}
                         {!cargando && !error && !resultado && <div className="reaction-suggestions-empty"><span>🔎</span><p>Construye una combinación y pulsa Buscar compuestos.</p></div>}
                     </div>
+
+                    {productoSeleccionado && reaccionVisual && (
+                        <div className="reaction-equation-panel">
+                            <div className="reaction-equation-header">
+                                <span>Reacción propuesta</span>
+                                <strong>{productoSeleccionado.nombre}</strong>
+                            </div>
+                            <div className="reaction-equation-row">
+                                <div className="reaction-equation-side">
+                                    {reaccionVisual.reactivos.map((reactivo, index) => (
+                                        <div className="reaction-equation-term" key={`${reactivo.formula}-${index}`}>
+                                            {index > 0 && <span className="reaction-equation-plus">+</span>}
+                                            <strong>{reactivo.formula}</strong>
+                                            <small>{reactivo.label}</small>
+                                        </div>
+                                    ))}
+                                </div>
+                                <span className="reaction-equation-arrow">→</span>
+                                <div className="reaction-equation-product">
+                                    <strong>{productoSeleccionado.formula}</strong>
+                                    <small>{productoSeleccionado.nombre}</small>
+                                </div>
+                            </div>
+                            <p className="reaction-equation-note">Vista inicial sin coeficientes. El siguiente paso será balancearla automáticamente.</p>
+                        </div>
+                    )}
                 </section>
             </div>
         </section>
@@ -198,6 +218,17 @@ function construirQueryVisual(elementosAgrupados) {
 function construirFormulaEntrada(elementosAgrupados) {
     if (!Array.isArray(elementosAgrupados) || elementosAgrupados.length === 0) return "";
     return elementosAgrupados.map((elemento) => `${elemento.simbolo}${elemento.cantidad > 1 ? elemento.cantidad : ""}`).join("");
+}
+
+function construirReaccionVisual(resumenReactivos, producto) {
+    if (!producto || !Array.isArray(resumenReactivos) || resumenReactivos.length === 0) return null;
+    return {
+        reactivos: resumenReactivos.map((elemento) => ({
+            formula: DIATOMIC_ELEMENTS.has(elemento.simbolo) ? `${elemento.simbolo}2` : elemento.simbolo,
+            label: elemento.nombre || elemento.simbolo
+        })),
+        producto
+    };
 }
 
 export default ReactionSandbox;
