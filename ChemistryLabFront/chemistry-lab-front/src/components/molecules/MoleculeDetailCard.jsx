@@ -68,9 +68,12 @@ function MoleculeDetailCard({ molecula, onClose }) {
                         <h4>🧊 Modelo 3D</h4>
 
                         <div className="molecule-detail-3d-content">
-                            {molecula.pubchemCid ? (
+                            {molecula.pubchemCid || molecula.modelo3dUrl ? (
                                 mostrarModelo3d ? (
-                                    <SdfViewer cid={molecula.pubchemCid}/>
+                                    <SdfViewer
+                                        cid={molecula.pubchemCid}
+                                        modelo3dUrl={molecula.modelo3dUrl}
+                                    />
                                 ) : (
                                     <button
                                         type="button"
