@@ -178,10 +178,12 @@ function ReactionSandbox({ elementos = [] }) {
                             <div className="reaction-equation-row">
                                 <div className="reaction-equation-side">
                                     {reaccionVisual.reactivos.map((reactivo, index) => (
-                                        <div className="reaction-equation-term" key={`${reactivo.formula}-${index}`}>
+                                        <div className="reaction-equation-part" key={`${reactivo.formula}-${index}`}>
                                             {index > 0 && <span className="reaction-equation-plus">+</span>}
-                                            <strong>{reactivo.formula}</strong>
-                                            <small>{reactivo.label}</small>
+                                            <div className="reaction-equation-term">
+                                                <strong>{reactivo.formula}</strong>
+                                                <small>{reactivo.label}</small>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
